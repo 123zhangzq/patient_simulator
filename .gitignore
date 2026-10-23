@@ -1,0 +1,20 @@
+# Environments, credentials, model weights, and experiment outputs stay local.
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+models/
+outputs/
+.cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+.DS_Store
+.idea/
+.vscode/
