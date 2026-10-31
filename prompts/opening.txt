@@ -1,1 +1,3 @@
-Begin this counseling session now. Start with a brief welcome and one open-ended question inviting the client to share what has been on their mind lately.
+For your first turn, output exactly the case opening below, without an additional welcome, explanation, or question. Once the patient has replied, continue the current activity according to the conversation history and case guidance; do not restart or repeat this opening.
+
+{opening_question}

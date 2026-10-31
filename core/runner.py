@@ -1,7 +1,8 @@
-"""Run the shared dialogue protocol for a fixed therapist and a selected patient."""
+"""Run independent dialogue cases while sharing one loaded language model."""
 
 import json
 import platform
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
@@ -10,68 +11,36 @@ import torch
 import transformers
 from transformers import set_seed
 
+from core.cases import DialogueCase, compose_prompts, load_cases
 from core.interfaces import DialogueMessage
 from core.llm import LocalQwen
 from core.registry import load_patient_class
 from core.therapist import Therapist
-from settings import read_prompt, write_json
+from settings import PROJECT_DIR, read_prompt, write_json
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def run(config: dict, config_path: Path, patient_method: str = "single_prompt") -> Path:
-    patient_class = load_patient_class(patient_method)
-    model_dir = Path(config["model_dir"])
-    manifest_path = model_dir / "download_manifest.json"
-    if not manifest_path.is_file():
-        raise FileNotFoundError(
-            f"No completed model download found at {manifest_path}. First run: "
-            f"python download_model.py --config {config_path}"
-        )
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if (manifest["model_id"] != config["model_id"]
-            or manifest["requested_revision"] != config["revision"]):
-        raise ValueError(
-            "The local download manifest does not match the configured model_id/revision. "
-            "Run the download script with this configuration first."
-        )
-    prompts = {
-        "therapist": read_prompt(config["therapist_prompt"]),
-        "patient": read_prompt(config["patient_prompt"]),
-        "opening": read_prompt(config["opening_prompt"]),
-    }
-    public_history: list[DialogueMessage] = []
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
-    output_dir = Path(config["output_dir"]) / timestamp
-    output_dir.mkdir(parents=True, exist_ok=False)
-    metadata = {
-        "status": "running", "started_at_utc": utc_now(),
-        "completed_rounds": 0, "utterances": 0,
-        "patient_method": patient_method,
-        "config_file": str(config_path), "config": config, "prompts": prompts,
-        "model_download": manifest,
-        "versions": {
-            "python": platform.python_version(), "torch": torch.__version__,
-            "transformers": transformers.__version__,
-            "accelerate": version("accelerate"),
-            "huggingface_hub": version("huggingface_hub"),
-            "safetensors": version("safetensors"),
-        },
-    }
+def _run_case(
+    llm,
+    patient_class,
+    prompts: dict[str, str],
+    config: dict,
+    output_dir: Path,
+    metadata: dict,
+) -> None:
+    """Persist one dialogue, including its partial progress on interruption."""
     metadata_path = output_dir / "metadata.json"
     write_json(metadata_path, metadata)
-    print(f"Experiment output directory: {output_dir}", flush=True)
     try:
-        # Preserve the baseline's single global random stream and call order.
+        # Each case starts with fresh agents, history, and an identical random
+        # seed. Earlier cases cannot change this case's patient or sampling state.
         set_seed(config["seed"])
-        llm = LocalQwen(config)
         therapist = Therapist(llm, prompts["therapist"], prompts["opening"])
         patient = patient_class(llm, prompts["patient"])
-        metadata["gpu"] = torch.cuda.get_device_name(0)
-        metadata["dtype"] = str(llm.dtype)
-        write_json(metadata_path, metadata)
+        public_history: list[DialogueMessage] = []
         with (output_dir / "dialogue.jsonl").open("w", encoding="utf-8") as jsonl, (
             output_dir / "dialogue.md"
         ).open("w", encoding="utf-8") as markdown:
@@ -79,8 +48,8 @@ def run(config: dict, config_path: Path, patient_method: str = "single_prompt") 
             markdown.flush()
             for round_number in range(1, config["rounds"] + 1):
                 for speaker, agent in (("Therapist", therapist), ("Patient", patient)):
-                    # Agents receive an immutable snapshot of public utterances.
-                    # Their private prompts and state remain inside their objects.
+                    # Only the generated public utterances enter either agent's
+                    # history. Reference transcripts remain outside model inputs.
                     result = agent.respond(tuple(public_history))
                     content = result["content"]
                     if not isinstance(content, str) or not content.strip():
@@ -117,5 +86,138 @@ def run(config: dict, config_path: Path, patient_method: str = "single_prompt") 
     finally:
         metadata["ended_at_utc"] = utc_now()
         write_json(metadata_path, metadata)
-    print(f"\nCompleted {config['rounds']} rounds and {metadata['utterances']} utterances.", flush=True)
+
+
+def run(
+    config: dict,
+    config_path: Path,
+    patient_method: str = "single_prompt",
+    cases: Sequence[DialogueCase] | None = None,
+    rounds_override: int | None = None,
+) -> Path:
+    """Run cases in order, using all repository cases when none are supplied.
+
+    Case prompts affect the therapist only. The patient prompt is read once from
+    the configured method and reused unchanged for each fresh patient instance.
+    """
+    patient_class = load_patient_class(patient_method)
+    model_dir = Path(config["model_dir"])
+    manifest_path = model_dir / "download_manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(
+            f"No completed model download found at {manifest_path}. First run: "
+            f"python download_model.py --config {config_path}"
+        )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if (manifest["model_id"] != config["model_id"]
+            or manifest["requested_revision"] != config["revision"]):
+        raise ValueError(
+            "The local download manifest does not match the configured model_id/revision. "
+            "Run the download script with this configuration first."
+        )
+    base_prompts = {
+        "therapist": read_prompt(config["therapist_prompt"]),
+        "patient": read_prompt(config["patient_prompt"]),
+        "opening": read_prompt(config["opening_prompt"]),
+    }
+    selected_cases = list(cases) if cases is not None else load_cases(PROJECT_DIR / "cases")
+    if not selected_cases:
+        raise ValueError("At least one dialogue case is required.")
+    if len({case.case_id for case in selected_cases}) != len(selected_cases):
+        raise ValueError("Dialogue case IDs must be unique within a batch.")
+    prepared = []
+    for case in selected_cases:
+        prompts = dict(base_prompts)
+        composed = compose_prompts(case, base_prompts["therapist"], base_prompts["opening"])
+        # Deliberately select only therapist inputs: a case cannot override
+        # the configured patient method, prompt, or generated conversation.
+        prompts["therapist"] = composed["therapist"]
+        prompts["opening"] = composed["opening"]
+        rounds = rounds_override if rounds_override is not None else (
+            case.data.get("rounds", config["rounds"])
+        )
+        if type(rounds) is not int or rounds <= 0:
+            raise ValueError("The number of dialogue rounds must be a positive integer.")
+        prepared.append((case, prompts, {**config, "rounds": rounds}))
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
+    output_dir = Path(config["output_dir"]) / timestamp
+    output_dir.mkdir(parents=True, exist_ok=False)
+    common = {
+        "patient_method": patient_method,
+        "config_file": str(config_path), "config": config,
+        "model_download": manifest,
+        "versions": {
+            "python": platform.python_version(), "torch": torch.__version__,
+            "transformers": transformers.__version__,
+            "accelerate": version("accelerate"),
+            "huggingface_hub": version("huggingface_hub"),
+            "safetensors": version("safetensors"),
+        },
+    }
+    batch = {
+        **common, "status": "running", "batch_status": "running",
+        "started_at_utc": utc_now(), "case_count": len(prepared),
+        "completed_cases": 0,
+        "cases": [
+            {
+                "case_id": case.case_id,
+                "output_dir": str(output_dir / case.case_id),
+                "status": "pending", "effective_rounds": case_config["rounds"],
+                "completed_rounds": 0, "utterances": 0,
+            }
+            for case, _, case_config in prepared
+        ],
+    }
+    batch_path = output_dir / "batch_metadata.json"
+    write_json(batch_path, batch)
+    print(f"Experiment output directory: {output_dir}", flush=True)
+    try:
+        set_seed(config["seed"])
+        llm = LocalQwen(config)
+        common["gpu"] = batch["gpu"] = torch.cuda.get_device_name(0)
+        common["dtype"] = batch["dtype"] = str(llm.dtype)
+        write_json(batch_path, batch)
+        for index, (case, prompts, case_config) in enumerate(prepared):
+            case_dir = output_dir / case.case_id
+            case_dir.mkdir(exist_ok=False)
+            metadata = {
+                **common, "status": "running", "started_at_utc": utc_now(),
+                "completed_rounds": 0, "utterances": 0,
+                "effective_rounds": case_config["rounds"],
+                "effective_config": case_config,
+                "prompts": prompts,
+                "case": {"source_file": str(case.path), "data": case.data},
+                "case_id": case.case_id,
+            }
+            entry = batch["cases"][index]
+            entry["status"] = "running"
+            write_json(batch_path, batch)
+            print(f"\nCase {index + 1}/{len(prepared)}: {case.case_id}", flush=True)
+            try:
+                _run_case(llm, patient_class, prompts, case_config, case_dir, metadata)
+            finally:
+                # _run_case records its final status before it propagates errors.
+                # This summary therefore includes completed partial rounds, too.
+                for field in ("status", "completed_rounds", "utterances", "error", "ended_at_utc"):
+                    if field in metadata:
+                        entry[field] = metadata[field]
+                write_json(batch_path, batch)
+            batch["completed_cases"] += 1
+            write_json(batch_path, batch)
+            print(
+                f"\nCompleted {metadata['completed_rounds']} rounds and "
+                f"{metadata['utterances']} utterances.", flush=True,
+            )
+        batch["status"] = batch["batch_status"] = "completed"
+    except KeyboardInterrupt:
+        batch["status"] = batch["batch_status"] = "interrupted"
+        raise
+    except Exception as error:
+        batch["status"] = batch["batch_status"] = "failed"
+        batch["error"] = f"{type(error).__name__}: {error}"
+        raise
+    finally:
+        batch["ended_at_utc"] = utc_now()
+        write_json(batch_path, batch)
     return output_dir

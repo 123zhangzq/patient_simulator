@@ -1,0 +1,417 @@
+{
+  "schema_version": 1,
+  "source": {
+    "workbook": "02_whole_session_data/Group 2/TYB2_S8_20221223_master_annotated_reviewer2.xlsx",
+    "worksheet": "utterances",
+    "excel_rows": [
+      42,
+      58
+    ],
+    "utt_ids": [
+      41,
+      57
+    ],
+    "dialog_ids": [
+      "dg001"
+    ],
+    "materials_excel_rows": [
+      877,
+      891
+    ],
+    "materials_utt_ids": [
+      876,
+      890
+    ],
+    "materials_dialog_ids": [
+      "dg008"
+    ]
+  },
+  "utterances": [
+    {
+      "excel_row": 42,
+      "utt_id": 41,
+      "start_time": "00:05:20.337",
+      "end_time": "00:05:46.781",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Food that's actually healthy for the brain is useful so today we're going to discuss something like that yeah uh I think Mr [NAME] uh yeah thank you you can uh mute yourself if you know um not talking so remember last week we did uh teach you some strategy how to remember these people's name yeah anybody can remember actually remember is it you try give a try what is this lady's name",
+      "address_code": "GROUP",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 43,
+      "utt_id": 42,
+      "start_time": "00:05:48.250",
+      "end_time": "00:05:49.290",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "Tan Mei Li, is it?",
+      "address_code": "CD",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 44,
+      "utt_id": 43,
+      "start_time": "00:05:49.370",
+      "end_time": "00:05:50.131",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Very good.",
+      "address_code": "XC030",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 45,
+      "utt_id": 44,
+      "start_time": "00:05:50.351",
+      "end_time": "00:05:51.131",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "And this gentleman?",
+      "address_code": "XC030",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 46,
+      "utt_id": 45,
+      "start_time": "00:05:53.632",
+      "end_time": "00:05:54.432",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "Chong...",
+      "address_code": "CD",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 47,
+      "utt_id": 46,
+      "start_time": "00:05:56.193",
+      "end_time": "00:05:57.753",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "I can't remember his name.",
+      "address_code": "CD",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 48,
+      "utt_id": 47,
+      "start_time": "00:05:57.833",
+      "end_time": "00:05:58.514",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "It's quite a long name.",
+      "address_code": "CD",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 49,
+      "utt_id": 48,
+      "start_time": "00:05:59.194",
+      "end_time": "00:05:59.554",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Okay.",
+      "address_code": null,
+      "dialog_id": null,
+      "include": "no"
+    },
+    {
+      "excel_row": 50,
+      "utt_id": 49,
+      "start_time": "00:06:00.394",
+      "end_time": "00:06:02.995",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "So how do you remember Tan Mei Li's name?",
+      "address_code": "XC030",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 51,
+      "utt_id": 50,
+      "start_time": "00:06:04.536",
+      "end_time": "00:06:06.817",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "Because actually, I can't remember.",
+      "address_code": "CD",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 52,
+      "utt_id": 51,
+      "start_time": "00:06:06.857",
+      "end_time": "00:06:10.078",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "I remember you gave an example, then it just etched into my mind.",
+      "address_code": "CD",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 53,
+      "utt_id": 52,
+      "start_time": "00:06:10.118",
+      "end_time": "00:06:15.980",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "So I was like... Because you said Mei Li in Chinese was beautiful or something like that, right?",
+      "address_code": "CD",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 54,
+      "utt_id": 53,
+      "start_time": "00:06:16.380",
+      "end_time": "00:06:16.760",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Yeah.",
+      "address_code": "XC030",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 55,
+      "utt_id": 54,
+      "start_time": "00:06:19.489",
+      "end_time": "00:06:46.474",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Match her physical characteristic right yeah she's well groomed yeah yeah and this one you're quite close uh his name is actually one way to remember is his name is the same as the badminton uh gold medalist olympian but his surname is different from the medalist uh surname his surname is Lim the gold medalist is Lee, all start with L",
+      "address_code": "XC030",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 56,
+      "utt_id": 55,
+      "start_time": "00:06:47.127",
+      "end_time": "00:06:48.487",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "So that's a way of linking up.",
+      "address_code": "XC030",
+      "dialog_id": "dg001",
+      "include": "yes"
+    },
+    {
+      "excel_row": 57,
+      "utt_id": 56,
+      "start_time": "00:06:48.547",
+      "end_time": "00:06:49.048",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "You know what I mean?",
+      "address_code": null,
+      "dialog_id": null,
+      "include": "no"
+    },
+    {
+      "excel_row": 58,
+      "utt_id": 57,
+      "start_time": "00:06:49.388",
+      "end_time": "00:06:49.608",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Yeah.",
+      "address_code": null,
+      "dialog_id": null,
+      "include": "no"
+    }
+  ],
+  "material_utterances": [
+    {
+      "excel_row": 877,
+      "utt_id": 876,
+      "start_time": "01:13:43.754",
+      "end_time": "01:13:48.739",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Okay, now it's a test for XC030 because I just introduced you the strategy, right?",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 878,
+      "utt_id": 877,
+      "start_time": "01:13:48.759",
+      "end_time": "01:13:49.700",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Can you remember their name?",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 879,
+      "utt_id": 878,
+      "start_time": "01:13:51.863",
+      "end_time": "01:13:59.191",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "Tan Mei Li and Wei Chong, right?",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 880,
+      "utt_id": 879,
+      "start_time": "01:14:00.992",
+      "end_time": "01:14:02.554",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Okay, Chong Wei, what's his surname?",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 881,
+      "utt_id": 880,
+      "start_time": "01:14:03.715",
+      "end_time": "01:14:05.858",
+      "speaker_role": "participant",
+      "speaker_code": "XC030",
+      "text": "Surname is Lim, is it?",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 882,
+      "utt_id": 881,
+      "start_time": "01:14:06.394",
+      "end_time": "01:14:06.814",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Very good.",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 883,
+      "utt_id": 882,
+      "start_time": "01:14:07.154",
+      "end_time": "01:14:08.555",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "You see, you can do it already.",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 884,
+      "utt_id": 883,
+      "start_time": "01:14:10.455",
+      "end_time": "01:14:11.035",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Very good.",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 885,
+      "utt_id": 884,
+      "start_time": "01:14:11.055",
+      "end_time": "01:14:13.996",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "You know, so maybe if I ask you next Tuesday, you can remember completely.",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 886,
+      "utt_id": 885,
+      "start_time": "01:14:14.417",
+      "end_time": "01:14:15.497",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "It's Chong Wei is the name.",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 887,
+      "utt_id": 886,
+      "start_time": "01:14:15.637",
+      "end_time": "01:14:19.698",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "It's the same as the badminton gold medalist, Olympian, right?",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 888,
+      "utt_id": 887,
+      "start_time": "01:14:20.018",
+      "end_time": "01:14:20.659",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Gold medalist.",
+      "address_code": null,
+      "dialog_id": null,
+      "include": "no"
+    },
+    {
+      "excel_row": 889,
+      "utt_id": 888,
+      "start_time": "01:14:21.059",
+      "end_time": "01:14:22.099",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "And the surname is Lim.",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 890,
+      "utt_id": 889,
+      "start_time": "01:14:22.399",
+      "end_time": "01:14:22.639",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Yes.",
+      "address_code": null,
+      "dialog_id": null,
+      "include": "no"
+    },
+    {
+      "excel_row": 891,
+      "utt_id": 890,
+      "start_time": "01:14:22.899",
+      "end_time": "01:14:27.541",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "So they say that means just now strategy we taught you, you know, you use it already, right?",
+      "address_code": "XC030",
+      "dialog_id": "dg008",
+      "include": "yes"
+    }
+  ]
+}

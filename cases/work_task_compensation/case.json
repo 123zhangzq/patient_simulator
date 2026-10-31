@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "id": "work_task_compensation",
+  "category": "compensation_daily_life",
+  "title": "Keeping track of task steps and checking routine work",
+  "summary": "Adapted from the EC011 exchange about recording new work instructions, consulting notes, mistakes during automatic routines, checking work, team support, and fatigue. The simulation asks about the current patient's methods rather than assigning the source participant's spreadsheet use or job history to them.",
+  "rounds": 10,
+  "source": {
+    "workbook": "02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx",
+    "worksheet": "utterances",
+    "excel_rows": [
+      219,
+      258
+    ],
+    "utt_ids": [
+      218,
+      257
+    ],
+    "dialog_ids": [
+      "dg006",
+      "dg007"
+    ]
+  },
+  "therapist": {
+    "context": "Explore how the patient keeps track of instructions for a new task and checks for mistakes in everyday activity. Work is an optional setting, not an assumed current role. Use a household, learning, or other relevant activity if the patient is not working. Start from what they do or find difficult before proposing a strategy.",
+    "objectives": [
+      "Elicit one concrete example of keeping track of task steps and any current memory or attention support.",
+      "Understand where the current approach works, where it breaks down, and whether tiredness or routine affects the task.",
+      "Discuss one practical adjustment or retain a useful existing method, with the patient deciding what is acceptable."
+    ],
+    "materials": [
+      "No external worksheet, image, or prior lesson is required. Build the discussion around an activity described by the patient.",
+      "Possible options to discuss after understanding the task: a short written or digital step list, checking instructions with the person teaching, a deliberate final check, an agreed second check, or a brief break. These are options, not facts about this patient.",
+      "A reported mistake or a need to check does not by itself establish severity, diagnosis, or inability to do the activity."
+    ],
+    "opening_question": "When someone shows you a new task, how do you keep track of the steps?",
+    "conversation_plan": [
+      "Listen to the patient's approach, then invite one concrete example if the answer is general. If they do not encounter new tasks at work, find a relevant everyday setting with them.",
+      "Explore one part of the sequence at a time: learning the steps, recording or remembering them, and finding the information again when needed.",
+      "Reflect a useful existing method specifically. Ask where it becomes difficult, or how they notice and check errors, without assuming their approach is problem-free.",
+      "If the patient mentions repetitive work, automatic behavior, interruptions, fatigue, or help from others, explore its practical effect on their example. Follow the issue they actually raise instead of covering every topic.",
+      "If an adjustment would help, offer one small option matched to the identified difficulty and ask whether it fits. A good existing method may simply be retained.",
+      "End with a brief account of their current approach and any change they accepted, declined, or wanted to consider."
+    ],
+    "response_guidance": [
+      "Do not assume the patient uses a spreadsheet, has a manager, is employed, or has supportive colleagues.",
+      "Do not declare there is no difficulty before hearing their account. Allow the patient to qualify your interpretation or correct it.",
+      "If the patient searches for a word, offer a brief candidate only when helpful and let them confirm or correct it.",
+      "Keep suggested tools proportionate to the task. Do not prescribe several strategies in a long list or require a successful outcome.",
+      "Separate the patient's own checking from another person's checking, and distinguish a strategy already used from a new idea not yet tried."
+    ],
+    "completion_criteria": [
+      "A relevant activity and the patient's present approach, or the absence of one, have been clarified.",
+      "At least one useful feature, limitation, or unresolved difficulty has been discussed in relation to that activity.",
+      "The closing captures an agreed next step, a decision to retain the existing approach, or the patient's decision not to change it."
+    ]
+  }
+}

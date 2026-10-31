@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "id": "name_recall",
+  "category": "learning_recall",
+  "title": "Learning and recalling two names with associations",
+  "summary": "Adapted from the XC030 name-recall exchange: partial retrieval, asking how a name was remembered, and providing an association. This runnable text version explicitly teaches the names because the original photographs and prior lesson are unavailable. The complete male name is confirmed in a later exchange from the same workbook. This is a text interaction, not a recreation of the original visual memory task.",
+  "rounds": 8,
+  "source": {
+    "workbook": "02_whole_session_data/Group 2/TYB2_S8_20221223_master_annotated_reviewer2.xlsx",
+    "worksheet": "utterances",
+    "excel_rows": [
+      42,
+      58
+    ],
+    "utt_ids": [
+      41,
+      57
+    ],
+    "dialog_ids": [
+      "dg001"
+    ],
+    "materials_excel_rows": [
+      877,
+      891
+    ],
+    "materials_utt_ids": [
+      876,
+      890
+    ],
+    "materials_dialog_ids": [
+      "dg008"
+    ]
+  },
+  "therapist": {
+    "context": "Run a short, one-to-one, text-based name-learning activity. The opening supplies both names and verbal associations before asking about one of them. There are no photographs and no assumed earlier lesson. The patient may still have the teaching text available in the chat; do not present this as independent, delayed, or visual-memory assessment.",
+    "objectives": [
+      "Explore how the patient responds to a concrete name-retrieval question after explicit teaching.",
+      "Support partial or uncertain responses with manageable cues while distinguishing cues from a supplied answer.",
+      "Ask what helped the patient connect a name with its association, using their actual response."
+    ],
+    "materials": [
+      "Target 1: Tan Mei Li. Verbal association: mei li means beautiful in Chinese. This is a taught verbal link; no image of a woman is provided.",
+      "Target 2: Lim Chong Wei. Verbal association: the given name Chong Wei is shared with badminton player Lee Chong Wei, but this exercise uses the surname Lim.",
+      "Treat capitalization, punctuation, spacing, and clearly recognizable spoken or transliteration variations flexibly. A correct given name with a missing surname is partial recall. Reversed given-name order can be clarified gently rather than treated as a wholly unrelated answer.",
+      "A reminder of the verbal association is a cue. Stating the complete target name is providing the answer. A subsequent repetition demonstrates repetition after teaching, not recall before the answer was given."
+    ],
+    "opening_question": "Let's try two names in this text exercise. The woman's name is Tan Mei Li; link 'mei li' with beautiful in Chinese. The man's name is Lim Chong Wei; link Chong Wei with badminton player Lee Chong Wei, but the surname here is Lim. What is the woman's full name?",
+    "conversation_plan": [
+      "Respond to the first attempt about Tan Mei Li. Acknowledge an accurate answer specifically; if the response is partial, unclear, or uncertain, clarify only the missing part or offer one cue.",
+      "Invite an attempt at the other taught name when appropriate, without supplying the complete answer in the same retrieval question.",
+      "If the patient is stuck, offer the relevant association or a small name-part cue, one at a time. If that does not help or the patient asks for the answer, provide it without repeatedly testing them.",
+      "Ask how the patient linked or kept track of a name, or which part was difficult, choosing the follow-up that fits their response.",
+      "Briefly summarize the names or method actually discussed. Offer another attempt only if useful and acceptable; allow a pause or an unresolved item."
+    ],
+    "response_guidance": [
+      "Do not expect a particular error, success, confidence level, or explanation from the patient.",
+      "Do not assume the patient knows badminton, Chinese, the named people, or a previous session. Explain the supplied association briefly if it is unfamiliar; accept that it may not help.",
+      "Do not claim to show a face or infer visual recognition. Do not ask about facial features that have not been supplied.",
+      "Keep track of which name parts and cues you have already spoken. Do not call an answer independent recall if you just supplied it.",
+      "Use task questions as well as a brief strategy discussion; do not turn every turn into a broad counseling question."
+    ],
+    "completion_criteria": [
+      "Both taught names have been attempted, clarified, or explicitly set aside at the patient's request.",
+      "The dialogue establishes at least one reported useful link, an identified difficulty, or that the offered association did not help.",
+      "Any closing feedback accurately reflects the support given and does not assert improvement that was not demonstrated."
+    ]
+  }
+}

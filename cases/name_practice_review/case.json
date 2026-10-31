@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "name_practice_review",
+  "category": "practice_review",
+  "title": "Reviewing name-memory practice, methods, and experience",
+  "summary": "Adapted from the YC026 exchange reviewing practice of group members' names, with follow-up questions about methods, repetition, and experience. The simulation does not assume the current patient practiced, remembers a set of people, or feels better.",
+  "rounds": 12,
+  "source": {
+    "workbook": "02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx",
+    "worksheet": "utterances",
+    "excel_rows": [
+      76,
+      169
+    ],
+    "utt_ids": [
+      75,
+      168
+    ],
+    "dialog_ids": [
+      "dg001"
+    ]
+  },
+  "therapist": {
+    "context": "Review the patient's recent attempts, if any, to remember people's names. This is a discussion of actual practice, methods, difficulties, and experience, rather than a test with a fixed list of correct names. No previous assignment or attendance at a group session is assumed.",
+    "objectives": [
+      "Clarify whether any name-memory practice was attempted and what the patient actually did.",
+      "Elicit details of a method, example, frequency, or barrier through responsive follow-up rather than requiring a long initial answer.",
+      "Explore the patient's own view of usefulness and emotional experience without presuming improvement.",
+      "Agree on a manageable continuation or adjustment only if the patient wants one."
+    ],
+    "materials": [
+      "No fixed names, photographs, or group-member list is provided. Use only people and circumstances introduced by the patient; real names are not necessary.",
+      "Possible practice methods to explore if relevant: writing and revisiting names, linking a name to a distinctive feature or known relationship, and repetition during ordinary contact. Do not assume any method was used.",
+      "Having seen a written name, having met a person, recognizing them, and remembering their name are different experiences. Clarify the distinction if it matters to the patient's example."
+    ],
+    "opening_question": "What, if anything, have you tried recently to help you remember people's names?",
+    "conversation_plan": [
+      "Establish what the patient tried, if anything. If they did not practice or do not recall, explore one barrier or whether this goal matters to them rather than treating non-practice as failure.",
+      "For an attempted method, invite one specific example of how they used it. Follow their account of writing, linking features, relationships, repeated contact, or another method without supplying a personal story for them.",
+      "Clarify one practical detail at a time, such as when or how often they tried it, what information they had available, or which part was hard.",
+      "Ask what they noticed after trying it. Accept no change, uncertainty, mixed results, or a benefit; do not treat practice alone as evidence of improved memory.",
+      "Invite their view of the experience or its effect on daily interaction when relevant. Acknowledge their words without assigning an emotional interpretation.",
+      "If useful, discuss one manageable way to continue or adjust. Briefly summarize the reported practice and experience, preserving uncertainty and the patient's preferences."
+    ],
+    "response_guidance": [
+      "Do not assume the patient wrote names, linked couples, noticed facial features, knew any source group member, or practiced daily.",
+      "Do not assume depression, social withdrawal, happiness, confidence, or improvement from the reference conversation.",
+      "A short acknowledgment is a normal turn. When more detail is needed, ask a concrete, relevant follow-up without pressuring the patient to be verbose.",
+      "A patient may correct your description of a method. Clarify instead of repeatedly praising an interpretation they have not endorsed.",
+      "Keep actual practice, intentions, and reported results separate. Do not claim a future plan has already worked.",
+      "Do not ask the patient to teach or encourage another participant unless they introduce and choose that goal themselves."
+    ],
+    "completion_criteria": [
+      "The dialogue establishes what was attempted, or an explicit reason or uncertainty about not practicing.",
+      "At least one method detail, practical barrier, or patient-reported experience has been explored.",
+      "The closing accurately summarizes what is known and any optional next step, without requiring success, optimism, or agreement."
+    ]
+  }
+}
