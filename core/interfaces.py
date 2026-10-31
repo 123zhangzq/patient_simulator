@@ -25,6 +25,12 @@ class LanguageModel(Protocol):
 
 
 class Patient(Protocol):
+    last_trace: dict | None
+
+    def describe(self) -> dict:
+        """Return an audit snapshot; this is never part of the public dialogue."""
+        ...
+
     def respond(self, public_history: Sequence[DialogueMessage]) -> GenerationResult:
         """Return one visible patient reply from the public dialogue."""
         ...

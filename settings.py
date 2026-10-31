@@ -15,6 +15,7 @@ EXPECTED_FIELDS = {
     *STRING_FIELDS, *POSITIVE_INT_FIELDS, "temperature", "top_p",
     "repetition_penalty", "seed",
 }
+AGENT_FIELDS = {"response_prompt", "policy_path", "attention_enabled", "memory_enabled", "parameters", "traits"}
 
 
 def load_config(path: str | Path) -> tuple[dict, Path]:
@@ -25,7 +26,7 @@ def load_config(path: str | Path) -> tuple[dict, Path]:
     if not isinstance(config, dict):
         raise ValueError("The configuration file must contain a JSON object.")
     missing = EXPECTED_FIELDS - config.keys()
-    unknown = config.keys() - EXPECTED_FIELDS
+    unknown = config.keys() - EXPECTED_FIELDS - {"patient_agents"}
     if missing or unknown:
         raise ValueError(f"Invalid configuration fields: missing {sorted(missing)}, unknown {sorted(unknown)}.")
     for key in STRING_FIELDS:
@@ -50,6 +51,22 @@ def load_config(path: str | Path) -> tuple[dict, Path]:
         if not value.is_absolute():
             value = config_path.parent / value
         config[key] = str(value.resolve())
+    if "patient_agents" in config:
+        agent = config["patient_agents"]
+        if not isinstance(agent, dict) or agent.keys() - AGENT_FIELDS:
+            raise ValueError(f"patient_agents must contain only {sorted(AGENT_FIELDS)}.")
+        for key in ("attention_enabled", "memory_enabled"):
+            if key in agent and type(agent[key]) is not bool:
+                raise ValueError(f"patient_agents.{key} must be a boolean.")
+        for key in ("parameters", "traits"):
+            if key in agent and not isinstance(agent[key], dict):
+                raise ValueError(f"patient_agents.{key} must be an object.")
+        for key in ("response_prompt", "policy_path"):
+            if key in agent:
+                if not isinstance(agent[key], str) or not agent[key].strip():
+                    raise ValueError(f"patient_agents.{key} must be a nonempty path.")
+                value = Path(agent[key]).expanduser()
+                agent[key] = str((config_path.parent / value).resolve() if not value.is_absolute() else value.resolve())
     # Older configurations used this default path before the baseline was moved.
     # Preserve a custom file at that location; migrate only a missing default.
     legacy_patient_prompt = (config_path.parent / "prompts" / "patient.txt").resolve()

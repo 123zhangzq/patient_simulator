@@ -8,6 +8,7 @@ from core.interfaces import Patient
 
 _PATIENT_CLASSES = {
     "single_prompt": "baselines.single_prompt.patient.SinglePromptPatient",
+    "patient_agents": "patient_agents.patient.PatientAgents",
 }
 
 

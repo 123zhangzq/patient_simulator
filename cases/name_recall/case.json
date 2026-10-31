@@ -2,8 +2,8 @@
   "schema_version": 1,
   "id": "name_recall",
   "category": "learning_recall",
-  "title": "Learning and recalling two names with associations",
-  "summary": "Adapted from the XC030 name-recall exchange: partial retrieval, asking how a name was remembered, and providing an association. This runnable text version explicitly teaches the names because the original photographs and prior lesson are unavailable. The complete male name is confirmed in a later exchange from the same workbook. This is a text interaction, not a recreation of the original visual memory task.",
+  "title": "Reviewing previously taught names and memory links",
+  "summary": "Anchored to the XC030 name-recall exchange: review previously taught names, accept partial retrieval, ask how a name was remembered, and offer a relevant association. The opening retains the source review premise while removing the food-topic transition and mute instruction. Reference answers are therapist-only material; the text runner does not reconstruct the prior lesson or pictures.",
   "rounds": 8,
   "source": {
     "workbook": "02_whole_session_data/Group 2/TYB2_S8_20221223_master_annotated_reviewer2.xlsx",
@@ -32,37 +32,376 @@
     ]
   },
   "therapist": {
-    "context": "Run a short, one-to-one, text-based name-learning activity. The opening supplies both names and verbal associations before asking about one of them. There are no photographs and no assumed earlier lesson. The patient may still have the teaching text available in the chat; do not present this as independent, delayed, or visual-memory assessment.",
+    "context": "Continue the review activity from the source: the session premise is that two pictured people and name-memory strategies were introduced last week. Begin by inviting recall of the woman, then the man, and discuss the method that helped. The current text runner does not supply the earlier lesson or photographs; this premise sets the conversation topic, not evidence of what this patient remembers. Accept a patient who does not recognize the exercise and clarify without inventing an image or insisting that they learned it.",
     "objectives": [
-      "Explore how the patient responds to a concrete name-retrieval question after explicit teaching.",
+      "Invite recall of previously taught names before offering a name or an association, following the original review sequence.",
       "Support partial or uncertain responses with manageable cues while distinguishing cues from a supplied answer.",
       "Ask what helped the patient connect a name with its association, using their actual response."
     ],
     "materials": [
-      "Target 1: Tan Mei Li. Verbal association: mei li means beautiful in Chinese. This is a taught verbal link; no image of a woman is provided.",
-      "Target 2: Lim Chong Wei. Verbal association: the given name Chong Wei is shared with badminton player Lee Chong Wei, but this exercise uses the surname Lim.",
+      "Therapist reference answer for the woman: Tan Mei Li. The original teaching linked mei li with beautiful in Chinese. Keep the answer private until the patient has attempted recall or asks for help; no photograph is supplied by this runner.",
+      "Therapist reference answer for the man: Lim Chong Wei. The original association links Chong Wei with badminton player Lee Chong Wei but uses the surname Lim. Use this only as responsive support, not as an opening presentation of the answer.",
       "Treat capitalization, punctuation, spacing, and clearly recognizable spoken or transliteration variations flexibly. A correct given name with a missing surname is partial recall. Reversed given-name order can be clarified gently rather than treated as a wholly unrelated answer.",
       "A reminder of the verbal association is a cue. Stating the complete target name is providing the answer. A subsequent repetition demonstrates repetition after teaching, not recall before the answer was given."
     ],
-    "opening_question": "Let's try two names in this text exercise. The woman's name is Tan Mei Li; link 'mei li' with beautiful in Chinese. The man's name is Lim Chong Wei; link Chong Wei with badminton player Lee Chong Wei, but the surname here is Lim. What is the woman's full name?",
+    "opening_question": "Last week we practised some strategies for remembering these people's names. Can you remember this lady's name?",
     "conversation_plan": [
-      "Respond to the first attempt about Tan Mei Li. Acknowledge an accurate answer specifically; if the response is partial, unclear, or uncertain, clarify only the missing part or offer one cue.",
-      "Invite an attempt at the other taught name when appropriate, without supplying the complete answer in the same retrieval question.",
-      "If the patient is stuck, offer the relevant association or a small name-part cue, one at a time. If that does not help or the patient asks for the answer, provide it without repeatedly testing them.",
-      "Ask how the patient linked or kept track of a name, or which part was difficult, choosing the follow-up that fits their response.",
-      "Briefly summarize the names or method actually discussed. Offer another attempt only if useful and acceptable; allow a pause or an unresolved item."
+      "Start with the source-based review question without first teaching or listing the answers. Respond to the woman-name attempt; clarify uncertainty or offer one cue only if needed.",
+      "Invite an attempt at the man's name, as in the source follow-up: And this gentleman? Allow a partial name or an explicit inability to recall.",
+      "When a name has been recalled, ask how the patient remembered it. If it was not recalled, ask which part is difficult rather than assuming a successful method.",
+      "Respond to the patient's explanation. Offer or reinforce an appropriate association only at this point, keeping a cue distinct from a full answer.",
+      "Briefly summarize the method actually discussed. Accept that an offered association may not help and that some items may remain unresolved."
     ],
     "response_guidance": [
       "Do not expect a particular error, success, confidence level, or explanation from the patient.",
-      "Do not assume the patient knows badminton, Chinese, the named people, or a previous session. Explain the supplied association briefly if it is unfamiliar; accept that it may not help.",
+      "The case supplies the prior-session review premise, not this patient's prior responses. If the patient says they did not attend, cannot identify the people, or lacks the material, acknowledge and clarify; do not insist they learned it or invent a past answer. Do not assume familiarity with badminton or Chinese.",
       "Do not claim to show a face or infer visual recognition. Do not ask about facial features that have not been supplied.",
-      "Keep track of which name parts and cues you have already spoken. Do not call an answer independent recall if you just supplied it.",
+      "Keep track of the name parts and cues you actually supply. Do not call an answer independent recall after supplying it, and do not infer retention of a prior lesson that this runner has not reconstructed.",
       "Use task questions as well as a brief strategy discussion; do not turn every turn into a broad counseling question."
     ],
     "completion_criteria": [
-      "Both taught names have been attempted, clarified, or explicitly set aside at the patient's request.",
+      "The woman and man name targets have been discussed or explicitly set aside, including when the patient lacks the prior task context.",
       "The dialogue establishes at least one reported useful link, an identified difficulty, or that the offered association did not help.",
       "Any closing feedback accurately reflects the support given and does not assert improvement that was not demonstrated."
+    ],
+    "reference_utterances": [
+      "And this gentleman?",
+      "So how do you remember Tan Mei Li's name?",
+      "So that's a way of linking up."
+    ]
+  },
+  "patient_profile": {
+    "schema_version": 1,
+    "participant_id": "XC030",
+    "role": "stroke_survivor",
+    "assessment_date": "2022-11-23",
+    "simulation_date": "2022-12-23",
+    "background": {
+      "age": 28,
+      "language": "English",
+      "education_years": 20,
+      "lives_with_family": true,
+      "lives_with_helper": false,
+      "independence": "Able to live independently",
+      "stroke_year": 2001,
+      "consent_date": "2022-06-06"
+    },
+    "assessments": {
+      "moca": {
+        "total": 28,
+        "attention": 6,
+        "language": 2,
+        "delayed_recall": 5,
+        "category_cue": 0,
+        "multiple_choice_cue": 0,
+        "visuospatial_executive": 4,
+        "abstraction": 2,
+        "orientation": 6,
+        "naming": 3,
+        "learning_trial1": 5,
+        "learning_trial2": 5,
+        "digit_span_forward": 1,
+        "digit_span_backward": 1,
+        "vigilance": 1,
+        "serial_sevens": 3,
+        "sentence_repetition": 1,
+        "verbal_fluency": 1
+      },
+      "sdmt": {
+        "total": 48
+      },
+      "dass21": {
+        "depression": 8,
+        "anxiety": 6,
+        "stress": 11
+      }
+    },
+    "known_facts": [
+      {
+        "id": "stroke_history",
+        "text": "The baseline profile records a stroke in 2001.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!AL107"
+      },
+      {
+        "id": "household_family",
+        "text": "The baseline profile records living with family.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!V107"
+      },
+      {
+        "id": "daily_living",
+        "text": "Able to live independently at baseline.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!AA107"
+      }
+    ],
+    "initial_memories": [],
+    "provenance": {
+      "sources": {
+        "home_visit": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx",
+          "sha256": "5653c7cc0a98a5231bc93fd51f2aa4c59b0c090e73d7e07e9742eb2eda845524"
+        },
+        "code_dictionary": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/patient_profile_codex_20260910/Patient_Profile_Data_v3.xlsx",
+          "sha256": "f3cd66530ada651be0ebf7d5bc1e4e78dc89ba1deecf6c4068c0a8d0d0534dd0"
+        },
+        "dialogue_source": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 2/TYB2_S8_20221223_master_annotated_reviewer2.xlsx",
+          "sha256": "9f923465de11c26e160b39c95a0dc726e6d058efd3a9138f55b10fdc9d2c90e5",
+          "usage": "Identity and recording date only; target participant responses are excluded from the profile."
+        },
+        "reference_dialogue": {
+          "path": "code/cases/name_recall/reference_dialogue.json",
+          "sha256": "96410ada016794c75efde6f46deec5a5d35f6038e4a796b65f211deab4d7103d",
+          "usage": "Speaker identity only; no response text is used as patient knowledge."
+        }
+      },
+      "selection": {
+        "assessment_sheet": "Home Visit 2",
+        "assessment_source_row": 42,
+        "background_sheet": "Home Visit 1",
+        "background_source_row": 107,
+        "rule": "Use the most recent explicitly dated Home Visit assessment before the source recording; keep baseline demographics separately attributed. Do not use future visits or target-response content.",
+        "home_visit_1_assessment_date": null,
+        "moca_score_policy": "Keep recorded totals and subitems without repeat education adjustment. Set conflicting runtime fields to null and retain their original values and related cells in provenance.",
+        "dass_score_policy": "Use only the selected visit totals; preserve the recorded scale and do not infer diagnostic categories."
+      },
+      "fields": {
+        "assessment_date": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "C42",
+          "raw_value": "23/11/2022",
+          "interpretation": "Use the date as recorded; do not replace an ambiguous-looking month/day from context."
+        },
+        "participant_id": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "A107",
+          "raw_value": "XC030",
+          "cross_check": {
+            "source_id": "dialogue_source",
+            "sheet": "utterances",
+            "cell": "D43",
+            "reference_json_pointer": "/utterances/1/speaker_code"
+          }
+        },
+        "role": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "B107",
+          "raw_value": "SS",
+          "interpretation": "Source participant role SS, stroke survivor; not a caregiver."
+        },
+        "simulation_date": {
+          "source_id": "dialogue_source",
+          "source": "Recording date encoded in the source workbook filename",
+          "raw_value": "2022-12-23"
+        },
+        "background.age": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "L107",
+          "raw_value": 28,
+          "interpretation": "Recorded age at baseline/consent; not recalculated from the redacted date of birth."
+        },
+        "background.language": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "P107",
+          "raw_value": 0,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H9"
+          }
+        },
+        "background.education_years": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "T107",
+          "raw_value": 20
+        },
+        "background.lives_with_family": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "V107",
+          "raw_value": 1
+        },
+        "background.lives_with_helper": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "X107",
+          "raw_value": 0
+        },
+        "background.independence": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "AA107",
+          "raw_value": 0,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H20"
+          }
+        },
+        "background.stroke_year": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "AL107",
+          "raw_value": 2001
+        },
+        "background.consent_date": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "J107",
+          "raw_value": "2022-06-06T00:00:00",
+          "interpretation": "Consent date only; not an asserted date of Home Visit 1 assessment."
+        },
+        "assessments.moca.total": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "D42",
+          "raw_value": 28
+        },
+        "assessments.moca.attention": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "V42",
+          "raw_value": 6
+        },
+        "assessments.moca.language": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "Y42",
+          "raw_value": 2
+        },
+        "assessments.moca.delayed_recall": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AC42",
+          "raw_value": 5
+        },
+        "assessments.moca.category_cue": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AD42",
+          "raw_value": 0
+        },
+        "assessments.moca.multiple_choice_cue": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AE42",
+          "raw_value": 0
+        },
+        "assessments.moca.visuospatial_executive": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "K42",
+          "raw_value": 4
+        },
+        "assessments.moca.abstraction": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AB42",
+          "raw_value": 2
+        },
+        "assessments.moca.orientation": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AL42",
+          "raw_value": 6
+        },
+        "assessments.moca.naming": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "O42",
+          "raw_value": 3
+        },
+        "assessments.moca.learning_trial1": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "P42",
+          "raw_value": 5
+        },
+        "assessments.moca.learning_trial2": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "Q42",
+          "raw_value": 5
+        },
+        "assessments.moca.digit_span_forward": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "R42",
+          "raw_value": 1
+        },
+        "assessments.moca.digit_span_backward": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "S42",
+          "raw_value": 1
+        },
+        "assessments.moca.vigilance": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "T42",
+          "raw_value": 1
+        },
+        "assessments.moca.serial_sevens": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "U42",
+          "raw_value": 3
+        },
+        "assessments.moca.sentence_repetition": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "W42",
+          "raw_value": 1
+        },
+        "assessments.moca.verbal_fluency": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "X42",
+          "raw_value": 1
+        },
+        "assessments.sdmt.total": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AM42",
+          "raw_value": 48
+        },
+        "assessments.dass21.depression": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AT42",
+          "raw_value": 8,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        },
+        "assessments.dass21.anxiety": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AU42",
+          "raw_value": 6,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        },
+        "assessments.dass21.stress": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AV42",
+          "raw_value": 11,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        }
+      },
+      "issues": []
+    },
+    "unknowns": [
+      "Home Visit 1 assessment date is not recorded; its consent date must not be treated as the assessment date.",
+      "Current occupation, specific work routines, note-taking habits, name-learning practice, and prior knowledge of the task targets are not established by the selected profile.",
+      "Personality, attachment style, motivation, and current-turn emotion are not measured by this profile.",
+      "Cognitive screening scores do not specify a token limit, memory capacity, forgetting probability, or language proficiency.",
+      "Zero cued-recall scores do not on their own establish lack of benefit from cues.",
+      "No past-session episode is seeded into initial_memories."
     ]
   }
 }

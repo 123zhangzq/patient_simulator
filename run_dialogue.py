@@ -7,6 +7,8 @@ from pathlib import Path
 
 from core.cases import compose_prompts, load_cases, select_cases
 from core.registry import available_patient_methods
+from core.patient_setup import prepare_patient_setup
+from core.profiles import patient_information, profile_fingerprint
 from settings import DEFAULT_CONFIG, PROJECT_DIR, load_config, read_prompt
 
 
@@ -22,6 +24,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         help="Override the number of dialogue rounds; each round has one reply per agent.",
     )
     parser.add_argument("--seed", type=int, help="Override the configured random seed.")
+    parser.add_argument("--no-attention", action="store_true", help="Disable attention filtering for patient_agents.")
+    parser.add_argument("--no-memory", action="store_true", help="Disable memory impairment for patient_agents.")
+    parser.add_argument("--show-patient", action="store_true", help="Include private patient information and instructions in --dry-run output.")
     parser.add_argument(
         "--cases-dir", type=Path, default=PROJECT_DIR / "cases",
         help="Directory searched recursively for case.json, or one case JSON file.",
@@ -32,6 +37,10 @@ def main(argv: Sequence[str] | None = None) -> None:
     preview.add_argument("--list-cases", action="store_true", help="List selected cases without loading a model.")
     preview.add_argument("--dry-run", action="store_true", help="Preview composed therapist prompts as JSON without loading a model.")
     args = parser.parse_args(argv)
+    if args.show_patient and not args.dry_run:
+        parser.error("--show-patient requires --dry-run.")
+    if (args.no_attention or args.no_memory) and args.patient != "patient_agents":
+        parser.error("--no-attention and --no-memory require --patient patient_agents.")
     if args.rounds is not None:
         if args.rounds <= 0:
             parser.error("--rounds must be a positive integer.")
@@ -42,6 +51,12 @@ def main(argv: Sequence[str] | None = None) -> None:
         config, config_path = load_config(args.config)
         if args.seed is not None:
             config["seed"] = args.seed
+        if args.no_attention or args.no_memory:
+            agent_options = config.setdefault("patient_agents", {})
+            if args.no_attention:
+                agent_options["attention_enabled"] = False
+            if args.no_memory:
+                agent_options["memory_enabled"] = False
         cases = select_cases(load_cases(args.cases_dir), case_ids=args.case_ids, category=args.category)
         if args.list_cases:
             for case in cases:
@@ -50,18 +65,27 @@ def main(argv: Sequence[str] | None = None) -> None:
             return
         therapist_template = read_prompt(config["therapist_prompt"])
         opening_template = read_prompt(config["opening_prompt"])
-        read_prompt(config["patient_prompt"])
         # Fail before loading weights if any selected case or template is invalid.
         prepared = [(case, compose_prompts(case, therapist_template, opening_template)) for case in cases]
+        patient_setups = {
+            case.case_id: prepare_patient_setup(config, args.patient, case.data["patient_profile"])
+            for case in cases
+        }
         if args.dry_run:
             print(json.dumps({
                 "config_file": str(config_path), "patient_method": args.patient,
-                "patient_prompt_file": config["patient_prompt"], "seed": config["seed"],
+                "patient_prompt_file": (config["patient_prompt"] if args.patient == "single_prompt" else
+                    config.get("patient_agents", {}).get("response_prompt", str(PROJECT_DIR / "prompts/patient_agents/response.txt"))),
+                "seed": config["seed"],
                 "cases": [{
                     "id": case.case_id, "category": case.data["category"],
                     "case_file": str(case.path),
                     "rounds": args.rounds if args.rounds is not None else case.data.get("rounds", config["rounds"]),
                     "prompts": prompts,
+                    "patient_id": case.data["patient_profile"]["participant_id"],
+                    "patient_profile_sha256": profile_fingerprint(case.data["patient_profile"]),
+                    **({"patient_information": patient_information(case.data["patient_profile"]),
+                        "patient_setup": patient_setups[case.case_id]} if args.show_patient else {}),
                 } for case, prompts in prepared],
             }, ensure_ascii=False, indent=2))
             return

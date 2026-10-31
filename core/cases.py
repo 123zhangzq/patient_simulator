@@ -1,4 +1,4 @@
-"""Load reusable conversation cases and compose therapist-only prompts."""
+"""Load self-contained cases; keep therapist and patient inputs separate."""
 
 import json
 import re
@@ -7,14 +7,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from string import Formatter
 
+from core.profiles import validate_patient_profile
+
 
 _IDENTIFIER = re.compile(r"[a-z0-9]+(?:_[a-z0-9]+)*\Z")
-_REQUIRED_FIELDS = {"schema_version", "id", "category", "title", "summary", "therapist"}
+_REQUIRED_FIELDS = {"schema_version", "id", "category", "title", "summary", "therapist", "patient_profile"}
 _OPTIONAL_FIELDS = {"source", "rounds"}
 _THERAPIST_FIELDS = {
     "context", "objectives", "materials", "opening_question", "conversation_plan",
     "response_guidance", "completion_criteria",
 }
+_OPTIONAL_THERAPIST_FIELDS = {"reference_utterances"}
 _LIST_FIELDS = {
     "objectives", "materials", "conversation_plan", "response_guidance", "completion_criteria",
 }
@@ -51,6 +54,7 @@ def _validate(data: object) -> None:
         raise ValueError(f"Invalid case fields: missing {sorted(missing)}, unknown {sorted(unknown)}.")
     if type(data["schema_version"]) is not int or data["schema_version"] != 1:
         raise ValueError("schema_version must be 1.")
+    validate_patient_profile(data["patient_profile"])
     for key in ("id", "category", "title", "summary"):
         _text(data[key], key)
     for key in ("id", "category"):
@@ -59,8 +63,12 @@ def _validate(data: object) -> None:
     if "rounds" in data and (type(data["rounds"]) is not int or data["rounds"] < 1):
         raise ValueError("rounds must be a positive integer.")
     therapist = data["therapist"]
-    if not isinstance(therapist, dict) or set(therapist) != _THERAPIST_FIELDS:
-        raise ValueError(f"therapist must contain exactly these fields: {', '.join(sorted(_THERAPIST_FIELDS))}.")
+    if (not isinstance(therapist, dict) or not _THERAPIST_FIELDS <= therapist.keys()
+            or therapist.keys() - _THERAPIST_FIELDS - _OPTIONAL_THERAPIST_FIELDS):
+        raise ValueError(
+            f"therapist requires {', '.join(sorted(_THERAPIST_FIELDS))}; "
+            "reference_utterances is optional."
+        )
     for key in ("context", "opening_question"):
         _text(therapist[key], f"therapist.{key}")
     for key in _LIST_FIELDS:
@@ -69,6 +77,12 @@ def _validate(data: object) -> None:
             raise ValueError(f"therapist.{key} must be a list of nonempty strings.")
         for value in values:
             _text(value, f"therapist.{key} item")
+    if "reference_utterances" in therapist:
+        examples = therapist["reference_utterances"]
+        if not isinstance(examples, list):
+            raise ValueError("therapist.reference_utterances must be a list of nonempty strings.")
+        for example in examples:
+            _text(example, "therapist.reference_utterances item")
     if "source" in data:
         source = data["source"]
         if not isinstance(source, dict):
@@ -161,6 +175,14 @@ def compose_prompts(
     ):
         if therapist[key]:
             sections.append(title + "\n" + "\n".join(f"- {item}" for item in therapist[key]))
+    if therapist.get("reference_utterances"):
+        sections.append(
+            "Historical therapist wording examples\n"
+            "These selected source excerpts illustrate questions and responses for this activity. "
+            "They are examples, not messages already spoken in this simulation or a script to replay. "
+            "Use a line only when it fits this patient's actual response; adapt person references as needed.\n"
+            + "\n".join(f"- {item}" for item in therapist["reference_utterances"])
+        )
     return {
         "therapist": "\n\n".join(sections),
         "opening": opening_template.format(opening_question=therapist["opening_question"]).strip(),

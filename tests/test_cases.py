@@ -12,6 +12,7 @@ CODE_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CODE_DIR))
 
 from core.cases import DialogueCase, compose_prompts, load_cases, select_cases
+from helpers import profile_data
 
 
 def case_data(case_id="test_case", category="recall"):
@@ -21,6 +22,7 @@ def case_data(case_id="test_case", category="recall"):
         "category": category,
         "title": "Offline reference title",
         "summary": "OFFLINE_SUMMARY_DO_NOT_INCLUDE",
+        "patient_profile": profile_data(),
         "therapist": {
             "context": "Review a previously practised task.",
             "objectives": ["Ask how the patient approached the task."],
@@ -113,6 +115,29 @@ class CaseTests(unittest.TestCase):
             with self.subTest(template=invalid):
                 with self.assertRaises(ValueError):
                     compose_prompts(case, "BASE", invalid)
+
+    def test_historical_therapist_examples_enter_only_therapist_guidance(self):
+        data = case_data()
+        data["therapist"]["reference_utterances"] = [
+            "How did you remember their names?", "How did you feel this exercise?",
+        ]
+        path = self.write_case("with_examples", data)
+        case, = load_cases(path)
+        composed = compose_prompts(case, "BASE", "Begin with: {opening_question}")
+        self.assertIn("Historical therapist wording examples", composed["therapist"])
+        for example in data["therapist"]["reference_utterances"]:
+            self.assertIn(example, composed["therapist"])
+            self.assertNotIn(example, composed["opening"])
+        self.assertNotIn("OFFLINE_PATIENT_REFERENCE_DO_NOT_INCLUDE", composed["therapist"])
+
+    def test_historical_examples_reject_nontext_entries(self):
+        for examples in ("not a list", [""], [{"speaker": "Patient", "text": "Private reply"}]):
+            with self.subTest(examples=examples):
+                data = case_data()
+                data["therapist"]["reference_utterances"] = examples
+                path = self.write_case("invalid_examples", data)
+                with self.assertRaisesRegex(ValueError, "reference_utterances"):
+                    load_cases(path)
 
     def test_empty_directory_missing_path_and_malformed_case_have_clear_errors(self):
         with self.assertRaisesRegex(ValueError, "No case.json"):

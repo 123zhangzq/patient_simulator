@@ -16,6 +16,7 @@ sys.path.insert(0, str(CODE_DIR))
 from baselines.single_prompt.patient import SinglePromptPatient
 from core.cases import DialogueCase
 from core.therapist import Therapist
+from helpers import profile_data
 
 
 class FakeModel:
@@ -56,8 +57,8 @@ class TrackingTherapist(Therapist):
 class TrackingPatient(SinglePromptPatient):
     instances = []
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.histories = []
         self.instances.append(self)
 
@@ -126,7 +127,7 @@ class RunnerTests(unittest.TestCase):
         self.seed = fake_transformers.set_seed
 
     def case(self, case_id, rounds=None):
-        data = {"id": case_id}
+        data = {"id": case_id, "patient_profile": profile_data(case_id)}
         if rounds is not None:
             data["rounds"] = rounds
         return DialogueCase(self.root / case_id / "case.json", data)
@@ -149,7 +150,9 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(therapist.histories[0], ())
             self.assertEqual(len(patient.histories[0]), 1)
             self.assertEqual(patient.histories[0][0].speaker, "Therapist")
-            self.assertEqual(patient.system_prompt, "BASE_PATIENT")
+            self.assertTrue(patient.system_prompt.startswith("BASE_PATIENT"))
+            self.assertIn("Case patient information", patient.system_prompt)
+            self.assertNotIn("PRIVATE_SOURCE_SENTINEL", patient.system_prompt)
         self.assertEqual(self.seed.call_args_list, [mock.call(42)] * 3)
 
         batch = self.read_json(output / "batch_metadata.json")
@@ -188,6 +191,29 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual([case["status"] for case in batch["cases"]], ["failed", "pending"])
         self.assertEqual(batch["cases"][0]["utterances"], 3)
         self.assertFalse((output / "case_b").exists())
+        traces = [json.loads(line) for line in (output / "case_a/patient_trace.jsonl").read_text().splitlines()]
+        self.assertEqual([record["status"] for record in traces], ["completed", "failed"])
+
+    def test_proposed_method_runs_multiple_cases_with_private_traces_and_fresh_memory(self):
+        from patient_agents.patient import PatientAgents
+        self.runner.load_patient_class.return_value = PatientAgents
+        output = self.run_batch([self.case("case_a", 2), self.case("case_b", 1)], patient_method="patient_agents")
+        self.assertEqual(len(FakeModel.instances), 1)
+        self.assertEqual(len(FakeModel.instances[0].calls), 6)
+        for case_id, rounds in (("case_a", 2), ("case_b", 1)):
+            metadata = self.read_json(output / case_id / "metadata.json")
+            self.assertEqual(metadata["status"], "completed")
+            self.assertEqual(metadata["patient_initialization"]["method"], "patient_agents")
+            self.assertEqual(len(metadata["patient_profile_sha256"]), 64)
+            traces = [json.loads(line) for line in (output / case_id / "patient_trace.jsonl").read_text().splitlines()]
+            self.assertEqual(len(traces), rounds)
+            self.assertEqual(traces[0]["trace"]["turn"], 1)
+            dialogue = (output / case_id / "dialogue.jsonl").read_text()
+            self.assertNotIn("turn_context", dialogue)
+            self.assertNotIn("PRIVATE_SOURCE_SENTINEL", dialogue)
+        for messages in FakeModel.instances[0].calls:
+            serialized = json.dumps(messages)
+            self.assertNotIn("PRIVATE_SOURCE_SENTINEL", serialized)
 
     def test_model_load_failure_leaves_batch_metadata(self):
         with mock.patch.object(self.runner, "LocalQwen", side_effect=RuntimeError("model unavailable")):

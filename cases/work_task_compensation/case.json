@@ -33,9 +33,15 @@
       "Possible options to discuss after understanding the task: a short written or digital step list, checking instructions with the person teaching, a deliberate final check, an agreed second check, or a brief break. These are options, not facts about this patient.",
       "A reported mistake or a need to check does not by itself establish severity, diagnosis, or inability to do the activity."
     ],
-    "opening_question": "When someone shows you a new task, how do you keep track of the steps?",
+    "opening_question": "Do you have any questions about keeping track of new tasks and checking your work?",
+    "reference_utterances": [
+      "Do you have any questions for this session?",
+      "You have to pay deliberate attention to check final one round.",
+      "no matter how how careful we are with our attention surely there will be some sort of things we overlook",
+      "if you're really tired and you have a lot of things to check even though mundane but the amount is there right you may have to take a break first before you do that"
+    ],
     "conversation_plan": [
-      "Listen to the patient's approach, then invite one concrete example if the answer is general. If they do not encounter new tasks at work, find a relevant everyday setting with them.",
+      "Begin with the source exchange's invitation to ask questions. If the patient has no questions, ask how they keep track of the steps when someone shows them a new task. Listen to their approach, then invite one concrete example if the answer is general. If they do not encounter new tasks at work, find a relevant everyday setting with them.",
       "Explore one part of the sequence at a time: learning the steps, recording or remembering them, and finding the information again when needed.",
       "Reflect a useful existing method specifically. Ask where it becomes difficult, or how they notice and check errors, without assuming their approach is problem-free.",
       "If the patient mentions repetitive work, automatic behavior, interruptions, fatigue, or help from others, explore its practical effect on their example. Follow the issue they actually raise instead of covering every topic.",
@@ -53,6 +59,355 @@
       "A relevant activity and the patient's present approach, or the absence of one, have been clarified.",
       "At least one useful feature, limitation, or unresolved difficulty has been discussed in relation to that activity.",
       "The closing captures an agreed next step, a decision to retain the existing approach, or the patient's decision not to change it."
+    ]
+  },
+  "patient_profile": {
+    "schema_version": 1,
+    "participant_id": "EC011",
+    "role": "stroke_survivor",
+    "assessment_date": "2022-10-26",
+    "simulation_date": "2022-12-01",
+    "background": {
+      "age": 37,
+      "language": "English",
+      "education_years": 16,
+      "lives_with_family": true,
+      "lives_with_helper": false,
+      "independence": "Able to live independently",
+      "stroke_year": 2015,
+      "consent_date": "2022-05-23"
+    },
+    "assessments": {
+      "moca": {
+        "total": 29,
+        "attention": 6,
+        "language": 2,
+        "delayed_recall": 5,
+        "category_cue": 0,
+        "multiple_choice_cue": 0,
+        "visuospatial_executive": 5,
+        "abstraction": 2,
+        "orientation": null,
+        "naming": 3,
+        "learning_trial1": 4,
+        "learning_trial2": 5,
+        "digit_span_forward": 1,
+        "digit_span_backward": 1,
+        "vigilance": 1,
+        "serial_sevens": 3,
+        "sentence_repetition": 1,
+        "verbal_fluency": 1
+      },
+      "sdmt": {
+        "total": 41
+      },
+      "dass21": {
+        "depression": 16,
+        "anxiety": 10,
+        "stress": 13
+      }
+    },
+    "known_facts": [
+      {
+        "id": "stroke_history",
+        "text": "The baseline profile records a stroke in 2015.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!AL27"
+      },
+      {
+        "id": "household_family",
+        "text": "The baseline profile records living with family.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!V27"
+      },
+      {
+        "id": "daily_living",
+        "text": "Able to live independently at baseline.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!AA27"
+      }
+    ],
+    "initial_memories": [],
+    "provenance": {
+      "sources": {
+        "home_visit": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx",
+          "sha256": "5653c7cc0a98a5231bc93fd51f2aa4c59b0c090e73d7e07e9742eb2eda845524"
+        },
+        "code_dictionary": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/patient_profile_codex_20260910/Patient_Profile_Data_v3.xlsx",
+          "sha256": "f3cd66530ada651be0ebf7d5bc1e4e78dc89ba1deecf6c4068c0a8d0d0534dd0"
+        },
+        "dialogue_source": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx",
+          "sha256": "640cbff347b291194509f8c3bc1678bb61d0814931882a68cdffb8d183131fd4",
+          "usage": "Identity and recording date only; target participant responses are excluded from the profile."
+        },
+        "reference_dialogue": {
+          "path": "code/cases/work_task_compensation/reference_dialogue.json",
+          "sha256": "b7a2e559047b875a85ef120cbdf83efca41e529cb3cb05098bf7db206cb4079d",
+          "usage": "Speaker identity only; no response text is used as patient knowledge."
+        }
+      },
+      "selection": {
+        "assessment_sheet": "Home Visit 2",
+        "assessment_source_row": 6,
+        "background_sheet": "Home Visit 1",
+        "background_source_row": 27,
+        "rule": "Use the most recent explicitly dated Home Visit assessment before the source recording; keep baseline demographics separately attributed. Do not use future visits or target-response content.",
+        "home_visit_1_assessment_date": null,
+        "moca_score_policy": "Keep recorded totals and subitems without repeat education adjustment. Set conflicting runtime fields to null and retain their original values and related cells in provenance.",
+        "dass_score_policy": "Use only the selected visit totals; preserve the recorded scale and do not infer diagnostic categories."
+      },
+      "fields": {
+        "assessment_date": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "C6",
+          "raw_value": "2022-10-26T00:00:00",
+          "interpretation": "Use the date as recorded; do not replace an ambiguous-looking month/day from context."
+        },
+        "participant_id": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "A27",
+          "raw_value": "EC011",
+          "cross_check": {
+            "source_id": "dialogue_source",
+            "sheet": "utterances",
+            "cell": "D220",
+            "reference_json_pointer": "/utterances/1/speaker_code"
+          }
+        },
+        "role": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "B27",
+          "raw_value": "SS",
+          "interpretation": "Source participant role SS, stroke survivor; not a caregiver."
+        },
+        "simulation_date": {
+          "source_id": "dialogue_source",
+          "source": "Recording date encoded in the source workbook filename",
+          "raw_value": "2022-12-01"
+        },
+        "background.age": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "L27",
+          "raw_value": 37,
+          "interpretation": "Recorded age at baseline/consent; not recalculated from the redacted date of birth."
+        },
+        "background.language": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "P27",
+          "raw_value": 0,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H9"
+          }
+        },
+        "background.education_years": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "T27",
+          "raw_value": 16
+        },
+        "background.lives_with_family": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "V27",
+          "raw_value": 1
+        },
+        "background.lives_with_helper": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "X27",
+          "raw_value": 0
+        },
+        "background.independence": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "AA27",
+          "raw_value": 0,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H20"
+          }
+        },
+        "background.stroke_year": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "AL27",
+          "raw_value": 2015
+        },
+        "background.consent_date": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "J27",
+          "raw_value": "2022-05-23T00:00:00",
+          "interpretation": "Consent date only; not an asserted date of Home Visit 1 assessment."
+        },
+        "assessments.moca.total": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "D6",
+          "raw_value": 29
+        },
+        "assessments.moca.attention": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "V6",
+          "raw_value": 6
+        },
+        "assessments.moca.language": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "Y6",
+          "raw_value": 2
+        },
+        "assessments.moca.delayed_recall": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AC6",
+          "raw_value": 5
+        },
+        "assessments.moca.category_cue": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AD6",
+          "raw_value": 0
+        },
+        "assessments.moca.multiple_choice_cue": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AE6",
+          "raw_value": 0
+        },
+        "assessments.moca.visuospatial_executive": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "K6",
+          "raw_value": 5
+        },
+        "assessments.moca.abstraction": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AB6",
+          "raw_value": 2
+        },
+        "assessments.moca.orientation": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AL6",
+          "raw_value": 1,
+          "status": "excluded_conflicting_domain_total",
+          "related_cells": {
+            "AF6": 1,
+            "AG6": 1,
+            "AH6": 1,
+            "AI6": 1,
+            "AJ6": 1,
+            "AK6": 1
+          }
+        },
+        "assessments.moca.naming": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "O6",
+          "raw_value": 3
+        },
+        "assessments.moca.learning_trial1": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "P6",
+          "raw_value": 4
+        },
+        "assessments.moca.learning_trial2": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "Q6",
+          "raw_value": 5
+        },
+        "assessments.moca.digit_span_forward": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "R6",
+          "raw_value": 1
+        },
+        "assessments.moca.digit_span_backward": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "S6",
+          "raw_value": 1
+        },
+        "assessments.moca.vigilance": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "T6",
+          "raw_value": 1
+        },
+        "assessments.moca.serial_sevens": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "U6",
+          "raw_value": 3
+        },
+        "assessments.moca.sentence_repetition": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "W6",
+          "raw_value": 1
+        },
+        "assessments.moca.verbal_fluency": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "X6",
+          "raw_value": 1
+        },
+        "assessments.sdmt.total": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AM6",
+          "raw_value": 41
+        },
+        "assessments.dass21.depression": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AT6",
+          "raw_value": 16,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        },
+        "assessments.dass21.anxiety": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AU6",
+          "raw_value": 10,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        },
+        "assessments.dass21.stress": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AV6",
+          "raw_value": 13,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        }
+      },
+      "issues": [
+        {
+          "field": "assessments.moca.orientation",
+          "reason": "Recorded orientation total conflicts with the six recorded item scores. Runtime value is null; neither the total nor the items is silently corrected."
+        }
+      ]
+    },
+    "unknowns": [
+      "Home Visit 1 assessment date is not recorded; its consent date must not be treated as the assessment date.",
+      "Current occupation, specific work routines, note-taking habits, name-learning practice, and prior knowledge of the task targets are not established by the selected profile.",
+      "Personality, attachment style, motivation, and current-turn emotion are not measured by this profile.",
+      "Cognitive screening scores do not specify a token limit, memory capacity, forgetting probability, or language proficiency.",
+      "Zero cued-recall scores do not on their own establish lack of benefit from cues.",
+      "No past-session episode is seeded into initial_memories.",
+      "Orientation ability is unresolved because the selected visit contains a conflicting domain total."
     ]
   }
 }

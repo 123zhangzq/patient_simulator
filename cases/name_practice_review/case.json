@@ -21,7 +21,7 @@
     ]
   },
   "therapist": {
-    "context": "Review the patient's recent attempts, if any, to remember people's names. This is a discussion of actual practice, methods, difficulties, and experience, rather than a test with a fixed list of correct names. No previous assignment or attendance at a group session is assumed.",
+    "context": "This TYB session follows an earlier invitation to practise remembering other group members' names. Review what the patient attempted, if anything, how they did it, and their experience. This is a practice review rather than a test with a fixed list of correct names. The earlier invitation is a task premise, not evidence that this patient attended, practised, remembers anyone, or had a particular result. If they do not know the group or assignment, clarify that first and agree on a relevant name-memory example with them.",
     "objectives": [
       "Clarify whether any name-memory practice was attempted and what the patient actually did.",
       "Elicit details of a method, example, frequency, or barrier through responsive follow-up rather than requiring a long initial answer.",
@@ -33,7 +33,13 @@
       "Possible practice methods to explore if relevant: writing and revisiting names, linking a name to a distinctive feature or known relationship, and repetition during ordinary contact. Do not assume any method was used.",
       "Having seen a written name, having met a person, recognizing them, and remembering their name are different experiences. Clarify the distinction if it matters to the patient's example."
     ],
-    "opening_question": "What, if anything, have you tried recently to help you remember people's names?",
+    "opening_question": "Would you like to share how you practised remembering the other group members' names, and how many you remember?",
+    "reference_utterances": [
+      "How did you remember their names?",
+      "I mean, how long did you practice?",
+      "So every day you write the name or try to, you know, practice and write it? Or do you like just one-off do it? And how did you do it?",
+      "How did you feel this exercise?"
+    ],
     "conversation_plan": [
       "Establish what the patient tried, if anything. If they did not practice or do not recall, explore one barrier or whether this goal matters to them rather than treating non-practice as failure.",
       "For an attempted method, invite one specific example of how they used it. Follow their account of writing, linking features, relationships, repeated contact, or another method without supplying a personal story for them.",
@@ -54,6 +60,350 @@
       "The dialogue establishes what was attempted, or an explicit reason or uncertainty about not practicing.",
       "At least one method detail, practical barrier, or patient-reported experience has been explored.",
       "The closing accurately summarizes what is known and any optional next step, without requiring success, optimism, or agreement."
+    ]
+  },
+  "patient_profile": {
+    "schema_version": 1,
+    "participant_id": "YC026",
+    "role": "stroke_survivor",
+    "assessment_date": "2022-07-11",
+    "simulation_date": "2022-12-05",
+    "background": {
+      "age": 66,
+      "language": "English",
+      "education_years": 10,
+      "lives_with_family": true,
+      "lives_with_helper": true,
+      "independence": "Requires some assistance with basic activities",
+      "stroke_year": 2019,
+      "consent_date": "2022-05-13"
+    },
+    "assessments": {
+      "moca": {
+        "total": 25,
+        "attention": 6,
+        "language": 2,
+        "delayed_recall": 3,
+        "category_cue": 1,
+        "multiple_choice_cue": 0,
+        "visuospatial_executive": 4,
+        "abstraction": 1,
+        "orientation": 6,
+        "naming": 3,
+        "learning_trial1": 5,
+        "learning_trial2": 5,
+        "digit_span_forward": 1,
+        "digit_span_backward": 1,
+        "vigilance": 1,
+        "serial_sevens": 3,
+        "sentence_repetition": 1,
+        "verbal_fluency": 1
+      },
+      "sdmt": {
+        "total": 30
+      },
+      "dass21": {
+        "depression": 2,
+        "anxiety": 3,
+        "stress": 4
+      }
+    },
+    "known_facts": [
+      {
+        "id": "stroke_history",
+        "text": "The baseline profile records a stroke in 2019.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!AL154"
+      },
+      {
+        "id": "household_family",
+        "text": "The baseline profile records living with family.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!V154"
+      },
+      {
+        "id": "daily_living",
+        "text": "Requires some assistance with basic activities at baseline.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!AA154"
+      },
+      {
+        "id": "household_helper",
+        "text": "The baseline profile records living with a helper.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!X154"
+      },
+      {
+        "id": "reported_sensory_motor_difficulties",
+        "text": "At baseline, the participant reported shaky hands and poor vision.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx#Home Visit 1!AX154"
+      }
+    ],
+    "initial_memories": [],
+    "provenance": {
+      "sources": {
+        "home_visit": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx",
+          "sha256": "5653c7cc0a98a5231bc93fd51f2aa4c59b0c090e73d7e07e9742eb2eda845524"
+        },
+        "code_dictionary": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/patient_profile_codex_20260910/Patient_Profile_Data_v3.xlsx",
+          "sha256": "f3cd66530ada651be0ebf7d5bc1e4e78dc89ba1deecf6c4068c0a8d0d0534dd0"
+        },
+        "dialogue_source": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx",
+          "sha256": "06dd6fca1da8fee8895e7ac1fa5405db54d1adeb29812302c15ecc001e59a682",
+          "usage": "Identity and recording date only; target participant responses are excluded from the profile."
+        },
+        "reference_dialogue": {
+          "path": "code/cases/name_practice_review/reference_dialogue.json",
+          "sha256": "5f8a86cd8fd705a3040825a40b0f9daef8ea2af52f62997595de44de143629ef",
+          "usage": "Speaker identity only; no response text is used as patient knowledge."
+        }
+      },
+      "selection": {
+        "assessment_sheet": "Home Visit 2",
+        "assessment_source_row": 21,
+        "background_sheet": "Home Visit 1",
+        "background_source_row": 154,
+        "rule": "Use the most recent explicitly dated Home Visit assessment before the source recording; keep baseline demographics separately attributed. Do not use future visits or target-response content.",
+        "home_visit_1_assessment_date": null,
+        "moca_score_policy": "Keep recorded totals and subitems without repeat education adjustment. Set conflicting runtime fields to null and retain their original values and related cells in provenance.",
+        "dass_score_policy": "Use only the selected visit totals; preserve the recorded scale and do not infer diagnostic categories."
+      },
+      "fields": {
+        "assessment_date": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "C21",
+          "raw_value": "2022-07-11T00:00:00",
+          "interpretation": "Use the date as recorded; do not replace an ambiguous-looking month/day from context."
+        },
+        "participant_id": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "A154",
+          "raw_value": "YC026",
+          "cross_check": {
+            "source_id": "dialogue_source",
+            "sheet": "utterances",
+            "cell": "D77",
+            "reference_json_pointer": "/utterances/1/speaker_code"
+          }
+        },
+        "role": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "B154",
+          "raw_value": "SS",
+          "interpretation": "Source participant role SS, stroke survivor; not a caregiver."
+        },
+        "simulation_date": {
+          "source_id": "dialogue_source",
+          "source": "Recording date encoded in the source workbook filename",
+          "raw_value": "2022-12-05"
+        },
+        "background.age": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "L154",
+          "raw_value": 66,
+          "interpretation": "Recorded age at baseline/consent; not recalculated from the redacted date of birth."
+        },
+        "background.language": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "P154",
+          "raw_value": 0,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H9"
+          }
+        },
+        "background.education_years": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "T154",
+          "raw_value": 10
+        },
+        "background.lives_with_family": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "V154",
+          "raw_value": 1
+        },
+        "background.lives_with_helper": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "X154",
+          "raw_value": 1
+        },
+        "background.independence": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "AA154",
+          "raw_value": 2,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H20"
+          }
+        },
+        "background.stroke_year": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "AL154",
+          "raw_value": 2019
+        },
+        "background.consent_date": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "J154",
+          "raw_value": "2022-05-13T00:00:00",
+          "interpretation": "Consent date only; not an asserted date of Home Visit 1 assessment."
+        },
+        "assessments.moca.total": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "D21",
+          "raw_value": 25
+        },
+        "assessments.moca.attention": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "V21",
+          "raw_value": 6
+        },
+        "assessments.moca.language": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "Y21",
+          "raw_value": 2
+        },
+        "assessments.moca.delayed_recall": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AC21",
+          "raw_value": 3
+        },
+        "assessments.moca.category_cue": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AD21",
+          "raw_value": 1
+        },
+        "assessments.moca.multiple_choice_cue": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AE21",
+          "raw_value": 0
+        },
+        "assessments.moca.visuospatial_executive": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "K21",
+          "raw_value": 4
+        },
+        "assessments.moca.abstraction": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AB21",
+          "raw_value": 1
+        },
+        "assessments.moca.orientation": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AL21",
+          "raw_value": 6
+        },
+        "assessments.moca.naming": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "O21",
+          "raw_value": 3
+        },
+        "assessments.moca.learning_trial1": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "P21",
+          "raw_value": 5
+        },
+        "assessments.moca.learning_trial2": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "Q21",
+          "raw_value": 5
+        },
+        "assessments.moca.digit_span_forward": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "R21",
+          "raw_value": 1
+        },
+        "assessments.moca.digit_span_backward": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "S21",
+          "raw_value": 1
+        },
+        "assessments.moca.vigilance": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "T21",
+          "raw_value": 1
+        },
+        "assessments.moca.serial_sevens": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "U21",
+          "raw_value": 3
+        },
+        "assessments.moca.sentence_repetition": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "W21",
+          "raw_value": 1
+        },
+        "assessments.moca.verbal_fluency": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "X21",
+          "raw_value": 1
+        },
+        "assessments.sdmt.total": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AM21",
+          "raw_value": 30
+        },
+        "assessments.dass21.depression": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AT21",
+          "raw_value": 2,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        },
+        "assessments.dass21.anxiety": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AU21",
+          "raw_value": 3,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        },
+        "assessments.dass21.stress": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AV21",
+          "raw_value": 4,
+          "interpretation": "Recorded total at the selected visit, retained without multiplying by two or assigning a severity category."
+        }
+      },
+      "issues": []
+    },
+    "unknowns": [
+      "Home Visit 1 assessment date is not recorded; its consent date must not be treated as the assessment date.",
+      "Current occupation, specific work routines, note-taking habits, name-learning practice, and prior knowledge of the task targets are not established by the selected profile.",
+      "Personality, attachment style, motivation, and current-turn emotion are not measured by this profile.",
+      "Cognitive screening scores do not specify a token limit, memory capacity, forgetting probability, or language proficiency.",
+      "Zero cued-recall scores do not on their own establish lack of benefit from cues.",
+      "No past-session episode is seeded into initial_memories."
     ]
   }
 }

@@ -1,14 +1,22 @@
 """A patient baseline that makes one model call per visible reply."""
 
 from collections.abc import Sequence
+import copy
 
 from core.interfaces import DialogueMessage, GenerationResult, LanguageModel
+from core.profiles import profile_fingerprint, render_patient_profile
 
 
 class SinglePromptPatient:
-    def __init__(self, llm: LanguageModel, system_prompt: str):
+    def __init__(self, llm: LanguageModel, system_prompt: str, *, patient_profile: dict,
+                 seed: int = 42, options: dict | None = None, prompts: dict | None = None):
         self.llm = llm
-        self.system_prompt = system_prompt
+        self.patient_profile = copy.deepcopy(patient_profile)
+        self.system_prompt = system_prompt + "\n\nCase patient information (JSON)\n" + render_patient_profile(patient_profile)
+        self.last_trace = None
+
+    def describe(self) -> dict:
+        return {"method": "single_prompt", "profile_sha256": profile_fingerprint(self.patient_profile)}
 
     def respond(self, public_history: Sequence[DialogueMessage]) -> GenerationResult:
         messages = [{"role": "system", "content": self.system_prompt}]
@@ -19,4 +27,5 @@ class SinglePromptPatient:
             }
             for message in public_history
         )
+        self.last_trace = {"method": "single_prompt", "model_input": copy.deepcopy(messages)}
         return self.llm.reply(messages)

@@ -1,6 +1,7 @@
 """Run independent dialogue cases while sharing one loaded language model."""
 
 import json
+import copy
 import platform
 from collections.abc import Sequence
 from datetime import datetime, timezone
@@ -13,6 +14,8 @@ from transformers import set_seed
 
 from core.cases import DialogueCase, compose_prompts, load_cases
 from core.interfaces import DialogueMessage
+from core.patient_setup import prepare_patient_setup
+from core.profiles import profile_fingerprint
 from core.llm import LocalQwen
 from core.registry import load_patient_class
 from core.therapist import Therapist
@@ -39,21 +42,45 @@ def _run_case(
         # seed. Earlier cases cannot change this case's patient or sampling state.
         set_seed(config["seed"])
         therapist = Therapist(llm, prompts["therapist"], prompts["opening"])
-        patient = patient_class(llm, prompts["patient"])
+        setup = metadata["patient_setup"]
+        patient = patient_class(
+            llm, setup["system_prompt"],
+            patient_profile=copy.deepcopy(metadata["case"]["data"]["patient_profile"]),
+            seed=config["seed"], options=copy.deepcopy(setup["options"]),
+            prompts=copy.deepcopy(setup["prompts"]),
+        )
+        metadata["patient_initialization"] = patient.describe()
+        write_json(metadata_path, metadata)
         public_history: list[DialogueMessage] = []
         with (output_dir / "dialogue.jsonl").open("w", encoding="utf-8") as jsonl, (
             output_dir / "dialogue.md"
-        ).open("w", encoding="utf-8") as markdown:
+        ).open("w", encoding="utf-8") as markdown, (
+            output_dir / "patient_trace.jsonl"
+        ).open("w", encoding="utf-8") as trace_file:
             markdown.write(f"# Therapist / Patient\n\nModel: {config['model_id']}\n\n")
             markdown.flush()
             for round_number in range(1, config["rounds"] + 1):
                 for speaker, agent in (("Therapist", therapist), ("Patient", patient)):
                     # Only the generated public utterances enter either agent's
                     # history. Reference transcripts remain outside model inputs.
-                    result = agent.respond(tuple(public_history))
-                    content = result["content"]
-                    if not isinstance(content, str) or not content.strip():
-                        raise ValueError(f"{speaker} returned an empty or invalid reply.")
+                    completed = False
+                    if speaker == "Patient":
+                        patient.last_trace = None
+                    try:
+                        result = agent.respond(tuple(public_history))
+                        content = result["content"]
+                        if not isinstance(content, str) or not content.strip():
+                            raise ValueError(f"{speaker} returned an empty or invalid reply.")
+                        completed = True
+                    finally:
+                        # Internal state and model inputs never enter public history.
+                        if speaker == "Patient" and patient.last_trace is not None:
+                            trace_file.write(json.dumps({
+                                "round": round_number,
+                                "status": "completed" if completed else "failed",
+                                "trace": patient.last_trace,
+                            }, ensure_ascii=False, allow_nan=False) + "\n")
+                            trace_file.flush()
                     record = {
                         "round": round_number, "speaker": speaker,
                         "created_at_utc": utc_now(),
@@ -97,8 +124,8 @@ def run(
 ) -> Path:
     """Run cases in order, using all repository cases when none are supplied.
 
-    Case prompts affect the therapist only. The patient prompt is read once from
-    the configured method and reused unchanged for each fresh patient instance.
+    Every method receives the same case-contained profile. Source workbooks and
+    reference transcripts are not read by the experiment.
     """
     patient_class = load_patient_class(patient_method)
     model_dir = Path(config["model_dir"])
@@ -117,7 +144,6 @@ def run(
         )
     base_prompts = {
         "therapist": read_prompt(config["therapist_prompt"]),
-        "patient": read_prompt(config["patient_prompt"]),
         "opening": read_prompt(config["opening_prompt"]),
     }
     selected_cases = list(cases) if cases is not None else load_cases(PROJECT_DIR / "cases")
@@ -133,12 +159,14 @@ def run(
         # the configured patient method, prompt, or generated conversation.
         prompts["therapist"] = composed["therapist"]
         prompts["opening"] = composed["opening"]
+        setup = prepare_patient_setup(config, patient_method, case.data["patient_profile"])
+        prompts["patient"] = setup["system_prompt"] or setup["prompts"]["response"]
         rounds = rounds_override if rounds_override is not None else (
             case.data.get("rounds", config["rounds"])
         )
         if type(rounds) is not int or rounds <= 0:
             raise ValueError("The number of dialogue rounds must be a positive integer.")
-        prepared.append((case, prompts, {**config, "rounds": rounds}))
+        prepared.append((case, prompts, {**config, "rounds": rounds}, setup))
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
     output_dir = Path(config["output_dir"]) / timestamp
@@ -166,7 +194,7 @@ def run(
                 "status": "pending", "effective_rounds": case_config["rounds"],
                 "completed_rounds": 0, "utterances": 0,
             }
-            for case, _, case_config in prepared
+            for case, _, case_config, _ in prepared
         ],
     }
     batch_path = output_dir / "batch_metadata.json"
@@ -178,7 +206,7 @@ def run(
         common["gpu"] = batch["gpu"] = torch.cuda.get_device_name(0)
         common["dtype"] = batch["dtype"] = str(llm.dtype)
         write_json(batch_path, batch)
-        for index, (case, prompts, case_config) in enumerate(prepared):
+        for index, (case, prompts, case_config, setup) in enumerate(prepared):
             case_dir = output_dir / case.case_id
             case_dir.mkdir(exist_ok=False)
             metadata = {
@@ -187,6 +215,8 @@ def run(
                 "effective_rounds": case_config["rounds"],
                 "effective_config": case_config,
                 "prompts": prompts,
+                "patient_setup": setup,
+                "patient_profile_sha256": profile_fingerprint(case.data["patient_profile"]),
                 "case": {"source_file": str(case.path), "data": case.data},
                 "case_id": case.case_id,
             }
