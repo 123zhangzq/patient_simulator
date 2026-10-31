@@ -1,8 +1,52 @@
-# Qwen Therapist–Patient 对话实验
+# Therapist–Patient 对话实验
 
 在 **Linux + NVIDIA GPU** 服务器上，本地加载一份 Qwen 权重，让 Therapist 和 Patient 使用各自的 prompt，交替完成 10 轮对话。每轮由 Therapist 先说、Patient 回复，默认共生成 **20 条消息**。
 
 本仓库只包含代码、配置和 prompt。模型在服务器首次部署时下载，以后复用服务器上的模型目录。本项目按 Linux GPU 环境编写；依照任务要求，开发时没有安装推理环境、下载模型或运行任何本地测试，实际运行需在你的 GPU 服务器上完成。
+
+## 项目结构与运行方式
+
+主要源码、配置与 prompt 文件如下：
+
+```text
+.
+├── README.md
+├── requirements.txt
+├── config.json
+├── config.qwen3-8b.json
+├── download_model.py
+├── settings.py
+├── run_dialogue.py
+├── core/
+│   ├── llm.py
+│   ├── therapist.py
+│   ├── interfaces.py
+│   ├── registry.py
+│   └── runner.py
+├── baselines/
+│   └── single_prompt/
+│       └── patient.py
+├── patient_agents/
+│   └── .gitkeep
+└── prompts/
+    ├── therapist.txt
+    ├── opening.txt
+    ├── baselines/
+    │   └── single_prompt/
+    │       └── patient.txt
+    └── patient_agents/
+        └── .gitkeep
+```
+
+根目录的 `run_dialogue.py` 是统一命令行入口；`download_model.py` 继续负责下载，`settings.py` 继续负责配置与路径处理。两份 JSON 配置也保留在根目录。
+
+`core/llm.py` 统一加载模型并生成回复，模型权重只加载一次，由 Therapist 和 Patient 共享。`core/therapist.py` 定义 Therapist；`core/interfaces.py` 定义角色之间共用的接口；`core/registry.py` 根据方法名选择 Patient 实现；`core/runner.py` 统一控制轮次、公开对话历史、随机种子和结果保存。
+
+当前唯一的 Patient 方法是 `single_prompt`，实现位于 `baselines/single_prompt/patient.py`：每次 Patient 回复都使用自己的私有 prompt 和公开对话历史，调用共享模型一次。`patient_agents/` 和 `prompts/patient_agents/` 目前都只有 `.gitkeep`，用于保留空目录。扩展 Patient 方法时，通过注册和选择方法复用同一个 runner，不需要复制整套对话流程。
+
+Patient 接口位于 `core/interfaces.py`。当前实现通过 `SinglePromptPatient(llm, system_prompt)` 接收共享模型和私有 prompt；`respond(public_history)` 接收仅含 `speaker`、`content` 的公开消息序列，返回 `GenerationResult`，字段为 `content`、`input_tokens`、`output_tokens`、`finish_reason`。runner 传入不可修改的历史快照，只将返回的 `content` 作为 Patient 台词加入后续对话。注册表仅在选中方法后导入对应类。
+
+本次目录整理不新增依赖。已有服务器的环境、`models/` 和 `outputs/` 可以继续使用，无需移动模型、重新安装或重新下载。仓库的默认 prompt、角色台词、终端日志和生成的对话文件标题均使用英语；README 使用中文。
 
 ## 1. 模型选择与服务器要求
 
@@ -160,10 +204,16 @@ python download_model.py --config config.qwen3-8b.json
 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py
 ```
 
+不传 `--patient` 时，默认选择 `single_prompt` 基线。也可以显式指定，效果相同：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --patient single_prompt
+```
+
 Qwen3-8B：
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --config config.qwen3-8b.json
+CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --patient single_prompt --config config.qwen3-8b.json
 ```
 
 `CUDA_VISIBLE_DEVICES=0` 选择服务器上编号为 0 的 GPU。要使用编号为 2 的 GPU，就改成 `CUDA_VISIBLE_DEVICES=2`；程序会把选中的那张卡视为当前进程的第一张 GPU。不要同时运行多个实验占满同一张卡。
@@ -177,9 +227,11 @@ CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --config config.qwen3-8b.json
 第 10 轮：Therapist → Patient
 ```
 
-`prompts/opening.txt` 是触发 Therapist 第一次发言的启动指令，不计入这 20 条消息。每次调用使用当前角色自己的 system prompt；历史中该角色的发言映射为 `assistant`，另一角色的发言映射为 `user`。Patient 的私有背景只放入 Patient 的 system prompt，Therapist 只看到其自己的 prompt 和已公开的对话内容。
+`prompts/opening.txt` 是触发 Therapist 第一次发言的启动指令，不计入这 20 条消息。runner 记录的公开历史只包含双方实际说出的台词；每次调用使用当前角色自己的 system prompt，历史中该角色的发言映射为 `assistant`，另一角色的发言映射为 `user`。Patient 的私有背景只放入 Patient 的 system prompt，Therapist 只看到其自己的 prompt 和已公开的对话内容。
 
-代码关闭模型的 thinking 输出，便于直接获得角色台词。每个角色共享模型权重，但 prompt 和历史角色映射彼此独立；修改 prompt 不会训练或修改权重。
+对话按配置轮数依次完成 Therapist 和 Patient 的回复，默认固定 10 轮、20 条消息。台词中的告别不会触发提前结束，最后一轮也不会额外注入收尾提示。`single_prompt` 基线每条 Patient 回复调用模型一次。
+
+代码关闭模型的 thinking 输出，便于直接获得角色台词。默认双方使用英语对话。每个角色共享模型权重，但 prompt 和历史角色映射彼此独立；修改 prompt 不会训练或修改权重。
 
 ## 5. 第二次及之后运行：直接复用已下载模型
 
@@ -197,7 +249,7 @@ CUDA_VISIBLE_DEVICES=0 python run_dialogue.py
 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --config config.qwen3-8b.json
 ```
 
-**不需要重新安装环境，不需要重新下载模型，也不需要登录 Hugging Face 或提供 token。** 保留 `.venv/` 和 `models/` 即可。每次运行会重新从第 1 轮开始一个新实验，创建新的输出目录。
+**不需要重新安装环境，不需要重新下载模型，也不需要登录 Hugging Face 或提供 token。** 保留 `.venv/` 和 `models/` 即可。更新为当前目录结构也不影响已有 `outputs/`。每次运行会重新从第 1 轮开始一个新实验，创建新的输出目录；不传 `--patient` 仍使用 `single_prompt`。
 
 推理加载使用 `local_files_only=True`。如需显式让 Hugging Face 库进入离线模式，可在这一条运行命令前增加 `HF_HUB_OFFLINE=1`：
 
@@ -214,12 +266,14 @@ HF_HUB_OFFLINE=1 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py
 | 文件 | 用途 |
 | --- | --- |
 | `prompts/therapist.txt` | Therapist 的角色、谈话风格、提问策略与限制 |
-| `prompts/patient.txt` | Patient 的角色、虚构背景、症状描述、情绪与行为方式 |
+| `prompts/baselines/single_prompt/patient.txt` | `single_prompt` 基线 Patient 的角色、虚构背景、症状描述、情绪与行为方式 |
 | `prompts/opening.txt` | 触发 Therapist 第一条发言的启动指令 |
 
-例如，想换 Patient 案例，就修改 `prompts/patient.txt` 中的背景；想换 Therapist 策略，就修改 `prompts/therapist.txt`。不要把 Patient 私有背景抄到 Therapist prompt 或 opening 中，否则 Therapist 会在对话开始前知道它。
+默认三个 prompt 都是英语，要求双方输出英语台词。想换 Patient 案例，就修改 `prompts/baselines/single_prompt/patient.txt` 中的背景；想换 Therapist 策略，就修改 `prompts/therapist.txt`。不要把 Patient 私有背景抄到 Therapist prompt 或 opening 中，否则 Therapist 会在对话开始前知道它。
 
 可以另建 prompt 文件，在 JSON 配置中修改 `therapist_prompt`、`patient_prompt`、`opening_prompt` 的路径。每次实验会保存当次 prompt 的快照；以后再编辑原文件，也不会改变已有输出中的快照。
+
+兼容旧配置：若 `patient_prompt` 仍为旧默认路径 `prompts/patient.txt`，只有在它解析为该配置目录下的这一旧默认位置、且旧文件不存在时，`settings.py` 才会回退到新路径 `prompts/baselines/single_prompt/patient.txt`。如果旧文件仍存在，例如你保留了自己的 Patient prompt，就继续读取旧文件。其他自定义路径缺失时仍会报错，不会被自动替换。
 
 ## 7. 配置、轮数与复现
 
@@ -242,14 +296,14 @@ HF_HUB_OFFLINE=1 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py
 
 配置里的相对路径都以**该配置文件所在目录**为基准。默认配置放在仓库根目录，所以 `models/`、`prompts/`、`outputs/` 都位于仓库内。若模型要放到数据盘，可将 `model_dir` 改为绝对路径，例如 `/data/models/Qwen3.5-9B`；仍需先用这份配置执行下载。
 
-轮数和种子也可只对本次运行覆盖：
+方法、轮数和种子也可只对本次运行指定；原有 `--config`、`--rounds` 和 `--seed` 参数保持兼容：
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --rounds 10 --seed 42
-CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --config config.qwen3-8b.json --rounds 10 --seed 123
+CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --patient single_prompt --rounds 10 --seed 42
+CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --patient single_prompt --config config.qwen3-8b.json --rounds 10 --seed 123
 ```
 
-改变 `seed` 可生成另一场对话；同一种子不保证在不同 GPU、PyTorch 或 Transformers 版本间逐字一致。
+随机种子在实验开始时统一设置一次，Therapist 和 Patient 按生成顺序使用同一全局随机流。改变 `seed` 可生成另一场对话；同一种子不保证在不同 GPU、PyTorch 或 Transformers 版本间逐字一致。
 
 首次下载时，脚本将 `revision` 解析成明确的模型 commit 并记录在 `download_manifest.json` 的 `resolved_revision` 中。`main` 可能随模型作者更新而变化，但推理不会联网检查更新。要固定长期复现实验，可以将配置的 `revision` 改为该清单中的完整 commit SHA，再使用同一配置执行下载，以更新清单中的 `requested_revision`。
 
@@ -268,7 +322,7 @@ outputs/本次运行时间戳/
 
 - `dialogue.md`：方便直接阅读的完整对话。
 - `dialogue.jsonl`：一条生成消息写一行，包含 `round`、`speaker`、`created_at_utc`、`content`、`input_tokens`、`output_tokens`、`finish_reason`，便于后续分析。默认成功完成时有 20 条生成消息。
-- `metadata.json`：本次配置与实际运行参数、prompt 快照、运行环境版本、GPU、精度、模型下载清单以及状态，另记录 `completed_rounds` 和 `utterances`。`status` 为 `running`、`completed`、`failed` 或 `interrupted`。
+- `metadata.json`：本次配置与实际运行参数、prompt 快照、运行环境版本、GPU、精度、模型下载清单以及状态，另记录 `patient_method`（当前为 `single_prompt`）、`completed_rounds` 和 `utterances`。`status` 为 `running`、`completed`、`failed` 或 `interrupted`。
 
 生成消息会逐条写入。因此后续某轮失败时，之前已生成的消息仍保留；中断或失败的实验不应当作完整的 10 轮结果。再次运行会新建实验，不会自动续写之前的对话。
 

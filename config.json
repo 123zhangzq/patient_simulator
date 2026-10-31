@@ -12,7 +12,7 @@
   "repetition_penalty": 1.05,
   "seed": 42,
   "therapist_prompt": "prompts/therapist.txt",
-  "patient_prompt": "prompts/patient.txt",
+  "patient_prompt": "prompts/baselines/single_prompt/patient.txt",
   "opening_prompt": "prompts/opening.txt",
   "output_dir": "outputs"
 }
