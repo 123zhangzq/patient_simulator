@@ -32,7 +32,12 @@ class ResponseAgent:
         self.interaction = None
 
     def respond(self, turn_context: dict) -> GenerationResult:
-        payload = {"patient": self.response_profile, "turn_context": turn_context}
+        # Put earlier material first and the current therapist stimulus last.
+        # This changes presentation only: no extra history or hidden units.
+        context = deepcopy(turn_context)
+        current = context.pop("accessible_current_units")
+        context["accessible_current_units"] = current
+        payload = {"patient": self.response_profile, "turn_context": context}
         messages = [
             {"role": "system", "content": self.system_prompt},
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False, allow_nan=False)},

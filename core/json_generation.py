@@ -53,6 +53,10 @@ class JsonGenerationConstraint:
             raise ValueError("json_schema must be an object.")
         parser = self._library.JsonSchemaParser(deepcopy(schema))
         enforcer = self._library.TokenEnforcer(self.tokenizer_data, parser)
+        # Required-field order is otherwise only a schema listing, not a
+        # generation order. TokenEnforcer replaces parser.config at creation.
+        # State must precede speech so it can condition this same output call.
+        parser.config.force_json_field_order = True
 
         def allowed_tokens(batch_id, input_ids):
             return enforcer.get_allowed_tokens(input_ids.tolist()).allowed_tokens
