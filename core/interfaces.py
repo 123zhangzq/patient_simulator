@@ -21,7 +21,7 @@ class GenerationResult(TypedDict):
 
 
 class LanguageModel(Protocol):
-    def reply(self, messages: list[dict[str, str]]) -> GenerationResult:
+    def reply(self, messages: list[dict[str, str]], *, max_new_tokens: int | None = None) -> GenerationResult:
         """Generate one reply from model-facing chat messages."""
         ...
 
@@ -30,7 +30,7 @@ class Patient(Protocol):
     last_trace: dict | None
 
     def initialize_history(self, history: Sequence[DialogueMessage]) -> None:
-        """Initialize the supplied public prefix without generating new speech."""
+        """Initialize the prefix; methods may build private state but no public speech."""
         ...
 
     def describe(self) -> dict:

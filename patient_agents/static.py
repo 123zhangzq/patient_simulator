@@ -16,16 +16,20 @@ TRAIT_VALUES = {
     "memory": {"preserved", "reduced", "markedly_reduced", "unknown"},
     "language": {"preserved", "reduced", "unknown"},
 }
-OPTION_FIELDS = {"attention_enabled", "memory_enabled", "policy_path", "parameters", "traits"}
+OPTION_FIELDS = {"attention_enabled", "memory_enabled", "policy_path", "parameters", "traits",
+                 "person_card_enabled", "person_card_max_new_tokens"}
 
 
 def load_policy(options: dict | None = None) -> dict:
     options = {} if options is None else options
     if not isinstance(options, dict) or options.keys() - OPTION_FIELDS:
         raise ValueError(f"Unknown patient_agents options; allowed: {sorted(OPTION_FIELDS)}")
-    for name in ("attention_enabled", "memory_enabled"):
+    for name in ("attention_enabled", "memory_enabled", "person_card_enabled"):
         if name in options and type(options[name]) is not bool:
             raise ValueError(f"{name} must be a boolean.")
+    if ("person_card_max_new_tokens" in options
+            and (type(options["person_card_max_new_tokens"]) is not int or options["person_card_max_new_tokens"] < 1)):
+        raise ValueError("person_card_max_new_tokens must be a positive integer.")
     if "policy_path" in options and not isinstance(options["policy_path"], (str, Path)):
         raise ValueError("policy_path must be a filesystem path.")
     defaults = json.loads(POLICY_PATH.read_text(encoding="utf-8"))

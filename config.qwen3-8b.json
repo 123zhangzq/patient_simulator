@@ -17,6 +17,10 @@
   "output_dir": "outputs",
   "patient_agents": {
     "response_prompt": "prompts/patient_agents/response.txt",
+    "person_card_prompt": "prompts/patient_agents/person_card.txt",
+    "format_repair_prompt": "prompts/patient_agents/format_repair.txt",
+    "person_card_enabled": true,
+    "person_card_max_new_tokens": 768,
     "policy_path": "patient_agents/policy.json",
     "attention_enabled": true,
     "memory_enabled": true,

@@ -15,7 +15,9 @@ EXPECTED_FIELDS = {
     *STRING_FIELDS, *POSITIVE_INT_FIELDS, "temperature", "top_p",
     "repetition_penalty", "seed",
 }
-AGENT_FIELDS = {"response_prompt", "policy_path", "attention_enabled", "memory_enabled", "parameters", "traits"}
+AGENT_FIELDS = {"response_prompt", "person_card_prompt", "format_repair_prompt", "policy_path",
+                "attention_enabled", "memory_enabled", "person_card_enabled", "person_card_max_new_tokens",
+                "parameters", "traits"}
 
 
 def load_config(path: str | Path) -> tuple[dict, Path]:
@@ -55,13 +57,16 @@ def load_config(path: str | Path) -> tuple[dict, Path]:
         agent = config["patient_agents"]
         if not isinstance(agent, dict) or agent.keys() - AGENT_FIELDS:
             raise ValueError(f"patient_agents must contain only {sorted(AGENT_FIELDS)}.")
-        for key in ("attention_enabled", "memory_enabled"):
+        for key in ("attention_enabled", "memory_enabled", "person_card_enabled"):
             if key in agent and type(agent[key]) is not bool:
                 raise ValueError(f"patient_agents.{key} must be a boolean.")
+        if ("person_card_max_new_tokens" in agent
+                and (type(agent["person_card_max_new_tokens"]) is not int or agent["person_card_max_new_tokens"] < 1)):
+            raise ValueError("patient_agents.person_card_max_new_tokens must be a positive integer.")
         for key in ("parameters", "traits"):
             if key in agent and not isinstance(agent[key], dict):
                 raise ValueError(f"patient_agents.{key} must be an object.")
-        for key in ("response_prompt", "policy_path"):
+        for key in ("response_prompt", "person_card_prompt", "format_repair_prompt", "policy_path"):
             if key in agent:
                 if not isinstance(agent[key], str) or not agent[key].strip():
                     raise ValueError(f"patient_agents.{key} must be a nonempty path.")

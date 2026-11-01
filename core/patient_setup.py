@@ -17,10 +17,12 @@ def prepare_patient_setup(config: dict, method: str, patient_profile: dict, shar
     if method != "patient_agents":
         raise ValueError(f"Unknown patient method: {method}.")
     options = copy.deepcopy(config.get("patient_agents", {}))
-    response_path = options.pop("response_prompt", str(PROJECT_DIR / "prompts" / "patient_agents" / "response.txt"))
+    prompts = {}
+    for name in ("response", "person_card", "format_repair"):
+        path = options.pop(name + "_prompt", str(PROJECT_DIR / "prompts" / "patient_agents" / (name + ".txt")))
+        prompts[name] = read_prompt(path)
     options.setdefault("policy_path", str(PROJECT_DIR / "patient_agents" / "policy.json"))
-    response_prompt = read_prompt(response_path)
     from patient_agents.static import compile_profile
 
     compile_profile(patient_profile, options=options)
-    return {"system_prompt": situation, "options": options, "prompts": {"response": response_prompt}}
+    return {"system_prompt": situation, "options": options, "prompts": prompts}

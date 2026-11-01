@@ -54,10 +54,16 @@ def _run_case(
             prompts=copy.deepcopy(setup["prompts"]),
         )
         public_history = list(initial_history(case))
-        patient.initialize_history(tuple(public_history))
         metadata["initial_history_utterances"] = len(public_history)
-        metadata["patient_initialization"] = patient.describe()
-        write_json(metadata_path, metadata)
+        try:
+            patient.initialize_history(tuple(public_history))
+        finally:
+            metadata["patient_initialization"] = patient.describe()
+            write_json(metadata_path, metadata)
+        # Private initialization must not consume the dialogue's sampling stream.
+        set_seed(config["seed"])
+        if "person_card" in metadata["patient_initialization"]:
+            write_json(output_dir / "person_card.json", metadata["patient_initialization"]["person_card"])
         write_json(output_dir / "initial_history.json", session_information(case)["initial_history"])
         with (output_dir / "dialogue.jsonl").open("w", encoding="utf-8") as jsonl, (
             output_dir / "dialogue.md"

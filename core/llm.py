@@ -57,7 +57,10 @@ class LocalQwen:
         ).eval()
 
     @torch.inference_mode()
-    def reply(self, messages: list[dict]) -> GenerationResult:
+    def reply(self, messages: list[dict], *, max_new_tokens: int | None = None) -> GenerationResult:
+        budget = self.config["max_new_tokens"] if max_new_tokens is None else max_new_tokens
+        if type(budget) is not int or budget < 1:
+            raise ValueError("max_new_tokens must be a positive integer.")
         text = self.tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True, enable_thinking=False,
         )
@@ -65,10 +68,10 @@ class LocalQwen:
             text, return_tensors="pt", add_special_tokens=False,
         ).to("cuda:0")
         input_tokens = inputs["input_ids"].shape[-1]
-        if input_tokens + self.config["max_new_tokens"] > self.config["max_context_tokens"]:
+        if input_tokens + budget > self.config["max_context_tokens"]:
             raise ValueError(
                 f"The dialogue requires {input_tokens} input tokens and up to "
-                f"{self.config['max_new_tokens']} output tokens, exceeding the configured "
+                f"{budget} output tokens, exceeding the configured "
                 f"max_context_tokens limit of {self.config['max_context_tokens']}. "
                 "Reduce the number of rounds or reply length, or increase max_context_tokens "
                 "if GPU memory allows. The conversation history has not been truncated."
@@ -78,7 +81,7 @@ class LocalQwen:
             pad_id = self.tokenizer.eos_token_id
         outputs = self.model.generate(
             **inputs,
-            max_new_tokens=self.config["max_new_tokens"],
+            max_new_tokens=budget,
             do_sample=True,
             temperature=self.config["temperature"],
             top_p=self.config["top_p"],
