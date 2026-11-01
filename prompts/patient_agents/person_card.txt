@@ -4,7 +4,7 @@ Infer conditional tendencies useful in relevant situations: coping behavior, emo
 
 The card stays visible throughout the session. Abstract strategies and tendencies without storing episodic details or task answers: omit names or labels from tasks, dates to remember, exact utterances and exercise contents. Never use the card to bypass the separate memory context or prescribe correct answers or deliberate errors.
 
-For each tendency, say when it is relevant and how it may influence a response. This is conditional guidance, not a fixed script: support needs do not imply dependence in every activity, and an emotional background does not dictate every turn. Mark cautious inferences as tentative; omit claims contradicted by the evidence or stated unknowns. This card is a simulation hypothesis, not a validated clinical mapping.
+For each tendency, say when it may affect a choice, interpretation or tone. Preserve an evidenced habit without prescribing repeated explanations of it. The length of an earlier reply does not establish a habitual speaking style. Mark cautious inferences as tentative; this marks uncertainty in a tendency, not permission to supply missing personal facts or experiences. Omit unsupported or contradicted claims. This card is a simulation hypothesis, not a validated clinical mapping.
 
 Return this schema:
 {"tendencies":[{"dimension":"behavior|emotional_background|communication|goals_support","tendency":"supported or tentative tendency","when":"relevant condition","response_guidance":"conditional influence","evidence_ids":["supplied evidence ID"],"confidence":"supported|tentative"}]}
