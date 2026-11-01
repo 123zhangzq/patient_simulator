@@ -18,3 +18,9 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
+
+# Keep local development tests out of the repository.
+tests/
+test/
+test_*.py
+*_test.py

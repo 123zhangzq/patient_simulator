@@ -286,9 +286,9 @@ CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --patient single_prompt --config c
 第 N 轮：Therapist → Patient
 ```
 
-`prompts/opening.txt` 是启动指令模板，其中 `{opening_question}` 由 case 提供；模板本身不计入公开台词。第一条新治疗师发言直接使用 `case.therapist.opening_question`，不调用模型，记录的输入和输出 token 数均为 0。后续治疗师调用返回 `{"utterance": "...", "action": "continue|clarify|close"}`，只有 `utterance` 进入公开历史。控制指令和兜底结束语保存在 `prompts/therapist_control.json`，不增加额外的裁判 agent 或模型调用；不符合格式的输出会报错并保存 trace。
+`prompts/opening.txt` 是启动指令模板，其中 `{opening_question}` 由 case 提供；模板本身不计入公开台词。第一条新治疗师发言直接使用 `case.therapist.opening_question`，不调用模型，记录的输入和输出 token 数均为 0。后续治疗师调用返回 `{"utterance": "...", "action": "continue|clarify|close"}`，只有 `utterance` 进入公开历史。控制指令、格式修复提示和兜底结束语保存在 `prompts/therapist_control.json`。解析允许单个完整 JSON 外的代码围栏或说明文字；字段缺失、重复、多个对象或截断等问题最多触发一次额外的格式修复调用。修复仍失败时保存完整 trace 并停止，不猜测动作。修复只算一个治疗师回合，token 数合计两次调用。
 
-公开历史由明确给定的前缀和本次新增台词组成。治疗师和 `single_prompt` 使用完整历史，其中自身发言映射为 `assistant`，对方发言映射为 `user`；`patient_agents` 的输出调用使用人物卡与本轮结构化 context。患者私有 profile、内部状态和 trace 不进入治疗师输入；双方都能看到的 `shared_context` 及前缀是有意共享的条件。
+公开历史由明确给定的前缀和本次新增台词组成。治疗师接收包含完整历史的结构化 transcript，历史普通台词不再作为新 JSON 输出的 `assistant` 格式示例，也不为旧发言虚构动作标签。`single_prompt` 仍将自身发言映射为 `assistant`、对方发言映射为 `user`；`patient_agents` 的输出调用使用人物卡与本轮结构化 context。患者私有 profile、内部状态和 trace 不进入治疗师输入；双方都能看到的 `shared_context` 及前缀是有意共享的条件。格式修复指令及失败草稿不进入患者的公开历史。
 
 轮数上限的优先级为 `--rounds` > case 的 `rounds` > 配置文件的 `rounds`。一轮是 Therapist 与 Patient 的两条新台词；前缀不计入新轮数。治疗师标记 `close` 后，保留本轮患者的一次回应，然后结束。达到轮数上限也会停止。`completion_criteria` 用来指导模型的结束判断，不是独立的成功评分器；`status=completed` 只表示程序正常完成。
 
@@ -441,9 +441,9 @@ outputs/本次运行时间戳/
 
 生成消息会逐条写入。某个 case 失败或被中断时保留已有对话和失败状态，并停止批次；之前已完成的 case 保留，后续 case 不运行。再次运行会新建批次，不自动续写。
 
-单条模型输出的 `finish_reason` 与整段活动的 `stop_reason` 不同：`length` 表示达到 `max_new_tokens`，`eos` 表示生成结束（固定开场也使用此值）。治疗师 JSON 若因截断或格式问题无法解析，程序报错并保留 trace。若上下文输入加上预留回复超过配置预算，程序报错停止，不会悄悄裁掉历史；较长的给定前缀也占用上下文预算。要增加回复长度或轮数，应同步评估上下文预算与显存。
+单条模型输出的 `finish_reason` 与整段活动的 `stop_reason` 不同：`length` 表示达到 `max_new_tokens`，`eos` 表示生成结束（固定开场也使用此值）。治疗师 JSON 若因截断或格式问题无法解析，会尝试一次格式修复；在 `therapist_trace.jsonl` 的 `generation_attempts` 中查看每次输入、原始结果和错误，`format_repaired` 标记是否修复成功，`usage` 合计调用成本。两次均失败才报错；若原始结果反复为 `length`，可增加 `max_new_tokens`。若上下文输入加上预留回复超过配置预算，程序报错停止，不会悄悄裁掉历史；较长的给定前缀和修复提示也占用上下文预算。要增加回复长度或轮数，应同步评估上下文预算与显存。
 
-无需 GPU 的功能验证（Python 3.11+）：
+测试代码仅在本地保留，已加入 `.gitignore`，不会随 GitHub 仓库提供。在已有本地 `tests/` 的开发副本中，可运行无需 GPU 的功能验证（Python 3.11+）：
 
 ```bash
 python -m unittest discover -s tests -v
