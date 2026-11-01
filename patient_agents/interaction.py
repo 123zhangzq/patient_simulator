@@ -13,6 +13,30 @@ def visible_ids(context):
             for item in context[key]}
 
 
+def response_schema(context):
+    """Constrain syntax and available references; semantic checks still follow."""
+    ids = sorted(visible_ids(context))
+    focus = {"type": "array", "maxItems": 4 if ids else 0, "uniqueItems": True,
+             "items": {"type": "string", **({"enum": ids} if ids else {})}}
+    return {
+        "type": "object", "additionalProperties": False,
+        "required": ["interaction", "utterance"],
+        "properties": {
+            "interaction": {
+                "type": "object", "additionalProperties": False,
+                "required": ["therapist_intent", "patient_act", "action_status", "focus_ids"],
+                "properties": {
+                    "therapist_intent": {"type": "string", "enum": sorted(INTENTS)},
+                    "patient_act": {"type": "string", "enum": sorted(ACTS)},
+                    "action_status": {"type": "string", "enum": sorted(STATUSES)},
+                    "focus_ids": focus,
+                },
+            },
+            "utterance": {"type": "string", "minLength": 1},
+        },
+    }
+
+
 def validate_interaction(value, context):
     fields = {"therapist_intent", "patient_act", "action_status", "focus_ids"}
     if not isinstance(value, dict) or set(value) != fields:

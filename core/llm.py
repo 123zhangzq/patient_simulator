@@ -44,6 +44,7 @@ class LocalQwen:
         if model_limit and config["max_context_tokens"] > model_limit:
             raise ValueError(f"max_context_tokens exceeds the model's context limit of {model_limit}.")
         self.tokenizer = AutoTokenizer.from_pretrained(config["model_dir"], **local_options)
+        self._json_constraint = None
         print(
             f"Loading the local model on cuda:0 with dtype={self.dtype} (loaded once per run)...",
             flush=True,
@@ -57,7 +58,8 @@ class LocalQwen:
         ).eval()
 
     @torch.inference_mode()
-    def reply(self, messages: list[dict], *, max_new_tokens: int | None = None) -> GenerationResult:
+    def reply(self, messages: list[dict], *, max_new_tokens: int | None = None,
+              json_schema: dict | None = None) -> GenerationResult:
         budget = self.config["max_new_tokens"] if max_new_tokens is None else max_new_tokens
         if type(budget) is not int or budget < 1:
             raise ValueError("max_new_tokens must be a positive integer.")
@@ -79,6 +81,14 @@ class LocalQwen:
         pad_id = self.tokenizer.pad_token_id
         if pad_id is None:
             pad_id = self.tokenizer.eos_token_id
+        constraints = {}
+        if json_schema is not None:
+            from core.json_generation import JsonGenerationConstraint
+
+            if self._json_constraint is None:
+                self._json_constraint = JsonGenerationConstraint(
+                    self.tokenizer, self.model.generation_config.eos_token_id)
+            constraints["prefix_allowed_tokens_fn"] = self._json_constraint.for_schema(json_schema)
         outputs = self.model.generate(
             **inputs,
             max_new_tokens=budget,
@@ -89,9 +99,11 @@ class LocalQwen:
             repetition_penalty=self.config["repetition_penalty"],
             pad_token_id=pad_id,
             use_cache=True,
+            **constraints,
         )
         generated = outputs[0, input_tokens:]
-        content = self.tokenizer.decode(generated, skip_special_tokens=True).strip()
+        decode_options = {"clean_up_tokenization_spaces": False} if json_schema is not None else {}
+        content = self.tokenizer.decode(generated, skip_special_tokens=True, **decode_options).strip()
         if not content:
             raise RuntimeError(
                 "The model generated an empty reply. The experiment has stopped; "

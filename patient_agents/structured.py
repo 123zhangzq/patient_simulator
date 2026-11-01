@@ -33,15 +33,21 @@ def parse_object(text):
     return result
 
 
-def generate_object(llm, messages, validator, repair_prompt, trace, max_new_tokens=None):
+def generate_object(llm, messages, validator, repair_prompt, trace, max_new_tokens=None, json_schema=None):
     """Validate one result, allowing one recorded repair with the same evidence."""
     trace.update(generation_attempts=[], usage={"input_tokens": 0, "output_tokens": 0})
+    if json_schema is not None:
+        trace["json_schema"] = deepcopy(json_schema)
     request = deepcopy(messages)
     for attempt in range(2):
         record = {"model_input": deepcopy(request)}
+        if json_schema is not None:
+            record["json_schema"] = deepcopy(json_schema)
         trace["generation_attempts"].append(record)
         try:
             kwargs = {} if max_new_tokens is None else {"max_new_tokens": max_new_tokens}
+            if json_schema is not None:
+                kwargs["json_schema"] = deepcopy(json_schema)
             result = llm.reply(request, **kwargs)
             record["result"] = deepcopy(result)
             for key in trace["usage"]:

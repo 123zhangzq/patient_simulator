@@ -21,7 +21,8 @@ class GenerationResult(TypedDict):
 
 
 class LanguageModel(Protocol):
-    def reply(self, messages: list[dict[str, str]], *, max_new_tokens: int | None = None) -> GenerationResult:
+    def reply(self, messages: list[dict[str, str]], *, max_new_tokens: int | None = None,
+              json_schema: dict | None = None) -> GenerationResult:
         """Generate one reply from model-facing chat messages."""
         ...
 

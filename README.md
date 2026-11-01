@@ -35,6 +35,7 @@
 │   ├── profiles.py
 │   ├── patient_setup.py
 │   ├── llm.py
+│   ├── json_generation.py
 │   ├── therapist.py
 │   ├── interfaces.py
 │   ├── registry.py
@@ -81,7 +82,7 @@ Patient 接口位于 `core/interfaces.py`。两个实现都接收共享 `llm`、
 
 随后 `respond(public_history)` 接收仅含 `speaker`、`content` 的公开消息序列，返回 `GenerationResult`，基本字段为 `content`、`input_tokens`、`output_tokens`、`finish_reason`。runner 传入不可修改的历史快照，只将 `content` 作为公开台词加入后续对话。`patient_agents` 不重复处理已初始化的前缀，也不把完整历史转交输出 LLM。治疗师另外返回可选控制字段 `dialogue_action`、`stop_reason`，它们不会进入患者听到的台词。注册表仅在选中方法后导入对应类。
 
-case 加载和批量运行不新增依赖。已有服务器的环境、`models/` 和 `outputs/` 可以继续使用。默认 prompt、角色台词、终端日志和生成的对话文件标题均使用英语；README 使用中文。每个 case 的 `patient_profile` 保存测量资料、真实已知事实、初始记忆、未知信息及来源。运行不读取 Excel 或 `reference_dialogue.json`；只有显式整理进 `case.session.initial_history` 的前缀台词会作为已有对话输入两种方法。前缀中的原患者自述是条件，不能再作为待预测答案评分。
+case 加载和 dry-run 不需要模型或格式约束依赖。运行 `patient_agents` 需要 `requirements.txt` 中的 `lm-format-enforcer==0.11.3`；已有服务器的模型和输出目录可继续使用。默认 prompt、角色台词、终端日志和生成的对话文件标题均使用英语；README 使用中文。每个 case 的 `patient_profile` 保存测量资料、真实已知事实、初始记忆、未知信息及来源。运行不读取 Excel 或 `reference_dialogue.json`；只有显式整理进 `case.session.initial_history` 的前缀台词会作为已有对话输入两种方法。前缀中的原患者自述是条件，不能再作为待预测答案评分。
 
 `session.mode` 支持 `new_activity`（无前缀的新活动）和 `continuation`（有前缀的继续交流）。`shared_context` 只放双方已知的情境与前缀已确立的熟悉习惯概要，不能把待回忆的姓名答案放在这里长期可见。`evaluation_note` 和每条前缀的 `source` 留在 case 快照供审计，不作为模型输入。未写 `session` 的旧 case 按无前缀的新活动运行。
 
@@ -94,6 +95,8 @@ case 加载和批量运行不新增依赖。已有服务器的环境、`models/`
 新增的 `session_tendencies` 最多三条，允许为空；每条包括类别、倾向、适用条件、回应指导、证据 ID 和确定程度。类别覆盖行为、情绪背景、沟通特点、目标与支持条件，不要求每类都填。它只使用 profile 中的资料及显式给定的前缀，不读取原始数据、未发生的对话、治疗师计划、评分答案或 `initial_memories`。证据原文只进入构建调用和初始化审计；输出模型只看到精简倾向。提示要求排除具体任务答案与事件摘要，不能把这些内容固化为永久记忆。结构校验能检查证据 ID，不能证明推断合理或保证不存在语义泄漏，需人工查看生成卡。该卡是实验假设，尚不是经过验证的 MacDonald 理论映射。
 
 通用互动状态仅含最新治疗师意图、患者回应类型、行动状态和可见信息 ID。行动状态区分提出、接受、尝试报告、完成报告、拒绝、暂缓；完成报告不代表环境已验证执行或效果。状态不保存自由文本摘要；下一轮只有支撑它的输入和患者发言仍可访问时，才提供 `interaction_state.previous_exchange`，否则清除。最新输入优先决定如何回应，旧计划不要求重复承诺。没有基于 case ID、姓名、固定结束句的分支，也没有自动替换重复台词。
+
+人物卡与患者逐轮回复使用 JSON Schema 约束生成：在模型选择下一个 token 时限制 JSON 结构、枚举和已提供的引用 ID，而不是事后猜测逗号或台词引号。`core/json_generation.py` 使用 [LM Format Enforcer](https://github.com/noamgat/lm-format-enforcer) 的核心解析器，绕过发布版 Transformers 集成中不兼容 Transformers 5 的旧导入。tokenizer 索引每个模型实例只构建一次，每次调用使用新的解析状态。baseline 和治疗师保持原有生成方式；患者模型仍需通过生成后校验，约束不能保证临床合理性、推断依据或避免 token 预算耗尽。重复引用、仅引用治疗师的倾向等仍由原校验处理，最多一次格式修复。
 
 ## 2. 模型选择与服务器要求
 
@@ -323,7 +326,13 @@ CUDA_VISIBLE_DEVICES=0 python run_dialogue.py
 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --config config.qwen3-8b.json
 ```
 
-**不需要重新安装环境，不需要重新下载模型，也不需要登录 Hugging Face 或提供 token。** 保留 `.venv/` 和 `models/` 即可。每次运行会创建一个新批次，并按筛选结果逐个从第 1 轮开始模拟；不传 `--patient` 仍使用 `single_prompt`。
+**保留现有环境和模型，不需要重新下载权重。** 从旧版升级并运行 `patient_agents` 时，在原环境中补装一次新增依赖：
+
+```bash
+python -m pip install lm-format-enforcer==0.11.3
+```
+
+新环境按 `requirements.txt` 安装已包含它；日常再次运行不需要重复安装。每次运行会创建一个新批次，并按筛选结果逐个从第 1 轮开始模拟；不传 `--patient` 仍使用 `single_prompt`。
 
 推理加载使用 `local_files_only=True`。如需显式让 Hugging Face 库进入离线模式，可在这一条运行命令前增加 `HF_HUB_OFFLINE=1`：
 
@@ -459,7 +468,7 @@ outputs/本次运行时间戳/
 - `therapist_trace.jsonl`：每次新 Therapist 调用的记录。首轮标记 `source=case_opening`，没有模型输入；后续记录 `model_input`、模型原始输出、请求动作、最终动作、澄清计数及可能的结束覆盖。用于区分模型自主收束、澄清超限与轮数上限。
 - `batch_metadata.json`：整个批次的状态，以及每个 case 的输出位置、轮数上限、完成进度、结束原因和错误。未开始的 case 标为 `pending`。
 
-agent 初始化详情在 `metadata.json → patient_initialization.person_card_construction`，包含证据、原始输出、格式修复、token 消耗及成功/失败状态；初始化失败也会保存，不会悄悄退回空人物卡继续运行。逐轮 `patient_trace.jsonl → trace.response_generation` 保存结构化输出及修复记录，`interaction_after_reply` 保存本轮状态标记。公开对话仅含 JSON 中的 `utterance`；逐轮 token 消耗包含私有状态和修复开销，不应当作纯台词 token 数。
+agent 初始化详情在 `metadata.json → patient_initialization.person_card_construction`，包含证据、原始输出、格式修复、token 消耗及成功/失败状态；初始化失败也会保存，不会悄悄退回空人物卡继续运行。逐轮 `patient_trace.jsonl → trace.response_generation` 保存结构化输出及修复记录，两处的 `json_schema` 记录实际生成约束，`interaction_after_reply` 保存本轮状态标记。公开对话仅含 JSON 中的 `utterance`；逐轮 token 消耗包含私有状态和修复开销，不应当作纯台词 token 数。
 
 生成消息会逐条写入。某个 case 失败或被中断时保留已有对话和失败状态，并停止批次；之前已完成的 case 保留，后续 case 不运行。再次运行会新建批次，不自动续写。
 

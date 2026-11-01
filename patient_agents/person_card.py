@@ -19,6 +19,33 @@ DIMENSIONS = {"behavior", "emotional_background", "communication", "goals_suppor
 ITEM_FIELDS = {"dimension", "tendency", "when", "response_guidance", "evidence_ids", "confidence"}
 
 
+def person_card_schema(sources):
+    """Use only the supplied evidence IDs in a bounded, complete card."""
+    ids = sorted(sources)
+    return {
+        "type": "object", "additionalProperties": False, "required": ["tendencies"],
+        "properties": {
+            "tendencies": {
+                "type": "array", "maxItems": 3 if ids else 0,
+                "items": {
+                    "type": "object", "additionalProperties": False,
+                    "required": ["dimension", "tendency", "when", "response_guidance", "evidence_ids", "confidence"],
+                    "properties": {
+                        "dimension": {"type": "string", "enum": sorted(DIMENSIONS)},
+                        **{field: {"type": "string", "minLength": 1, "maxLength": 180}
+                           for field in ("tendency", "when", "response_guidance")},
+                        "evidence_ids": {
+                            "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": True,
+                            "items": {"type": "string", **({"enum": ids} if ids else {})},
+                        },
+                        "confidence": {"type": "string", "enum": ["supported", "tentative"]},
+                    },
+                },
+            },
+        },
+    }
+
+
 class PersonCardBuilder:
     def __init__(self, llm: LanguageModel, compiled: dict, prompt: str | None = None,
                  repair_prompt: str | None = None, max_new_tokens: int = 768):
@@ -125,6 +152,7 @@ class PersonCardBuilder:
             card, result = generate_object(
                 self.llm, messages, lambda value: self._validate(value, sources),
                 self.repair_prompt, self.last_trace, max_new_tokens=self.max_new_tokens,
+                json_schema=person_card_schema(sources),
             )
         except Exception:
             self.last_trace["status"] = "failed"

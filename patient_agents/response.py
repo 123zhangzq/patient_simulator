@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from core.interfaces import GenerationResult, LanguageModel
-from patient_agents.interaction import validate_interaction
+from patient_agents.interaction import response_schema, validate_interaction
 from patient_agents.structured import generate_object
 
 
@@ -49,7 +49,8 @@ class ResponseAgent:
                     "interaction": validate_interaction(value["interaction"], turn_context)}
 
         try:
-            parsed, result = generate_object(self.llm, messages, validate, self.repair_prompt, self.last_trace)
+            parsed, result = generate_object(self.llm, messages, validate, self.repair_prompt, self.last_trace,
+                                             json_schema=response_schema(turn_context))
         finally:
             attempts = self.last_trace.get("generation_attempts", [])
             if attempts:
