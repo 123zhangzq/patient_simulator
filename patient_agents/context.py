@@ -29,7 +29,8 @@ class ContextController:
         self.frustration = 0
         self.memories = [
             {"id": f"initial:{item['id']}", "text": item["text"], "encoded_turn": 0,
-             "origin": "initial_memory", "cue_tags": item.get("cue_tags", [])}
+             "origin": "initial_memory", "speaker": None, "addressee": None,
+             "cue_tags": item.get("cue_tags", [])}
             for item in self.compiled["initial_memories"]
         ]
         self.last_trace: dict = {}
@@ -43,6 +44,7 @@ class ContextController:
             identifier = f"t{self.turn}:p{index + 1}"
             self.memories.append({"id": identifier, "text": unit, "encoded_turn": self.turn,
                                   "origin": "patient_utterance", "cue_tags": [],
+                                  "speaker": "Patient", "addressee": "Therapist",
                                   "from_initial_history": from_initial_history})
             ids.append(identifier)
         return ids
@@ -61,7 +63,8 @@ class ContextController:
         if not isinstance(therapist_text, str) or not therapist_text.strip():
             raise ValueError("A nonempty new therapist utterance is required.")
         self.turn += 1
-        units = [{"id": f"t{self.turn}:u{index + 1}", "text": text}
+        units = [{"id": f"t{self.turn}:u{index + 1}", "text": text,
+                  "speaker": "Therapist", "addressee": "Patient"}
                  for index, text in enumerate(split_units(therapist_text))]
         attention = self.compiled["traits"]["attention"]
         memory_trait = self.compiled["traits"]["memory"]
@@ -124,6 +127,7 @@ class ContextController:
             if success:
                 retrieved.append({"id": item["id"], "text": item["text"],
                                   "origin": item["origin"], "learned_turn": item["encoded_turn"],
+                                  "speaker": item["speaker"], "addressee": item["addressee"],
                                   "from_initial_history": item.get("from_initial_history", False),
                                   "access": "working_memory" if in_working_memory else "episodic_retrieval"})
         # Encoding takes place after retrieval: a newly supplied answer is new

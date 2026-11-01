@@ -16,7 +16,7 @@ from patient_agents.structured import generate_object
 
 PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "patient_agents"
 DIMENSIONS = {"behavior", "emotional_background", "communication", "goals_support"}
-ITEM_FIELDS = {"dimension", "tendency", "when", "response_guidance", "evidence_ids", "confidence"}
+ITEM_FIELDS = {"dimension", "tendency", "when", "evidence_ids", "confidence"}
 
 
 def person_card_schema(sources):
@@ -29,11 +29,11 @@ def person_card_schema(sources):
                 "type": "array", "maxItems": 3 if ids else 0,
                 "items": {
                     "type": "object", "additionalProperties": False,
-                    "required": ["dimension", "tendency", "when", "response_guidance", "evidence_ids", "confidence"],
+                    "required": ["dimension", "tendency", "when", "evidence_ids", "confidence"],
                     "properties": {
                         "dimension": {"type": "string", "enum": sorted(DIMENSIONS)},
                         **{field: {"type": "string", "minLength": 1, "maxLength": 180}
-                           for field in ("tendency", "when", "response_guidance")},
+                           for field in ("tendency", "when")},
                         "evidence_ids": {
                             "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": True,
                             "items": {"type": "string", **({"enum": ids} if ids else {})},
@@ -75,16 +75,12 @@ class PersonCardBuilder:
         for item in view["known_facts"]:
             evidence.append({"id": f"p{len(evidence) + 1}", "kind": "profile",
                              "field": "known_fact", "text": item["text"]})
-        # Include measurements as dated evidence, not already-derived diagnoses
-        # or personality labels. Internal policy thresholds are not evidence.
-        for instrument, scores in self.compiled["evidence"].items():
-            for field, value in scores.items():
-                if type(value) in (int, float):
-                    evidence.append({"id": f"p{len(evidence) + 1}", "kind": "assessment",
-                                     "field": f"{instrument}.{field}", "value": value,
-                                     "assessment_date": self.compiled.get("assessment_date")})
+        # Raw measurement numbers stay in the compiled cognition/audit view.
+        # They are not clinical interpretations for this descriptive card.
         evidence.extend({"id": f"h{index + 1}", "kind": "prior_utterance",
-                         "speaker": message.speaker, "text": message.content}
+                         "speaker": message.speaker,
+                         "addressee": "Patient" if message.speaker == "Therapist" else "Therapist",
+                         "text": message.content}
                         for index, message in enumerate(history))
         return evidence
 
@@ -103,7 +99,7 @@ class PersonCardBuilder:
                 raise ValueError("Unknown person-card dimension.")
             if item["confidence"] not in ("supported", "tentative"):
                 raise ValueError("Tendency confidence must be supported or tentative.")
-            for field in ("tendency", "when", "response_guidance"):
+            for field in ("tendency", "when"):
                 if (not isinstance(item[field], str) or not item[field].strip()
                         or len(item[field].strip()) > 180):
                     raise ValueError(f"Tendency {field} must contain 1–180 characters.")
@@ -116,7 +112,7 @@ class PersonCardBuilder:
                        or sources[key]["speaker"] == "Patient" for key in ids):
                 raise ValueError("Therapist statements alone cannot establish a patient tendency.")
             normalized.append({**deepcopy(item), **{field: item[field].strip()
-                              for field in ("tendency", "when", "response_guidance")}})
+                              for field in ("tendency", "when")}})
         return {"tendencies": normalized}
 
     def build(self, history: Sequence[DialogueMessage]) -> dict:

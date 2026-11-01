@@ -47,7 +47,8 @@ class ResponseAgent:
             context.get("interaction_state", {}).pop("previous_exchange", None)
         current = context.pop("accessible_current_units")
         context["accessible_current_units"] = current
-        payload = {"patient": self.response_profile, "turn_context": context}
+        payload = {"reply_speaker": "Patient", "reply_addressee": "Therapist",
+                   "patient": self.response_profile, "turn_context": context}
         messages = [
             {"role": "system", "content": self.system_prompt},
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False, allow_nan=False)},
