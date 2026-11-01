@@ -1,10 +1,9 @@
 {
-  "response_format": "Return one JSON object, for example: {\"utterance\":\"your next spoken turn\",\"action\":\"continue\"}. Choose one action: continue advances the exchange; clarify resolves confusion or a stalled answer; close ends it. Keep utterance conversational and usually one short sentence. A closing does not reopen the activity. Return JSON only and escape quotes inside strings.",
+  "response_format": "Return one JSON object, for example: {\"utterance\":\"your next spoken turn\",\"action\":\"continue\"}. Choose one action: continue advances the exchange; clarify addresses confusion or a stalled answer; close ends it. Only utterance is spoken; action is private. Return JSON only and escape quotes inside strings.",
   "first_turn": "Begin with the exact supplied opening and action continue.",
-  "following_turn": "Respond to the latest patient turn. The activity is already underway. Stop when the useful exchange is complete; the round limit is not a target.",
-  "repair_limit": "Repeated clarification has not helped. Give a brief cue, set the item aside, or close rather than asking the same question again.",
-  "last_turn": "This is the last available turn. End briefly with action close, based on what actually happened. Do not ask another question or claim unobserved success.",
-  "stall_closing": "Let's leave that for now.",
+  "following_turn": "Continue from the latest patient turn. Close when the exchange reaches a useful stopping point; the round limit is not a target.",
+  "repair_limit": "There have been several clarification turns. Consider whether another explanation or cue would help, or whether to set the issue aside or close.",
+  "last_turn": "This is the last available turn. End with action close, based on what actually happened. Do not ask another question or claim unobserved success.",
   "budget_closing": "Let's stop here for today.",
-  "format_repair": "Return the corrected draft as one complete JSON object with exactly utterance and action. action must be continue, clarify or close. Preserve the intended spoken content where clear; if incomplete, finish with a short turn consistent with the current instructions. Escape quotes inside strings. No commentary, markdown or extra fields."
+  "format_repair": "Return the corrected draft as one complete JSON object with exactly utterance and action. action must be continue, clarify or close. Preserve the intended spoken content where clear; if incomplete, finish consistently with the current instructions. Escape quotes inside strings. No commentary, markdown or extra fields."
 }

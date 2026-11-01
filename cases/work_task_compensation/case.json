@@ -3,7 +3,7 @@
   "id": "work_task_compensation",
   "category": "compensation_daily_life",
   "title": "Continuing a discussion of task notes and checking work",
-  "summary": "Continue the supplied report of spreadsheet notes and checking instructions. Explore one practical point about using those notes, and retain the method or discuss one small adjustment. The supplied patient report is context, not a predicted answer.",
+  "summary": "Continue the supplied report of spreadsheet notes and checking instructions. Explore the patient's approach, experience and related concerns, discussing support or adjustments when useful. The supplied patient report is context, not a predicted answer.",
   "rounds": 10,
   "source": {
     "workbook": "02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx",
@@ -24,24 +24,23 @@
   "therapist": {
     "context": "The patient has just described recording instructions in a spreadsheet, checking unclear parts with the person teaching, and referring back to the notes.",
     "objectives": [
-      "Understand one practical point about using the notes; retain the approach or agree on one small adjustment."
+      "Understand how the patient uses the reported note-taking method and what they find helpful, difficult or important about it. Discuss support or changes when these fit their account."
     ],
     "materials": [
-      "The supplied prefix establishes a self-reported method, not a job title, completed task, specific error or proof of success.",
-      "If a difficulty comes up, a possible adjustment is marking the last completed step or checking an uncertain instruction. Choose only what fits that difficulty."
+      "The supplied prefix establishes a self-reported method, not a job title, completed task, specific error or proof of success."
     ],
-    "opening_question": "How do you find the part you need in those notes?",
+    "opening_question": "You mentioned keeping notes when someone shows you a task. How does that work for you when you need to use them?",
     "conversation_plan": [
-      "Follow the patient's answer with one concrete question if something needs clarifying.",
-      "If there is a difficulty, discuss one relevant adjustment. A hypothetical example is optional when it helps explain that difficulty, not a new problem to add each turn.",
-      "Once the approach is clear, briefly confirm what the patient wants to keep or try and close. An adequate existing method needs no extra improvement."
+      "Let the patient describe their approach, then follow a relevant detail, qualification or concern they raise. Acknowledge useful parts and clarify what is unclear.",
+      "Discuss how the method fits their needs and experience. Offer an explanation or practical suggestion when helpful, leaving room for the patient to qualify it, disagree or describe another relevant aspect.",
+      "Close when the discussion reaches a useful stopping point. An adequate method need not be changed, and a new concern need not be invented to keep the exchange going."
     ],
     "response_guidance": [
-      "Follow the patient's report rather than the earlier therapist's praise. Do not ask for an unprovided incident or assume the method always works.",
-      "Do not keep adding features or scenarios after a workable choice has been made."
+      "Follow the patient's report rather than treating earlier praise as proof of success. Do not assume a particular incident, difficulty or outcome.",
+      "Stay with the patient's account; use a hypothetical example only to clarify something relevant, not to keep introducing problems or force a new plan."
     ],
     "completion_criteria": [
-      "The current method is clear and any needed adjustment has been discussed, or the patient has no further concern."
+      "The patient's approach and relevant experiences or concerns have been explored to a useful stopping point, or the patient wants to stop. A new strategy or commitment is not required."
     ]
   },
   "patient_profile": {

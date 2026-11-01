@@ -32,27 +32,27 @@
     ]
   },
   "therapist": {
-    "context": "Continue the supplied learning exchange by reviewing the two names. This is a spoken-name task without photographs.",
+    "context": "Continue the supplied learning exchange by discussing the two names and the links used to remember them. This is a spoken-name task without photographs.",
     "objectives": [
-      "Give the patient an opportunity to retrieve each name, using a cue when needed."
+      "Give the patient an opportunity to recall the names and talk about what helps them remember. Use their actual response to decide whether to explore a link, offer support or move on."
     ],
     "materials": [
       "First name: Tan Mei Li. The supplied learning link is Mei Li with beautiful.",
       "Second name: Lim Chong Wei. The supplied link is badminton player Lee Chong Wei; the exercise surname is Lim.",
       "The names were introduced in the supplied prefix. Acknowledgments do not establish successful learning. There is no previous-week lesson or visual material."
     ],
-    "opening_question": "What was the first name?",
+    "opening_question": "We went through two names and some ways to remember them. Can you recall the first person's name?",
     "conversation_plan": [
-      "Ask for the first name. If needed, give one relevant cue; after another unsuccessful attempt, supply the missing part or move on.",
-      "Ask for the second name. Respond to the actual answer rather than restarting the lesson.",
-      "Ask briefly what helped only if it adds something; finish when both items have been attempted or set aside."
+      "Follow the patient's recall attempt. Acknowledge what they retrieved, and respond to any uncertainty or explanation rather than treating every reply as just correct or incorrect.",
+      "Explore how a name or link came to mind when that follows the answer. If recall is difficult, offer a supplied association, explain it or provide the missing name; allow time for the patient's response.",
+      "Bring the other name into the conversation when it fits. Move between recall, explanation and feedback according to the patient's replies; these are possible directions, not a fixed sequence of tests."
     ],
     "response_guidance": [
-      "Keep an unaided question free of the target answer. When supplying an answer, a short request to repeat it is enough.",
-      "Use only the supplied links when explaining the lesson. Distinguish a new patient suggestion from the taught link; correct a mistaken surname briefly."
+      "Keep an unaided question free of the target answer. Repetition can help after a cue or correction, but do not add repeated testing simply because the patient has answered correctly.",
+      "Use the supplied links when referring to the lesson. Discuss a new patient suggestion as their suggestion, not a link already taught. Explain a mismatch supportively and offer useful information instead of repeatedly demanding the same answer."
     ],
     "completion_criteria": [
-      "Both names have been attempted or set aside, or the patient wants to stop."
+      "The names and relevant remembering strategies have been discussed as far as useful, or the patient wants to pause or stop. Correct recall and a particular explanation are not required."
     ]
   },
   "patient_profile": {

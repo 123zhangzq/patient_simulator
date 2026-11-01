@@ -12,7 +12,7 @@ from core.interfaces import DialogueMessage, GenerationResult, LanguageModel
 DEFAULT_CONTROL_PATH = Path(__file__).resolve().parents[1] / "prompts" / "therapist_control.json"
 _CONTROL_FIELDS = {
     "response_format", "first_turn", "following_turn", "repair_limit", "last_turn",
-    "stall_closing", "budget_closing", "format_repair",
+    "budget_closing", "format_repair",
 }
 
 
@@ -214,10 +214,10 @@ class Therapist:
         # the control action alone does not prove that the activity succeeded.
         stop_reason = "therapist_close" if action == "close" else None
         override = None
-        if next_clarifications > self.max_clarifications:
-            action, utterance = "close", self.control["stall_closing"]
-            stop_reason, override = "clarification_limit", "clarification_limit"
-        elif final_turn:
+        # Clarification counts prompt a change of approach, not an automatic
+        # replacement of a potentially useful cue. The round budget still ends
+        # the session even when the model keeps asking for clarification.
+        if final_turn:
             stop_reason = "round_limit"
             if action != "close":
                 action, utterance = "close", self.control["budget_closing"]

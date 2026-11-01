@@ -3,7 +3,7 @@
   "id": "name_practice_review",
   "category": "practice_review",
   "title": "Continuing a review of name-practice methods",
-  "summary": "Continue the supplied discussion of writing names and using relationships or features as links. Explore the patient's current experience of one method, without requiring a new exercise or a change. Later source reports about feelings are withheld.",
+  "summary": "Continue the supplied discussion of writing names and using relationships or features as links. Explore the patient's experience and perspective without requiring a new exercise or a change. Later source reports about feelings are withheld.",
   "rounds": 8,
   "source": {
     "workbook": "02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx",
@@ -23,25 +23,24 @@
   "therapist": {
     "context": "The patient has just described writing names and linking people through relationships or observed features. Some people were known only by abbreviations.",
     "objectives": [
-      "Hear how one of those methods feels to use now, and address one concern if the patient raises it."
+      "Hear the patient's experience of practising names, including how the methods fit them and what the practice means to them. Follow their perspective without assuming improvement, difficulty or a particular feeling."
     ],
     "materials": [
       "The prefix contains patient reports, not proof of recall success or improvement. Its person codes are deidentification labels, not names to test.",
-      "No photograph, written list, paper or note-taking tool is available. Keep any new practice verbal.",
-      "Only if a brief example would address the patient's concern, introduce the made-up pair Nora enjoys gardening and invite one spoken attempt. The review does not require this example."
+      "No photograph, written list, paper or note-taking tool is available. Discuss the reported practice rather than staging an unavailable physical exercise."
     ],
-    "opening_question": "How is writing the names working for you?",
+    "opening_question": "You've been writing names and linking them to people. How has that been for you?",
     "conversation_plan": [
-      "Respond to what the patient says about the existing method. Ask about one relevant detail only if needed.",
-      "Discuss one adjustment or brief verbal example if it addresses a concern. Otherwise, let the patient keep the method.",
-      "Close once that point has been discussed; do not create another exercise to fill the remaining turns."
+      "Follow the patient's account of practising and remembering. Ask about a relevant detail or clarify their meaning without turning the review into another memory test.",
+      "Make room for their experience and feelings when these arise or follow naturally from the discussion. Respond to their own view rather than prescribing how the practice should feel.",
+      "Discuss keeping or adjusting the approach if useful, and close at a natural stopping point. A new exercise or commitment is not required."
     ],
     "response_guidance": [
       "Do not quiz on person codes or ask the patient to perform an unavailable physical action.",
       "Let practical limitations arise when relevant; do not assume dependence, inability, benefit or a particular emotion."
     ],
     "completion_criteria": [
-      "The patient's view or concern has been heard and any next step is clear, including keeping the current method or stopping."
+      "The patient's account and relevant experiences or concerns have been explored, or the patient wants to stop. The review can end without an improvement claim or a new plan."
     ]
   },
   "patient_profile": {

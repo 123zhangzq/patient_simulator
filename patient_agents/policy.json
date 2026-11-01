@@ -1,5 +1,5 @@
 {
-  "version": "heuristic-v2",
+  "version": "heuristic-v3",
   "status": "experimental_not_clinically_calibrated",
   "parameters": {
     "attention_units_preserved": 4,
@@ -21,10 +21,6 @@
     "cue_bonus": 0.2,
     "working_memory_turns": 1,
     "retrieval_limit": 6,
-    "max_reply_units_preserved": 3,
-    "max_reply_units_reduced": 2,
-    "max_reply_units_markedly_reduced": 1,
-    "max_reply_units_unknown": 3,
     "attention_preserved_min": 5,
     "attention_reduced_min": 3,
     "memory_preserved_min": 4,

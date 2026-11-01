@@ -84,13 +84,17 @@ class ContextController:
         # by several short clauses. It expires with the recent workspace and
         # never becomes an unlimited transcript or a verified personal fact.
         working_ids.update(item["id"] for item in recent if item["origin"] == "patient_utterance")
-        # Only previously encoded episodes are candidates. Neither the public
-        # transcript nor an omitted input unit is accessible to this retrieval.
+        # Encoded dialogue stays eligible even when a follow-up uses only a
+        # pronoun or a new phrase. Relevance and recency rank these candidates;
+        # the older-episode limit and probabilistic gate still control access.
+        # Preloaded memories require a matching cue or a recall request. Neither
+        # the public transcript nor an omitted input is restored here.
         ranked = []
         for item in self.memories:
             overlap = len(query & self._tokens(item["text"]))
             tag_match = any(self._tokens(tag) & query for tag in item["cue_tags"])
-            if not self.memory_enabled or item["id"] in working_ids or overlap or tag_match or recall_requested:
+            if (not self.memory_enabled or item["origin"] != "initial_memory"
+                    or overlap or tag_match or recall_requested):
                 ranked.append((overlap + int(tag_match), item))
         ranked.sort(key=lambda pair: (pair[1]["id"] in working_ids, pair[0], pair[1]["encoded_turn"]), reverse=True)
         # A retrieval limit applies to older episodes, not to a current turn's
@@ -148,10 +152,6 @@ class ContextController:
             },
             "interaction_state": {"affect": "mild_frustration" if self.frustration >= 2 else "neutral",
                                   "some_input_was_missed": bool(omitted)},
-            "response_policy": {
-                "act": "answer_accessible_then_request_repeat" if omitted else "answer_accessible",
-                "max_reply_units": self.parameters[f"max_reply_units_{attention if self.attention_enabled else 'preserved'}"],
-            },
         }
         self.last_trace = {
             "turn": self.turn, "input_units": units, "attended_ids": [u["id"] for u in attended],

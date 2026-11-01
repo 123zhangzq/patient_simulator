@@ -6,8 +6,6 @@ from copy import deepcopy
 INTENTS = {"question", "instruction", "feedback", "closing", "other"}
 ACTS = {"answer", "clarify", "choose", "plan", "report_attempt", "report_result", "pause", "close", "other"}
 STATUSES = {"none", "proposed", "accepted", "attempt_reported", "completion_reported", "declined", "deferred"}
-CLOSING_ACTS = {"close", "pause", "clarify", "other"}
-CLOSING_STATUSES = {"none", "deferred", "declined"}
 
 
 def visible_ids(context):
@@ -28,24 +26,22 @@ def response_schema(context, interaction_enabled=True):
     focus = {"type": "array", "minItems": 1 if ids else 0, "maxItems": 4 if ids else 0, "uniqueItems": True,
              "items": {"type": "string", **({"enum": ids} if ids else {})}}
 
-    def branch(intents, acts, statuses):
-        return {
-            "type": "object", "additionalProperties": False,
-            "required": ["therapist_intent", "patient_act", "action_status", "focus_ids"],
-            "properties": {
-                "therapist_intent": {"type": "string", "enum": sorted(intents)},
-                "patient_act": {"type": "string", "enum": sorted(acts)},
-                "action_status": {"type": "string", "enum": sorted(statuses)},
-                "focus_ids": focus,
-            },
-        }
+    interaction = {
+        "type": "object", "additionalProperties": False,
+        "required": ["therapist_intent", "patient_act", "action_status", "focus_ids"],
+        "properties": {
+            "therapist_intent": {"type": "string", "enum": sorted(INTENTS)},
+            "patient_act": {"type": "string", "enum": sorted(ACTS)},
+            "action_status": {"type": "string", "enum": sorted(STATUSES)},
+            "focus_ids": focus,
+        },
+    }
 
     return {
         "type": "object", "additionalProperties": False,
         "required": ["interaction", "utterance"],
         "properties": {
-            "interaction": {"anyOf": [branch({"closing"}, CLOSING_ACTS, CLOSING_STATUSES),
-                                      branch(INTENTS - {"closing"}, ACTS, STATUSES)]},
+            "interaction": interaction,
             "utterance": {"type": "string", "minLength": 1},
         },
     }
@@ -64,9 +60,6 @@ def validate_interaction(value, context):
             or any(not isinstance(item, str) for item in ids)
             or (current and not ids) or len(set(ids)) != len(ids) or not set(ids) <= current):
         raise ValueError("focus_ids must contain 1–4 distinct current input IDs, not older memory IDs; empty only if no current input.")
-    if value["therapist_intent"] == "closing":
-        if value["patient_act"] not in CLOSING_ACTS or value["action_status"] not in CLOSING_STATUSES:
-            raise ValueError("A closing requires patient_act close/pause/clarify/other and action_status none/deferred/declined.")
     return deepcopy(value)
 
 
