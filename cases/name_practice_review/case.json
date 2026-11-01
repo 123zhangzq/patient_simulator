@@ -2,9 +2,9 @@
   "schema_version": 1,
   "id": "name_practice_review",
   "category": "practice_review",
-  "title": "Reviewing name-memory practice, methods, and experience",
-  "summary": "Adapted from the YC026 exchange reviewing practice of group members' names, with follow-up questions about methods, repetition, and experience. The simulation does not assume the current patient practiced, remembers a set of people, or feels better.",
-  "rounds": 12,
+  "title": "Continuing a review of name-practice methods",
+  "summary": "A continuation conditioned on the source conversation through Excel row 136. The patient has already described writing names and using relationships and observed features as links. New dialogue explores their present choice to retain or adjust this approach, with an optional concrete example. Later source reports about feelings and depression are not supplied or required.",
+  "rounds": 8,
   "source": {
     "workbook": "02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx",
     "worksheet": "utterances",
@@ -21,45 +21,41 @@
     ]
   },
   "therapist": {
-    "context": "This TYB session follows an earlier invitation to practise remembering other group members' names. Review what the patient attempted, if anything, how they did it, and their experience. This is a practice review rather than a test with a fixed list of correct names. The earlier invitation is a task premise, not evidence that this patient attended, practised, remembers anyone, or had a particular result. If they do not know the group or assignment, clarify that first and agree on a relevant name-memory example with them.",
+    "context": "Continue after the supplied name-practice discussion. The patient has already described writing names and linking them to relationships or observed features. Explore their current preference about keeping or adjusting this approach. Do not restart a homework interview from an empty history or assume there has been no name exercise.",
     "objectives": [
-      "Clarify whether any name-memory practice was attempted and what the patient actually did.",
-      "Elicit details of a method, example, frequency, or barrier through responsive follow-up rather than requiring a long initial answer.",
-      "Explore the patient's own view of usefulness and emotional experience without presuming improvement.",
-      "Agree on a manageable continuation or adjustment only if the patient wants one."
+      "Let the patient identify whether to retain the reported approach, discuss a difficulty, or try one small adjustment.",
+      "Keep the discussion grounded in the supplied reports and any concrete activity actually undertaken now.",
+      "Allow a mixed or uncertain appraisal, a correction, refusal or an unchanged strategy without requiring a positive emotional outcome."
     ],
     "materials": [
-      "No fixed names, photographs, or group-member list is provided. Use only people and circumstances introduced by the patient; real names are not necessary.",
-      "Possible practice methods to explore if relevant: writing and revisiting names, linking a name to a distinctive feature or known relationship, and repetition during ordinary contact. Do not assume any method was used.",
-      "Having seen a written name, having met a person, recognizing them, and remembering their name are different experiences. Clarify the distinction if it matters to the patient's example."
+      "The prefix supplies reports of writing names, using relationships and noticing some features. It also says some people had only been seen as abbreviations. It does not establish an exact number of practice sessions, a current written list, successful recall of every person or improvement in mood.",
+      "The transcript person codes are deidentification labels. Do not quiz the patient on those codes, translate them into invented real names, or claim to show the original people or their faces.",
+      "If the patient wants a concrete trial, use one explicitly fictional verbal example: Nora enjoys gardening. Offer the link Nora with a gardener, say that this is a new made-up example, and ask whether hearing, repeating or noting the pair would suit them. There is no image, paper or actual note-taking tool in this text activity.",
+      "A preference or plan expressed now is allowed to be new. It does not prove the patient used that method in the past or that it will work.",
+      "Reported hand or vision difficulties do not establish inability to write or recognize every face. Ask about a relevant practical limitation only if the patient raises it or it affects the proposed activity."
     ],
-    "opening_question": "Would you like to share how you practised remembering the other group members' names, and how many you remember?",
-    "reference_utterances": [
-      "How did you remember their names?",
-      "I mean, how long did you practice?",
-      "So every day you write the name or try to, you know, practice and write it? Or do you like just one-off do it? And how did you do it?",
-      "How did you feel this exercise?"
-    ],
+    "opening_question": "You mentioned writing names and linking them to people. What would you like to keep or change about that approach?",
     "conversation_plan": [
-      "Establish what the patient tried, if anything. If they did not practice or do not recall, explore one barrier or whether this goal matters to them rather than treating non-practice as failure.",
-      "For an attempted method, invite one specific example of how they used it. Follow their account of writing, linking features, relationships, repeated contact, or another method without supplying a personal story for them.",
-      "Clarify one practical detail at a time, such as when or how often they tried it, what information they had available, or which part was hard.",
-      "Ask what they noticed after trying it. Accept no change, uncertainty, mixed results, or a benefit; do not treat practice alone as evidence of improved memory.",
-      "Invite their view of the experience or its effect on daily interaction when relevant. Acknowledge their words without assigning an emotional interpretation.",
-      "If useful, discuss one manageable way to continue or adjust. Briefly summarize the reported practice and experience, preserving uncertainty and the patient's preferences."
+      "Begin from the practice report already supplied and invite the patient current view. Do not repeatedly ask whether they ever practised or demand an exact number of remembered names.",
+      "Follow one concrete point: what to retain, a difficulty they identify, uncertainty about the approach, or a preference not to change it. Do not create a personal story for them.",
+      "When details of a past attempt are unavailable, acknowledge that gap. Offer an optional small current example rather than repeating questions about unprovided homework details.",
+      "If the patient accepts a trial, introduce the fictional example explicitly and take one chosen action at a time. Distinguish talking about writing from an actual note being created; distinguish repeating the pair from later recall.",
+      "Ask for the patient current appraisal only if useful. Accept that a strategy may be unhelpful or that they want to keep the existing method. Do not claim success from agreement alone.",
+      "Close with a brief summary of what the patient chose, declined or left uncertain. There is no need to try the example or introduce another topic merely to use all rounds."
     ],
     "response_guidance": [
-      "Do not assume the patient wrote names, linked couples, noticed facial features, knew any source group member, or practiced daily.",
-      "Do not assume depression, social withdrawal, happiness, confidence, or improvement from the reference conversation.",
-      "A short acknowledgment is a normal turn. When more detail is needed, ask a concrete, relevant follow-up without pressuring the patient to be verbose.",
-      "A patient may correct your description of a method. Clarify instead of repeatedly praising an interpretation they have not endorsed.",
-      "Keep actual practice, intentions, and reported results separate. Do not claim a future plan has already worked.",
-      "Do not ask the patient to teach or encourage another participant unless they introduce and choose that goal themselves."
+      "Use the prefix as existing conversation, while remembering that therapist suggestions and praise do not verify outcomes. Do not reenact the historical instruction to teach another participant.",
+      "A missing detail is unknown. Do not convert I cannot remember into we have never tried this, and do not erase the supplied practice report.",
+      "Do not infer a current emotional state, a new clinical history, dependence on a helper or benefit from practice. Outcomes are not prescribed by the earlier discussion or a screening score.",
+      "Ask one concrete question at a time. If clarification is needed, simplify it rather than adding more subquestions or another long paraphrase.",
+      "After at most two unsuccessful clarifications, offer one concrete optional example or close the topic. Do not pressure the patient to supply an unknown story.",
+      "Keep physical limitations proportionate and relevant. Do not drift into an unsupported story about poor home lighting, a helper reporting every name or inability to write.",
+      "Let the patient make a current decision without requiring a pre-existing preference or a fabricated practice history."
     ],
     "completion_criteria": [
-      "The dialogue establishes what was attempted, or an explicit reason or uncertainty about not practicing.",
-      "At least one method detail, practical barrier, or patient-reported experience has been explored.",
-      "The closing accurately summarizes what is known and any optional next step, without requiring success, optimism, or agreement."
+      "The patient has chosen to retain, adjust, try or decline an approach, or has explained why the question remains uncertain.",
+      "Any optional example and its result are described only to the extent they actually occurred.",
+      "The conversation closes without requiring improved mood, perfect recall, a new story or the full round budget."
     ]
   },
   "patient_profile": {
@@ -399,11 +395,98 @@
     },
     "unknowns": [
       "Home Visit 1 assessment date is not recorded; its consent date must not be treated as the assessment date.",
-      "Current occupation, specific work routines, note-taking habits, name-learning practice, and prior knowledge of the task targets are not established by the selected profile.",
+      "The assessment profile does not establish practice history. The supplied conversation prefix separately establishes reports of writing names and using relationships or features; exact practice frequency, current materials and later emotional outcomes remain unknown.",
       "Personality, attachment style, motivation, and current-turn emotion are not measured by this profile.",
       "Cognitive screening scores do not specify a token limit, memory capacity, forgetting probability, or language proficiency.",
       "Zero cued-recall scores do not on their own establish lack of benefit from cues.",
-      "No past-session episode is seeded into initial_memories."
+      "No separate past-session episode is seeded in initial_memories; the supplied conversation prefix is processed as earlier dialogue."
     ]
+  },
+  "session": {
+    "mode": "continuation",
+    "shared_context": "You are continuing a one-to-one review after the supplied discussion of name practice. In that discussion, the patient reported writing names, using relationships between people and noticing some features, while having seen only abbreviations for some people. Those are prior reports, not a claim of perfect recall or measured improvement. Person codes in the historical transcript are deidentification labels, not names to memorize or recite. No photographs or written list are currently displayed.",
+    "initial_history": [
+      {
+        "speaker": "Therapist",
+        "content": "Would you like to share with us how you remember other, whether you remember other group members' names and how many have you practiced and remembered?",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F76:F76"
+      },
+      {
+        "speaker": "Patient",
+        "content": "Yeah. Actually, some of them, I have not seen them at all. But I only see their abbreviations. Okay. There are four couples. YC064 and YC063. EH001 and EH002, EC015 and EC014 and EC024 and EC025.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F77:F83"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "You remember the other group as well. That's nice. So not just the people here, EH001 and EH002 and the other group you also remember. Excellent. How did you remember their names?",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F84:F88"
+      },
+      {
+        "speaker": "Patient",
+        "content": "As I said, I learned also. First, I see they come in couples. And then if the boy's name I can captured, then I remember the husband's name. And some individuals, I will see through the facial.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F89:F92"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "Their facial expression.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F93:F93"
+      },
+      {
+        "speaker": "Patient",
+        "content": "Yeah.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F94:F94"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "Their facial features. Okay, so you remember the husband's name and then from that link to the wife's name, is it?",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F95:F96"
+      },
+      {
+        "speaker": "Patient",
+        "content": "Correct. EC022 I remember she got gray hair and I think she accompanied her mother.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F97:F98"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "Similar hairstyle. Excellent. Yeah. Similar beautiful smile as well. EC022 and SXX CXX got similar smile too. Very nice. Always very keen, you know, listening to lecture. Very good. YC026, that's amazing. I mean, how long did you practice? You remember group by group. Excellent.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F99:F110"
+      },
+      {
+        "speaker": "Patient",
+        "content": "I keep writing the name.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F111:F111"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "Writing.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F112:F112"
+      },
+      {
+        "speaker": "Patient",
+        "content": "Writing. Also, since you always share with YC064 and YC063, I kept seeing her. She's very friendly.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F113:F116"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "Yes.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F117:F117"
+      },
+      {
+        "speaker": "Patient",
+        "content": "And now I know YC001 is a writer. And also YC016",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F118:F119"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "Okay. Okay, excellent. So you must share with YC063. She really wants to remember people's names. You must join the session and tell her you can do it so she can do it too she really has a struggle with that and YC064 has a great time of challenge to teach her I think maybe you give a try and see whether you can teach her with a better outcome okay YC026 very nice very nice excellent That's excellent work. So every day you write the name or try to, you know, practice and write it? Or do you like just one-off do it? And how did you do it?",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F120:F128"
+      },
+      {
+        "speaker": "Patient",
+        "content": "I tried to write down all my friends, consistently of my friends in my group. Now, right now, And some of them, I saw their features. I know who they are. And I try to remember, like, YC016, he got a big moustache. And most of us, I would expect, a thing or two not wearing. Like, people like YC029 and XC023, they are younger than us. Right?",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx#utterances!F129:F136"
+      }
+    ],
+    "evaluation_note": "Source utterances at Excel rows 76–136 are supplied context, not generated answers or evaluation targets. The continuation begins after that cut. Later source patient reports about happiness, depression, social withdrawal or reading difficulty are withheld and must not be assumed. Repeating a supplied practice method is not evidence of predicting it independently."
   }
 }

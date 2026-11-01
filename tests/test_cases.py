@@ -11,7 +11,8 @@ import unittest
 CODE_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CODE_DIR))
 
-from core.cases import DialogueCase, compose_prompts, load_cases, select_cases
+from core.cases import (DialogueCase, compose_prompts, initial_history, load_cases, select_cases,
+                        session_information, session_fingerprint)
 from helpers import profile_data
 
 
@@ -148,6 +149,71 @@ class CaseTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Invalid case file") as error:
             load_cases(path)
         self.assertIn(str(path), str(error.exception))
+
+    def test_prefix_and_shared_situation_are_explicit_but_sources_and_suffix_stay_out(self):
+        data = case_data()
+        data["session"] = {
+            "mode": "continuation", "shared_context": "We just worked through a short practice.",
+            "initial_history": [
+                {"speaker": "Therapist", "content": "Try the label ZOLNAR.", "source": "PRIVATE_PREFIX_SOURCE"},
+                {"speaker": "Patient", "content": "I tried repeating it.", "source": "PRIVATE_PREFIX_SOURCE"},
+            ],
+            "evaluation_note": "UNSEEN_REFERENCE_SUFFIX",
+        }
+        case, = load_cases(self.write_case("prefix", data))
+        information = session_information(case)
+        composed = compose_prompts(case, "BASE", "Start: {opening_question}")
+        self.assertIn(data["session"]["shared_context"], composed["therapist"])
+        self.assertEqual([message.content for message in initial_history(case)],
+                         [item["content"] for item in data["session"]["initial_history"]])
+        visible = json.dumps(information) + json.dumps(composed)
+        for hidden in ("PRIVATE_PREFIX_SOURCE", "UNSEEN_REFERENCE_SUFFIX", "OFFLINE_PATIENT_REFERENCE_DO_NOT_INCLUDE"):
+            self.assertNotIn(hidden, visible)
+        information["initial_history"][0]["content"] = "mutation"
+        self.assertEqual(session_information(case)["initial_history"][0]["content"], "Try the label ZOLNAR.")
+        self.assertEqual(len(session_fingerprint(case)), 64)
+        altered = copy.deepcopy(data)
+        altered["session"]["initial_history"][0]["content"] = "Try another label."
+        self.assertNotEqual(session_fingerprint(case), session_fingerprint(DialogueCase(case.path, altered)))
+
+    def test_incomplete_or_misordered_continuations_fail_before_generation(self):
+        valid = {
+            "mode": "continuation", "shared_context": "An earlier activity.",
+            "initial_history": [
+                {"speaker": "Therapist", "content": "A question.", "source": "fixture"},
+                {"speaker": "Patient", "content": "An answer.", "source": "fixture"},
+            ], "evaluation_note": "Only score after the prefix.",
+        }
+        for change in (
+            {"initial_history": []}, {"mode": "new_activity"},
+            {"initial_history": valid["initial_history"][:1]},
+            {"initial_history": list(reversed(valid["initial_history"]))},
+            {"mode": "unknown"}, {"extra": "hidden instruction"},
+        ):
+            with self.subTest(change=change):
+                data = case_data()
+                data["session"] = {**valid, **change}
+                with self.assertRaises(ValueError):
+                    load_cases(self.write_case("bad_session", data))
+
+    def test_repository_continuations_stop_at_the_declared_reference_cut(self):
+        cuts = {"work_task_compensation": 230, "name_practice_review": 136}
+        for case in load_cases(CODE_DIR / "cases"):
+            if case.case_id not in cuts:
+                self.assertEqual(case.data["session"]["mode"], "new_activity")
+                self.assertEqual(initial_history(case), ())
+                continue
+            reference = json.loads((case.path.parent / "reference_dialogue.json").read_text())
+            prefix = []
+            for row in reference["utterances"]:
+                if row["excel_row"] > cuts[case.case_id]:
+                    break
+                speaker = "Therapist" if row["speaker_role"] == "therapist" else "Patient"
+                if prefix and prefix[-1]["speaker"] == speaker:
+                    prefix[-1]["content"] += " " + row["text"]
+                else:
+                    prefix.append({"speaker": speaker, "content": row["text"]})
+            self.assertEqual(session_information(case)["initial_history"], prefix)
 
 
 if __name__ == "__main__":

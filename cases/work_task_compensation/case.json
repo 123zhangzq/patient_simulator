@@ -2,8 +2,8 @@
   "schema_version": 1,
   "id": "work_task_compensation",
   "category": "compensation_daily_life",
-  "title": "Keeping track of task steps and checking routine work",
-  "summary": "Adapted from the EC011 exchange about recording new work instructions, consulting notes, mistakes during automatic routines, checking work, team support, and fatigue. The simulation asks about the current patient's methods rather than assigning the source participant's spreadsheet use or job history to them.",
+  "title": "Continuing a discussion of task notes and checking work",
+  "summary": "A continuation conditioned on the source conversation through Excel row 230, where the patient has already described recording new-task instructions in a spreadsheet and checking them with the person teaching. New responses explore practical choices around interruptions and checking; they are not an independent prediction of the supplied note-taking report.",
   "rounds": 10,
   "source": {
     "workbook": "02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx",
@@ -22,43 +22,37 @@
     ]
   },
   "therapist": {
-    "context": "Explore how the patient keeps track of instructions for a new task and checks for mistakes in everyday activity. Work is an optional setting, not an assumed current role. Use a household, learning, or other relevant activity if the patient is not working. Start from what they do or find difficult before proposing a strategy.",
+    "context": "Continue after the supplied exchange about spreadsheet notes. The patient has already described a way of recording new instructions and checking them with the person teaching. Use that established starting point to discuss one concrete challenge or choice. Do not restart by asking whether any strategy exists.",
     "objectives": [
-      "Elicit one concrete example of keeping track of task steps and any current memory or attention support.",
-      "Understand where the current approach works, where it breaks down, and whether tiredness or routine affects the task.",
-      "Discuss one practical adjustment or retain a useful existing method, with the patient deciding what is acceptable."
+      "Explore how the described notes could support the patient when a task is interrupted or repeated.",
+      "Distinguish an existing self-reported habit from a proposed adjustment or hypothetical action.",
+      "Reach a useful stopping point: retain the approach, consider one small change, or leave a question unresolved according to the patient response."
     ],
     "materials": [
-      "No external worksheet, image, or prior lesson is required. Build the discussion around an activity described by the patient.",
-      "Possible options to discuss after understanding the task: a short written or digital step list, checking instructions with the person teaching, a deliberate final check, an agreed second check, or a brief break. These are options, not facts about this patient.",
-      "A reported mistake or a need to check does not by itself establish severity, diagnosis, or inability to do the activity."
+      "The supplied conversation prefix establishes the patient report of spreadsheet notes, checking instructions with the person teaching, and referring back to those notes. It does not establish a job title, a particular manager, a completed task or a specific error.",
+      "A possible concrete situation is losing ones place after an interruption while following familiar instructions. Present this as a hypothetical example if the patient has not described it as an actual event.",
+      "Options that may be discussed after hearing the patient include marking the last completed step, consulting the original instructions, a deliberate final check, asking for clarification, or a short break. Do not present an option as an action already performed."
     ],
-    "opening_question": "Do you have any questions about keeping track of new tasks and checking your work?",
-    "reference_utterances": [
-      "Do you have any questions for this session?",
-      "You have to pay deliberate attention to check final one round.",
-      "no matter how how careful we are with our attention surely there will be some sort of things we overlook",
-      "if you're really tired and you have a lot of things to check even though mundane but the amount is there right you may have to take a break first before you do that"
-    ],
+    "opening_question": "With those notes available, what would you do if an interruption made you lose your place in a task?",
     "conversation_plan": [
-      "Begin with the source exchange's invitation to ask questions. If the patient has no questions, ask how they keep track of the steps when someone shows them a new task. Listen to their approach, then invite one concrete example if the answer is general. If they do not encounter new tasks at work, find a relevant everyday setting with them.",
-      "Explore one part of the sequence at a time: learning the steps, recording or remembering them, and finding the information again when needed.",
-      "Reflect a useful existing method specifically. Ask where it becomes difficult, or how they notice and check errors, without assuming their approach is problem-free.",
-      "If the patient mentions repetitive work, automatic behavior, interruptions, fatigue, or help from others, explore its practical effect on their example. Follow the issue they actually raise instead of covering every topic.",
-      "If an adjustment would help, offer one small option matched to the identified difficulty and ask whether it fits. A good existing method may simply be retained.",
-      "End with a brief account of their current approach and any change they accepted, declined, or wanted to consider."
+      "Invite the patient response to the concrete interruption example. Follow the method they choose rather than demanding a particular error or solution.",
+      "Ask one relevant follow-up about using or checking the notes, such as how to decide which step to restart from. The patient may qualify the scenario, explain a familiar habit, or say they would need help.",
+      "If the patient reports a real difficulty, explore only the details needed to understand it. If no personal example is available, stay with the explicit hypothetical situation instead of repeatedly demanding a past incident.",
+      "Offer at most one practical adjustment when helpful. Allow the patient to keep their existing approach, modify the suggestion or decline it.",
+      "Summarize the actual report and any intended next step, then close. Do not demand agreement, improvement or a new problem to fill the remaining rounds."
     ],
     "response_guidance": [
-      "Do not assume the patient uses a spreadsheet, has a manager, is employed, or has supportive colleagues.",
-      "Do not declare there is no difficulty before hearing their account. Allow the patient to qualify your interpretation or correct it.",
-      "If the patient searches for a word, offer a brief candidate only when helpful and let them confirm or correct it.",
-      "Keep suggested tools proportionate to the task. Do not prescribe several strategies in a long list or require a successful outcome.",
-      "Separate the patient's own checking from another person's checking, and distinguish a strategy already used from a new idea not yet tried."
+      "Treat the supplied patient description as a report already made in this conversation. Do not infer exact frequency, reliability, current fatigue, a manager response or the absence of difficulty.",
+      "The prefix contains historical therapist praise and assumptions. Continue from the patient account rather than adopting those assumptions as verified facts.",
+      "Use plain, adult language and one concrete issue at a time. If the patient requests clarification, reduce the question to a single step.",
+      "Distinguish a lack of information about an event from a claim that it never happened. A difficulty recalling details does not erase the supplied conversation history.",
+      "If two clarifications do not establish a useful example, offer a simpler explicit hypothetical situation or close the topic; do not keep rephrasing the same request.",
+      "Do not supply unprovided personal incidents or relationships. Discuss an unfamiliar challenge as an explicitly hypothetical possibility, not an event from this patient life."
     ],
     "completion_criteria": [
-      "A relevant activity and the patient's present approach, or the absence of one, have been clarified.",
-      "At least one useful feature, limitation, or unresolved difficulty has been discussed in relation to that activity.",
-      "The closing captures an agreed next step, a decision to retain the existing approach, or the patient's decision not to change it."
+      "The patient has described a possible response to the situation, identified a difficulty, or chosen not to pursue it.",
+      "Any proposed adjustment is clearly distinguished from an existing habit and a demonstrated result.",
+      "The closing respects a decision to retain the approach or end the conversation without filling the round budget."
     ]
   },
   "patient_profile": {
@@ -402,12 +396,49 @@
     },
     "unknowns": [
       "Home Visit 1 assessment date is not recorded; its consent date must not be treated as the assessment date.",
-      "Current occupation, specific work routines, note-taking habits, name-learning practice, and prior knowledge of the task targets are not established by the selected profile.",
+      "The assessment profile does not establish a job title or detailed work routine. The supplied conversation prefix separately establishes the patient report of spreadsheet notes and checking instructions; details beyond that report remain unknown.",
       "Personality, attachment style, motivation, and current-turn emotion are not measured by this profile.",
       "Cognitive screening scores do not specify a token limit, memory capacity, forgetting probability, or language proficiency.",
       "Zero cued-recall scores do not on their own establish lack of benefit from cues.",
-      "No past-session episode is seeded into initial_memories.",
+      "No separate past-session episode is seeded in initial_memories; the supplied conversation prefix is processed as earlier dialogue.",
       "Orientation ability is unresolved because the selected visit contains a conflicting domain total."
     ]
+  },
+  "session": {
+    "mode": "continuation",
+    "shared_context": "You are continuing a one-to-one conversation about keeping track of work tasks. The supplied earlier exchange is part of this conversation: the patient described recording new-task instructions in a spreadsheet, checking unclear instructions with the person teaching, and referring back to the notes. This is a prior self-report, not proof that every task succeeds. The earlier therapist suggestion that there is no difficulty is not an established fact.",
+    "initial_history": [
+      {
+        "speaker": "Therapist",
+        "content": "Do you have any questions for this session?",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx#utterances!F219:F219"
+      },
+      {
+        "speaker": "Patient",
+        "content": "Nope.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx#utterances!F220:F220"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "Quite straightforward, right? So you do that well, right? With attention.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx#utterances!F221:F223"
+      },
+      {
+        "speaker": "Patient",
+        "content": "Sorry?",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx#utterances!F224:F224"
+      },
+      {
+        "speaker": "Therapist",
+        "content": "You have no, no challenge in this area. You do quite okay.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx#utterances!F225:F226"
+      },
+      {
+        "speaker": "Patient",
+        "content": "Yeah, I guess so. I mean, like if I were to get work in terms of like, if it's a new task that I'm, you know, doing, then if there's any, if someone is teaching me, I would just, just, you know, like just take it down like all in a spreadsheet and then if I forget anything or, you know, then I can always just check again with the person. You know, then once I complete that set of notes for that task, then, I just keep it with me and then, you know, if I happen to forget, you know, I can just refer back to my notes, you know, and then get it done.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx#utterances!F227:F230"
+      }
+    ],
+    "evaluation_note": "The source exchange at utterances Excel rows 219–230 is supplied context and is excluded from response evaluation. The new continuation may differ from source rows 231–258. Those later patient replies, including specific mistakes and manager experiences, are not input facts or required outcomes."
   }
 }

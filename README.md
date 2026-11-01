@@ -2,9 +2,9 @@
 
 ## 1. 简介
 
-在 **Linux + NVIDIA GPU** 服务器上，本地加载一份 Qwen 权重，按 `cases/` 中的场景逐个模拟 Therapist–Patient 对话。通用治疗师规则与每个 case 的主题、材料、开场问题、推进方式组合成完整 prompt。每轮由 Therapist 先说、Patient 回复，两者共享同一份模型。
+在 **Linux + NVIDIA GPU** 服务器上，本地加载一份 Qwen 权重，按 `cases/` 中的场景逐个模拟 Therapist–Patient 对话。case 同时定义患者资料、活动起点、已有经历和治疗师的推进方式。每轮由 Therapist 先说、Patient 回复，两者共享同一份模型。场景参考真实认知训练交流，但允许合理适配，不要求复刻 TYB 的课程流程或原患者回答。
 
-首批包含姓名学习与回忆、工作任务补偿策略、姓名练习回顾三个 case，分别设置 8、10、12 轮预算。可继续增加同类别或新类别的 case。模型在服务器首次部署时下载，以后复用服务器上的模型目录。本项目按 Linux GPU 环境编写；列出 case、预览 prompt 和运行功能测试不需要 GPU。
+首批包含姓名学习与回忆、工作任务补偿策略、姓名练习回顾三个 case，分别设置最多 8、10、8 轮新对话。姓名任务从当前教学开始；另外两例先提供明确选取的真实对话前缀，再继续交流。活动可以提前结束，不要求凑满轮数。模型在服务器首次部署时下载，以后复用服务器上的模型目录。本项目按 Linux GPU 环境编写；列出 case、预览 prompt 和运行功能测试不需要 GPU。
 
 ## 项目结构与运行方式
 
@@ -50,6 +50,7 @@
 │   └── policy.json
 └── prompts/
     ├── therapist.txt
+    ├── therapist_control.json
     ├── opening.txt
     ├── baselines/
     │   └── single_prompt/
@@ -62,22 +63,28 @@
 
 `core/cases.py` 负责发现、校验和筛选 case，以及合成治疗师 prompt。`core/llm.py` 统一加载模型并生成回复，整个批次只加载一次。`core/therapist.py` 定义 Therapist；`core/interfaces.py` 定义角色之间共用的接口；`core/registry.py` 根据方法名选择 Patient 实现；`core/runner.py` 统一控制各 case 的轮次、公开对话历史、随机种子和结果保存。
 
-两种 Patient 方法使用同一个 case 中嵌入的真实患者 profile，可以在相同场景、模型和种子下比较：
+两种 Patient 方法使用同一个 case 中嵌入的真实患者 profile，以及相同的 `session.shared_context` 和 `session.initial_history`，可以在相同场景、模型和种子下比较：
 
 | 方法 | 患者如何获得信息 |
 | --- | --- |
-| `single_prompt` | 私有 prompt 加入 case 的患者资料，每次回复接收完整公开对话历史，调用模型一次 |
-| `patient_agents` | 静态编译器整理 profile，动态控制器决定本轮可见输入与可提取记忆，输出模块只用这些信息调用模型一次 |
+| `single_prompt` | 私有 prompt 加入患者资料与共同情境，每次回复接收给定前缀及完整新增对话，调用模型一次 |
+| `patient_agents` | 静态编译器提供持续可见的人物卡，动态控制器处理前缀和新输入的编码与提取，输出模块据此调用模型一次 |
 
 `patient_agents/static.py`、`context.py`、`response.py` 分别承担这三个职责，由 `patient.py` 组合。首版静态和动态模块使用可替换的规则，只有输出模块调用 LLM；三个职责不意味着加载三个模型或每轮调用三个 LLM。治疗师和患者仍共享一份模型权重。扩展 Patient 方法时，通过注册和选择方法复用同一个 runner，不需要复制整套对话流程。
 
-Patient 接口位于 `core/interfaces.py`。两个实现都接收共享 `llm`、私有 prompt，以及 `patient_profile`、`seed`、`options` 和 `prompts`；`respond(public_history)` 接收仅含 `speaker`、`content` 的公开消息序列，返回 `GenerationResult`，字段为 `content`、`input_tokens`、`output_tokens`、`finish_reason`。runner 传入不可修改的历史快照，只将返回的 `content` 作为 Patient 台词加入后续对话。`patient_agents` 在内部提取新治疗师发言，不把整个历史转交输出 LLM。注册表仅在选中方法后导入对应类。
+Patient 接口位于 `core/interfaces.py`。两个实现都接收共享 `llm`、私有 prompt，以及 `patient_profile`、`seed`、`options` 和 `prompts`。runner 先调用一次 `initialize_history(public_history)`：基线在之后的模型调用中使用完整前缀；`patient_agents` 按顺序处理前缀的治疗师输入和患者自述，不生成新台词。相同的学习输入不意味着强制相同的编码结果。
 
-case 加载和批量运行不新增依赖。已有服务器的环境、`models/` 和 `outputs/` 可以继续使用。默认 prompt、角色台词、终端日志和生成的对话文件标题均使用英语；README 使用中文。每个 case 的 `patient_profile` 保存测量资料、真实已知事实、初始记忆、未知信息及来源；运行不读取 Excel 或参考患者回答。姓名练习、工作笔记、就业情况等不由任务主题自动补成人物背景。
+随后 `respond(public_history)` 接收仅含 `speaker`、`content` 的公开消息序列，返回 `GenerationResult`，基本字段为 `content`、`input_tokens`、`output_tokens`、`finish_reason`。runner 传入不可修改的历史快照，只将 `content` 作为公开台词加入后续对话。`patient_agents` 不重复处理已初始化的前缀，也不把完整历史转交输出 LLM。治疗师另外返回可选控制字段 `dialogue_action`、`stop_reason`，它们不会进入患者听到的台词。注册表仅在选中方法后导入对应类。
 
-当前机制是实验原型。动态模块按标点拆分输入，用词语重合和提示关键词近似检索；注意容量、编码概率、保留率、提取概率及情绪变化规则尚未临床校准。MoCA 总分不直接设定记忆，SDMT 与 DASS 保留为证据，首版不把它们换算成反应速度或情绪诊断。输出模型仍可能违反信息边界，需结合每轮 trace 检查实际表现。
+case 加载和批量运行不新增依赖。已有服务器的环境、`models/` 和 `outputs/` 可以继续使用。默认 prompt、角色台词、终端日志和生成的对话文件标题均使用英语；README 使用中文。每个 case 的 `patient_profile` 保存测量资料、真实已知事实、初始记忆、未知信息及来源。运行不读取 Excel 或 `reference_dialogue.json`；只有显式整理进 `case.session.initial_history` 的前缀台词会作为已有对话输入两种方法。前缀中的原患者自述是条件，不能再作为待预测答案评分。
 
-最近的已编码信息形成有容量限制的工作记忆，较早信息按提取概率和每轮保留率决定是否可及；`working_memory_turns` 控制近期窗口。预置的 `initial_memories` 属于过去经历，第一轮也要经过提取，不能当成刚刚听到的信息。类别与选择提示分项保留在证据中，首版提示收益使用统一的可调 `cue_bonus`，尚未根据这些分项做个体化换算。
+`session.mode` 支持 `new_activity`（无前缀的新活动）和 `continuation`（有前缀的继续交流）。`shared_context` 只放双方已知的情境与前缀已确立的熟悉习惯概要，不能把待回忆的姓名答案放在这里长期可见。`evaluation_note` 和每条前缀的 `source` 留在 case 快照供审计，不作为模型输入。未写 `session` 的旧 case 按无前缀的新活动运行。
+
+当前机制是实验原型。动态模块按标点拆分输入，用词语重合和提示关键词近似检索；注意容量、编码概率、保留率、提取概率及情绪变化规则尚未临床校准。MoCA 总分不直接设定记忆，SDMT 与 DASS 保留为证据，不把它们换算成反应速度或情绪诊断。语言表达默认 `unknown`，不再根据 MoCA language=2 自动设成 `reduced`；需要限制表达时用显式实验覆盖。输出模型仍可能违反信息边界，需结合每轮 trace 检查实际表现。
+
+人物卡中的稳定背景和已知事实持续可见，不再靠当前问题的词面重合筛选。任务材料和对话经历进入注意、编码和提取机制。最近的已编码信息形成工作记忆；近期患者自述完整保留，避免当前选择或计划因句子截取而消失。较早信息按提取概率和每轮保留率决定是否可及，`working_memory_turns` 控制近期窗口。预置的 `patient_profile.initial_memories` 属于过去经历，第一轮也要经过提取；`session.initial_history` 则逐轮处理实际给定的前缀，二者用途不同。类别与选择提示分项保留在证据中，提示收益仍使用统一的可调 `cue_bonus`，尚未根据这些分项做个体化换算。
+
+动态输出的 `information_access` 区分当前输入是否完整、是否返回了早先发言，不宣称这些发言足以回答当前问题。没有提取出历史不代表活动从未发生，也不自动触发“不理解”或挫败状态。人物卡、给定经历、当前输入与输出 prompt 共同约束表达；语义判断仍由输出模型完成，并非已经实现了可靠的事实验证器。
 
 ## 2. 模型选择与服务器要求
 
@@ -219,7 +226,7 @@ python run_dialogue.py --case name_recall --dry-run
 python run_dialogue.py --case name_recall --patient patient_agents --dry-run --show-patient
 ```
 
-默认递归寻找 `cases/` 中所有名为 `case.json` 的文件，按相对路径排序。`reference_dialogue.json` 中的原始转录只供追溯，不读取进模型。普通 `--dry-run` 展示治疗师 prompt、患者 ID 和 profile 哈希；加 `--show-patient` 才同时展示患者资料及方法配置，仍不会生成对话。三个 case 的内容说明、来源定位和新增方法见 [cases/README.md](cases/README.md)。
+默认递归寻找 `cases/` 中所有名为 `case.json` 的文件，按相对路径排序。`reference_dialogue.json` 只供追溯，运行不会读取它；从中明确选取并嵌入 case 的前缀会按 `session` 配置使用。普通 `--dry-run` 展示治疗师 prompt、共同情境与前缀、患者 ID、`patient_profile_sha256`、`session_sha256` 及治疗师控制文本；加 `--show-patient` 才同时展示患者资料及方法配置，仍不会生成对话。三个 case 的内容说明、来源定位和新增方法见 [cases/README.md](cases/README.md)。
 
 运行三个职责模块，或在同一 case 上运行基线：
 
@@ -228,7 +235,7 @@ CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case name_recall --patient patie
 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case name_recall --patient single_prompt --seed 42
 ```
 
-两个方法读取同一个嵌入 profile，并记录相同的 `patient_profile_sha256`。基线直接看到 profile 和完整公开历史；`patient_agents` 的输出 LLM 只看到静态表达约束与动态模块给出的本轮信息。比较时同时保持 case、模型、轮数和配置一致，并使用多个种子观察变化。
+两个方法读取同一个嵌入 profile 与 session，分别记录 `patient_profile_sha256` 和 `session_sha256`。基线直接看到 profile 和完整公开历史；`patient_agents` 的输出 LLM 看到稳定人物卡、共同情境和动态模块给出的本轮信息。比较时同时保持 case、模型、轮数上限和配置一致，并使用多个种子观察变化。自由对话中的治疗师会随患者回答改变下一步，因此相同配置不保证相同后续问题；要隔离患者机制差异，还需使用相同刺激的对照。
 
 注意与记忆消融只适用于 `patient_agents`：
 
@@ -279,11 +286,15 @@ CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --patient single_prompt --config c
 第 N 轮：Therapist → Patient
 ```
 
-`prompts/opening.txt` 是启动指令模板，其中 `{opening_question}` 由 case 提供；模板本身不计入生成消息。第一条治疗师发言要求使用 case 定义的开场，后续根据患者回应继续。开场和推进方式以原始实例的有效内容为依据，清理无关转场或设备提醒。runner 记录的公开历史只包含双方实际说出的台词。治疗师和 `single_prompt` 使用完整历史，其中自身发言映射为 `assistant`，对方发言映射为 `user`；`patient_agents` 的输出调用只发送私有输出规则及本轮结构化 context。患者资料、内部状态和 trace 不进入治疗师输入；case 的原始患者回答不进入任一角色的 prompt。
+`prompts/opening.txt` 是启动指令模板，其中 `{opening_question}` 由 case 提供；模板本身不计入公开台词。第一条新治疗师发言直接使用 `case.therapist.opening_question`，不调用模型，记录的输入和输出 token 数均为 0。后续治疗师调用返回 `{"utterance": "...", "action": "continue|clarify|close"}`，只有 `utterance` 进入公开历史。控制指令和兜底结束语保存在 `prompts/therapist_control.json`，不增加额外的裁判 agent 或模型调用；不符合格式的输出会报错并保存 trace。
 
-轮数优先级为 `--rounds` > case 的 `rounds` > 配置文件的 `rounds`。一轮仍是两条生成消息；当前按有效轮数运行，告别或 case 的 `completion_criteria` 不触发程序提前结束，后者仅指导治疗师如何收束。两个方法每条 Patient 回复都调用模型一次。
+公开历史由明确给定的前缀和本次新增台词组成。治疗师和 `single_prompt` 使用完整历史，其中自身发言映射为 `assistant`，对方发言映射为 `user`；`patient_agents` 的输出调用使用人物卡与本轮结构化 context。患者私有 profile、内部状态和 trace 不进入治疗师输入；双方都能看到的 `shared_context` 及前缀是有意共享的条件。
 
-同批所有 case 共享模型权重，但每个 case 都新建 Therapist、Patient 和空历史，并重置随机种子。上一段对话和患者私有状态不会带入下一段。
+轮数上限的优先级为 `--rounds` > case 的 `rounds` > 配置文件的 `rounds`。一轮是 Therapist 与 Patient 的两条新台词；前缀不计入新轮数。治疗师标记 `close` 后，保留本轮患者的一次回应，然后结束。达到轮数上限也会停止。`completion_criteria` 用来指导模型的结束判断，不是独立的成功评分器；`status=completed` 只表示程序正常完成。
+
+默认最多连续两次澄清。模型标记 `clarify` 时计数；相邻治疗师问句忽略大小写、标点和空白后相同，也会自动计数，即使模型错误标成 `continue`。之后控制指令要求提供具体线索、示范、转入有依据的活动步骤或结束；第三次连续澄清触发可编辑的兜底结束语。换一种说法的语义重复仍依赖模型正确标记，不能保证全部识别。普通结束记录 `stop_reason=therapist_close`，澄清超限为 `clarification_limit`，轮数耗尽为 `round_limit`。这些原因都不等于记忆成功或策略有效。
+
+同批所有 case 共享模型权重，但每个 case 都新建 Therapist、Patient，初始化自己的 session 前缀，并重置随机种子。上一段模拟和患者私有状态不会带入下一段。两个方法每条新 Patient 回复都调用模型一次。
 
 代码关闭模型的 thinking 输出，便于直接获得角色台词。默认双方使用英语对话。每个角色共享模型权重，但 prompt 和历史角色映射彼此独立；修改 prompt 不会训练或修改权重。
 
@@ -320,33 +331,38 @@ HF_HUB_OFFLINE=1 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py
 | 文件 | 用途 |
 | --- | --- |
 | `prompts/therapist.txt` | Therapist 的角色、谈话风格、提问策略与限制 |
+| `prompts/therapist_control.json` | 治疗师 JSON 输出约定、澄清上限提示、最后一轮指令与兜底结束语 |
 | `prompts/baselines/single_prompt/patient.txt` | `single_prompt` 基线 Patient 的通用扮演与证据约束；个体资料来自 case |
 | `prompts/patient_agents/response.txt` | 输出模块如何根据可见 context 说话及承认不确定性 |
 | `patient_agents/static.py` | profile 到模拟假设及输出约束的编译规则 |
 | `patient_agents/context.py` | 输入接收、记忆编码、提取和逐轮交互状态 |
 | `patient_agents/policy.json` | 默认容量、概率、阈值、提示关键词等实验参数 |
 | `prompts/opening.txt` | 通用启动模板，必须恰好包含一个 `{opening_question}` |
-| `cases/<case目录>/case.json` | 场景主题、目标、材料、开场问题、推进方式、嵌入的患者 profile 及可选轮数 |
-| `cases/<case目录>/reference_dialogue.json` | 原始逐行对话与 Excel 定位，供核对，不进入模型 |
+| `cases/<case目录>/case.json` | 活动主题、患者 profile、session 共同背景与前缀、治疗师目标与开场、轮数上限 |
+| `cases/<case目录>/reference_dialogue.json` | 原始逐行对话与 Excel 定位，供核对；运行不读取，选用前缀须显式整理到 case |
 
-默认 prompt 模板使用英语，当前三个 case 的患者语言也均为英语。Patient 根据 case 中的语言字段输出；增加其他语言的 case 时也应相应调整治疗师语言。修改所有场景共用的治疗师行为时编辑 `prompts/therapist.txt`；修改某个场景的内容时编辑其 `case.json` 中的 `therapist`。Patient 侧按选定方法使用对应 prompt，不要把患者私有背景或原始患者回答放进治疗师字段。静态编译与动态控制首版没有隐藏的 LLM prompt；修改机制应编辑对应模块或 policy。
+默认 prompt 模板使用英语，当前三个 case 的患者语言也均为英语。Patient 根据 case 中的语言字段输出；增加其他语言的 case 时也应相应调整治疗师语言。修改所有场景共用的治疗师行为时编辑 `prompts/therapist.txt`，控制格式与结束语在 `therapist_control.json`；修改某个场景时分别编辑 case 的 `session` 和 `therapist`。Patient 侧按选定方法使用对应 prompt，不要把私有背景或未见目标回答放进治疗师字段。静态编译与动态控制没有隐藏的 LLM prompt；修改机制应编辑对应模块或 policy。
 
 合成分工如下：
 
 ```text
-prompts/therapist.txt + case.therapist 的情境、目标、材料、推进、回应指导与原治疗师例句
+prompts/therapist.txt + case.therapist + session.shared_context
     → Therapist system prompt
 prompts/opening.txt 中的 {opening_question} + case.therapist.opening_question
-    → 第一轮启动指令
-配置指定的 patient_prompt + case.patient_profile 的模型可见资料
+    → 启动指令；首条台词直接使用 opening_question
+prompts/therapist_control.json + 当前轮数与澄清计数
+    → 后续 Therapist 调用的输出格式与推进约束
+配置指定的 patient_prompt + case.patient_profile + session.shared_context
     → single_prompt 的 Patient system prompt
-case.patient_profile + patient_agents.policy.json + config.patient_agents
-    → 静态假设 + 动态 context
-prompts/patient_agents/response.txt + 静态输出约束 + 动态 context
+case.patient_profile + patient_agents/policy.json + config.patient_agents
+    → 持续可见的人物卡 + 实验参数
+session.initial_history + 新输入
+    → baseline 完整历史；patient_agents 顺序编码与动态 context
+prompts/patient_agents/response.txt + shared_context + 人物卡 + 动态 context
     → patient_agents 的 Patient 输出调用
 ```
 
-`summary`、`source` 和完整的 `reference_dialogue.json` 不参与上述合成；从原文中选出的治疗师有效话语通过可选的 `therapist.reference_utterances` 进入 prompt，帮助模型保留历史实例的提问和反馈方式。例句不代表已经发生的模拟对话，也不要求逐句照读。运行时不需要原始 Excel 数据包，不预设患者会如何回答。姓名回忆 case 保留原复习情境，但当前尚未重建前次教学及人物图片，详见 [cases/README.md](cases/README.md)。
+`summary`、来源字段、`session.evaluation_note` 和完整的 `reference_dialogue.json` 不参与上述合成。可选的 `therapist.reference_utterances` 只是表达示例，不代表已经发生的对话；`session.initial_history` 才是明确给定的已有交流。姓名回忆 case 从当前文字教学开始，不再假定患者上周已经学过，也不声称有照片。两个 continuation case 只评价给定前缀之后的生成，不能把前缀事实的复述当作独立预测。切点和材料见 [cases/README.md](cases/README.md)。
 
 可以另建 prompt 文件，在 JSON 配置中修改 `therapist_prompt`、`patient_prompt`、`opening_prompt` 的路径；`patient_agents` 的输出 prompt 由 `patient_agents.response_prompt` 指定。自定义 opening 模板同样需要 `{opening_question}`。每个 case 的输出会保存 prompt、profile、有效 policy 和配置快照；以后编辑原文件不会改变已有快照。
 
@@ -362,7 +378,7 @@ prompts/patient_agents/response.txt + 静态输出约束 + 动态 context
 | `revision` | 下载版本，默认 `main`；可改为具体 commit SHA |
 | `model_dir` | 服务器本地模型目录 |
 | `dtype` | `auto`、`bfloat16` 或 `float16`；`auto` 在当前 GPU 支持 BF16 时使用 BF16，否则使用 FP16 |
-| `rounds` | case 未指定轮数时的默认值，默认 10；一轮是 Therapist + Patient 两条 |
+| `rounds` | case 未指定时的新对话轮数上限，默认 10；一轮是 Therapist + Patient 两条新台词，不包括前缀 |
 | `max_new_tokens` | 每条回复最多生成的 token 数，默认 256 |
 | `max_context_tokens` | 本项目采用的上下文总预算，默认 8192，包含输入与预留的新回复 |
 | `temperature`、`top_p`、`top_k` | 采样参数，控制回复的随机性与候选范围 |
@@ -380,7 +396,9 @@ prompts/patient_agents/response.txt + 静态输出约束 + 动态 context
 
 `patient_agents.parameters` 只接受 policy 已有的参数名；概率和每轮保留率取 0–1，数量和阈值使用正整数。注意和记忆分档可选 `preserved`、`reduced`、`markedly_reduced`、`unknown`；语言可选 `preserved`、`reduced`、`unknown`。这些名称是程序中的实验分组，不是临床诊断。修改分档阈值、检索上限或词表后，应保存对应配置并检查 trace，不能把示例默认值报告为已验证的患者认知参数。
 
-方法、轮数和种子也可只对本次运行指定。`--rounds` 会覆盖所有选中 case 的轮数；原有 `--config`、`--patient` 和 `--seed` 保持可用：
+默认 policy 版本为 `heuristic-v2`。稳定人物事实不再按词面检索，语言分数不再自动决定表达分档，因此已删除 `known_fact_limit` 和 `language_preserved_min`。使用旧自定义 policy 或参数覆盖时，请同步删除这两个参数并与当前 policy 字段保持一致；无效字段会明确报错，不会被静默忽略。语言默认 `unknown`，若研究设计需要其他分档，可在 `patient_agents.traits.language` 显式设置并保留依据。
+
+方法、轮数上限和种子也可只对本次运行指定。`--rounds` 会覆盖所有选中 case 的上限；原有 `--config`、`--patient` 和 `--seed` 保持可用：
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case name_recall --rounds 10 --seed 42
@@ -402,8 +420,10 @@ outputs/本次运行时间戳/
 ├── batch_metadata.json
 ├── name_recall/
 │   ├── metadata.json
+│   ├── initial_history.json
 │   ├── dialogue.jsonl
 │   ├── patient_trace.jsonl
+│   ├── therapist_trace.jsonl
 │   └── dialogue.md
 ├── work_task_compensation/
 │   └── ...
@@ -411,15 +431,17 @@ outputs/本次运行时间戳/
     └── ...
 ```
 
-- `dialogue.md`：方便直接阅读的完整对话。
-- `dialogue.jsonl`：一条生成消息写一行，包含 `round`、`speaker`、`created_at_utc`、`content`、`input_tokens`、`output_tokens`、`finish_reason`。成功完成时有该 case 有效轮数的两倍条消息。
-- `metadata.json`：配置、有效轮数、prompt、case/profile 快照、源 case 文件路径、环境及模型信息；`patient_profile_sha256` 标识完整规范化 profile，`patient_setup` 保存方法资源，`patient_initialization` 保存实际初始化信息（`patient_agents` 包括编译结果和有效 policy）。另有 `patient_method`、`completed_rounds`、`utterances` 和 `status`（`running`、`completed`、`failed`、`interrupted`）。profile 内的来源工作簿哈希用于追溯，不代表运行时重新读取或校验了 Excel。
-- `patient_trace.jsonl`：每次 Patient 调用的内部记录。`patient_agents` 记录输入单元、接收与遗漏、编码、提取概率及结果、状态和交给输出模块的 context；两种方法均记录实际 `model_input`，生成失败时也尽可能保留调用输入。患者刚生成的话仅记录为“说过的话”，不会自动升级为真实个人事实。trace 不进入公开对话或治疗师 prompt，也不是患者可直接读到的完整记忆库。
-- `batch_metadata.json`：整个批次的状态，以及每个 case 的输出位置、有效轮数、完成进度和错误。未开始的 case 标为 `pending`。
+- `dialogue.md`：先展示给定前缀并标明“不由本次生成、不评分”，再展示新对话，方便连续阅读。
+- `initial_history.json`：单独保存两种方法收到的前缀 `speaker` / `content`；新活动保存空列表。前缀的来源仍可在 metadata 中的完整 case 快照查到。
+- `dialogue.jsonl`：一条新台词写一行，包含 `round`、`speaker`、`created_at_utc`、`content`、`input_tokens`、`output_tokens`、`finish_reason`。不包含给定前缀；正常结束后有 `completed_rounds` 的两倍条消息。首条固定开场的 token 数为 0。
+- `metadata.json`：配置、轮数上限、prompt、case/profile/session 快照、源 case 文件路径、环境及模型信息。`patient_profile_sha256` 标识完整规范化 profile；`session_sha256` 标识模型可见的 mode、共同情境和前缀，不包含来源注释与评价说明。`patient_setup` 保存方法资源，`patient_initialization` 保存初始化结果（`patient_agents` 包括编译结果、有效 policy 和前缀处理 trace）。另有 `initial_history_utterances`、`completed_rounds`、`utterances`、`stop_reason` 和 `status`（`running`、`completed`、`failed`、`interrupted`）；完成轮数和台词数只统计新增部分。profile 内的来源工作簿哈希用于追溯，不代表运行时重新读取或校验了 Excel。
+- `patient_trace.jsonl`：每次新 Patient 调用的内部记录。`patient_agents` 记录输入单元、接收与遗漏、编码、提取概率及结果、信息访问状态和交给输出模块的 context；两种方法均记录实际 `model_input`，失败时也尽可能保留调用输入。外层 `round` 是新增轮号，内部 context 的 `turn` 包括已处理的前缀轮次。源前缀中的患者自述会标记 `from_initial_history`；患者刚生成的话仅记录为“说过的话”，不会自动升级为真实个人事实。trace 不进入公开对话或治疗师 prompt。
+- `therapist_trace.jsonl`：每次新 Therapist 调用的记录。首轮标记 `source=case_opening`，没有模型输入；后续记录 `model_input`、模型原始输出、请求动作、最终动作、澄清计数及可能的结束覆盖。用于区分模型自主收束、澄清超限与轮数上限。
+- `batch_metadata.json`：整个批次的状态，以及每个 case 的输出位置、轮数上限、完成进度、结束原因和错误。未开始的 case 标为 `pending`。
 
 生成消息会逐条写入。某个 case 失败或被中断时保留已有对话和失败状态，并停止批次；之前已完成的 case 保留，后续 case 不运行。再次运行会新建批次，不自动续写。
 
-结束原因中，`length` 表示已经达到 `max_new_tokens`，这条回复可能被截断；`eos` 表示模型生成结束标记。若上下文输入加上预留回复超过配置预算，程序报错停止，不会悄悄裁掉历史。要增加回复长度或轮数，应同步评估上下文预算与显存。
+单条模型输出的 `finish_reason` 与整段活动的 `stop_reason` 不同：`length` 表示达到 `max_new_tokens`，`eos` 表示生成结束（固定开场也使用此值）。治疗师 JSON 若因截断或格式问题无法解析，程序报错并保留 trace。若上下文输入加上预留回复超过配置预算，程序报错停止，不会悄悄裁掉历史；较长的给定前缀也占用上下文预算。要增加回复长度或轮数，应同步评估上下文预算与显存。
 
 无需 GPU 的功能验证（Python 3.11+）：
 
@@ -427,7 +449,7 @@ outputs/本次运行时间戳/
 python -m unittest discover -s tests -v
 ```
 
-测试覆盖 case/profile 加载与校验、prompt 合成与内容隔离、无模型预览，以及使用模拟模型验证批量运行和失败记录。机制测试检查注意、记忆、提示与随机种子控制。它们验证程序行为，不验证真实模型的对话质量、认知映射的临床效度或 GPU 推理。
+测试覆盖 case/profile/session 校验、前缀输入与审计信息隔离、无模型预览，以及用模拟模型验证批量运行、提前结束、澄清上限和失败记录。机制测试检查注意、记忆、前缀只处理一次、稳定人物信息持续可见与随机种子控制。它们验证程序行为，不验证真实模型的对话质量、认知映射的临床效度或 GPU 推理。本轮改动尚未运行真实 LLM，需在服务器检查自然表达、动作标记是否准确以及是否仍会编造经历。
 
 ## 9. 常见问题
 

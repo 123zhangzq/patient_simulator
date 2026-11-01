@@ -2,8 +2,8 @@
   "schema_version": 1,
   "id": "name_recall",
   "category": "learning_recall",
-  "title": "Reviewing previously taught names and memory links",
-  "summary": "Anchored to the XC030 name-recall exchange: review previously taught names, accept partial retrieval, ask how a name was remembered, and offer a relevant association. The opening retains the source review premise while removing the food-topic transition and mute instruction. Reference answers are therapist-only material; the text runner does not reconstruct the prior lesson or pictures.",
+  "title": "Learning two names and returning to them after a short activity",
+  "summary": "A text-based learning activity using the source name materials, with explicit teaching in the current session before recall. No earlier lesson, photographs, learning success, or patient target answer is assumed. The short intervening activity is not a reconstruction of a week-long delay.",
   "rounds": 8,
   "source": {
     "workbook": "02_whole_session_data/Group 2/TYB2_S8_20221223_master_annotated_reviewer2.xlsx",
@@ -32,42 +32,39 @@
     ]
   },
   "therapist": {
-    "context": "Continue the review activity from the source: the session premise is that two pictured people and name-memory strategies were introduced last week. Begin by inviting recall of the woman, then the man, and discuss the method that helped. The current text runner does not supply the earlier lesson or photographs; this premise sets the conversation topic, not evidence of what this patient remembers. Accept a patient who does not recognize the exercise and clarify without inventing an image or insisting that they learned it.",
+    "context": "Begin a new, one-to-one text-based learning activity. Teach the two names and explain the supplied links before asking the patient to retrieve them. Discuss one short intervening topic before returning to the names. The patient does not have a previous lesson or photographs to rely on.",
     "objectives": [
-      "Invite recall of previously taught names before offering a name or an association, following the original review sequence.",
-      "Support partial or uncertain responses with manageable cues while distinguishing cues from a supplied answer.",
-      "Ask what helped the patient connect a name with its association, using their actual response."
+      "Establish an actual learning opportunity for each name and observe whether the patient understands or wants a different explanation.",
+      "After a brief intervening exchange, invite one name at a time without repeating its answer in the question.",
+      "Distinguish repetition, partial recall, cue-supported retrieval and an answer supplied by the therapist; discuss whether the approach suits the patient."
     ],
     "materials": [
-      "Therapist reference answer for the woman: Tan Mei Li. The original teaching linked mei li with beautiful in Chinese. Keep the answer private until the patient has attempted recall or asks for help; no photograph is supplied by this runner.",
-      "Therapist reference answer for the man: Lim Chong Wei. The original association links Chong Wei with badminton player Lee Chong Wei but uses the surname Lim. Use this only as responsive support, not as an opening presentation of the answer.",
-      "Treat capitalization, punctuation, spacing, and clearly recognizable spoken or transliteration variations flexibly. A correct given name with a missing surname is partial recall. Reversed given-name order can be clarified gently rather than treated as a wholly unrelated answer.",
-      "A reminder of the verbal association is a cue. Stating the complete target name is providing the answer. A subsequent repetition demonstrates repetition after teaching, not recall before the answer was given."
+      "First target: Tan Mei Li. For this exercise, the verbal link is Mei Li with beautiful. Explain the link as teaching material; do not assume the patient knows Chinese or knows anyone with this name.",
+      "Second target: Lim Chong Wei. The given name Chong Wei matches badminton player Lee Chong Wei, but this exercise uses the surname Lim. If the player is unfamiliar, explain that these two people share given names; do not assume familiarity with badminton.",
+      "Refer to the first or second name. No face, person, or photograph is displayed by this text activity.",
+      "Use a short non-name exchange as the intervening activity, such as inviting the patient to choose whether instructions should be given all at once or in smaller parts. Do not invent a time delay or a separate appointment.",
+      "Recognizable spacing, pronunciation or transliteration variations may be accepted. A missing surname is partial recall. Do not provide the full target while asking for unaided recall."
     ],
-    "opening_question": "Last week we practised some strategies for remembering these people's names. Can you remember this lady's name?",
+    "opening_question": "Let's try a short name exercise. The first name is Tan Mei Li; for this exercise, link Mei Li with the word beautiful. Does that link make sense to you?",
     "conversation_plan": [
-      "Start with the source-based review question without first teaching or listing the answers. Respond to the woman-name attempt; clarify uncertainty or offer one cue only if needed.",
-      "Invite an attempt at the man's name, as in the source follow-up: And this gentleman? Allow a partial name or an explicit inability to recall.",
-      "When a name has been recalled, ask how the patient remembered it. If it was not recalled, ask which part is difficult rather than assuming a successful method.",
-      "Respond to the patient's explanation. Offer or reinforce an appropriate association only at this point, keeping a cue distinct from a full answer.",
-      "Briefly summarize the method actually discussed. Accept that an offered association may not help and that some items may remain unresolved."
+      "Respond to the first learning response. If the link is unclear, explain it briefly or accept that it is not helpful; this is not yet a test of earlier recall.",
+      "Introduce Lim Chong Wei and its verbal link in a separate turn. Permit a brief repetition or clarification without calling it successful delayed recall.",
+      "Hold one short intervening exchange on a different concrete topic. Then invite retrieval of the first name and, if useful, the second name, one at a time.",
+      "After an uncertain or partial attempt, offer at most one relevant cue and one further attempt for that name. If it still cannot be retrieved, provide the answer as new information or set the item aside, according to the patient response. Do not repeat a failed test indefinitely.",
+      "Briefly discuss which part felt useful or difficult based on the actual exchange. Close once the names have been attempted or set aside, or the patient wants to stop."
     ],
     "response_guidance": [
-      "Do not expect a particular error, success, confidence level, or explanation from the patient.",
-      "The case supplies the prior-session review premise, not this patient's prior responses. If the patient says they did not attend, cannot identify the people, or lacks the material, acknowledge and clarify; do not insist they learned it or invent a past answer. Do not assume familiarity with badminton or Chinese.",
-      "Do not claim to show a face or infer visual recognition. Do not ask about facial features that have not been supplied.",
-      "Keep track of the name parts and cues you actually supply. Do not call an answer independent recall after supplying it, and do not infer retention of a prior lesson that this runner has not reconstructed.",
-      "Use task questions as well as a brief strategy discussion; do not turn every turn into a broad counseling question."
+      "Keep teaching before testing. Do not claim the names were learned last week or that an unspecified previous session occurred.",
+      "The teaching content establishes exposure, not successful encoding. Do not assume every introduced link was understood or remembered.",
+      "If the patient supplies an unsupported association, do not say it is correct automatically. Clarify whether it is a personal suggestion or a remembered taught link, and distinguish it from the supplied material.",
+      "When asked to repeat, shorten or separate the information rather than restating a longer version of the same multi-part question.",
+      "Accept a declined exercise, an unhelpful link, partial recall or no recall. Do not convert a cooperative acknowledgment into demonstrated success.",
+      "An immediate repetition after you give the answer is not independent recall. Do not claim clinically meaningful improvement or a week-long retention result."
     ],
     "completion_criteria": [
-      "The woman and man name targets have been discussed or explicitly set aside, including when the patient lacks the prior task context.",
-      "The dialogue establishes at least one reported useful link, an identified difficulty, or that the offered association did not help.",
-      "Any closing feedback accurately reflects the support given and does not assert improvement that was not demonstrated."
-    ],
-    "reference_utterances": [
-      "And this gentleman?",
-      "So how do you remember Tan Mei Li's name?",
-      "So that's a way of linking up."
+      "Each target has been introduced and later attempted, or explicitly set aside without forcing participation.",
+      "The conclusion accurately distinguishes what was recalled from what required a cue or the full answer.",
+      "The activity ends when the patient declines or the useful attempts are complete; the round count is an upper limit."
     ]
   },
   "patient_profile": {
@@ -401,7 +398,13 @@
       "Personality, attachment style, motivation, and current-turn emotion are not measured by this profile.",
       "Cognitive screening scores do not specify a token limit, memory capacity, forgetting probability, or language proficiency.",
       "Zero cued-recall scores do not on their own establish lack of benefit from cues.",
-      "No past-session episode is seeded into initial_memories."
+      "No previous name lesson is assumed. The current session creates learning opportunities through actual therapist messages."
     ]
+  },
+  "session": {
+    "mode": "new_activity",
+    "shared_context": "You are beginning a short, one-to-one text-based name-learning activity. There are no photographs and no assumed previous lesson. Names and any verbal links will be introduced in this conversation. It is fine to ask for a clearer explanation, try a link, or decide it is not useful.",
+    "initial_history": [],
+    "evaluation_note": "Evaluate only responses after the names have actually been presented, distinguishing immediate repetition, later recall, cue-assisted recall and supplied answers. The baseline can read its full chat history; this is a comparison of simulation mechanisms, not proof of independent human delayed recall. No source patient answer is included as prior experience."
   }
 }

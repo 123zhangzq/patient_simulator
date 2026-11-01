@@ -14,7 +14,7 @@ CODE_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CODE_DIR))
 
 from baselines.single_prompt.patient import SinglePromptPatient
-from core.cases import DialogueCase
+from core.cases import DialogueCase, compose_prompts, load_cases
 from core.therapist import Therapist
 from helpers import profile_data
 
@@ -22,6 +22,8 @@ from helpers import profile_data
 class FakeModel:
     instances = []
     fail_on_reply = None
+    therapist_action = "continue"
+    invalid_therapist_json = False
 
     def __init__(self, config):
         self.config = dict(config)
@@ -33,8 +35,13 @@ class FakeModel:
         self.calls.append([dict(message) for message in messages])
         if len(self.calls) == self.fail_on_reply:
             raise RuntimeError("simulated generation failure")
+        is_therapist = messages[0]["content"].startswith(("THERAPIST_", "You are a therapist"))
+        content = f"reply-{len(self.calls)}"
+        if is_therapist:
+            content = "invalid control reply" if self.invalid_therapist_json else json.dumps({
+                "utterance": content, "action": self.therapist_action})
         return {
-            "content": f"reply-{len(self.calls)}",
+            "content": content,
             "input_tokens": 10,
             "output_tokens": 2,
             "finish_reason": "eos",
@@ -44,8 +51,8 @@ class FakeModel:
 class TrackingTherapist(Therapist):
     instances = []
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.histories = []
         self.instances.append(self)
 
@@ -108,6 +115,8 @@ class RunnerTests(unittest.TestCase):
         self.addCleanup(lambda: sys.modules.pop("core.runner", None))
         FakeModel.instances = []
         FakeModel.fail_on_reply = None
+        FakeModel.therapist_action = "continue"
+        FakeModel.invalid_therapist_json = False
         TrackingTherapist.instances = []
         TrackingPatient.instances = []
 
@@ -127,7 +136,8 @@ class RunnerTests(unittest.TestCase):
         self.seed = fake_transformers.set_seed
 
     def case(self, case_id, rounds=None):
-        data = {"id": case_id, "patient_profile": profile_data(case_id)}
+        data = {"id": case_id, "patient_profile": profile_data(case_id),
+                "therapist": {"opening_question": f"Opening for {case_id}?"}}
         if rounds is not None:
             data["rounds"] = rounds
         return DialogueCase(self.root / case_id / "case.json", data)
@@ -175,7 +185,7 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(self.config["rounds"], 2)
 
     def test_partial_generation_failure_is_persisted_and_later_case_stays_pending(self):
-        FakeModel.fail_on_reply = 4
+        FakeModel.fail_on_reply = 3
         with self.assertRaisesRegex(RuntimeError, "simulated generation failure"):
             self.run_batch([self.case("case_a", 2), self.case("case_b", 1)])
         output, = Path(self.config["output_dir"]).iterdir()
@@ -199,7 +209,7 @@ class RunnerTests(unittest.TestCase):
         self.runner.load_patient_class.return_value = PatientAgents
         output = self.run_batch([self.case("case_a", 2), self.case("case_b", 1)], patient_method="patient_agents")
         self.assertEqual(len(FakeModel.instances), 1)
-        self.assertEqual(len(FakeModel.instances[0].calls), 6)
+        self.assertEqual(len(FakeModel.instances[0].calls), 4)
         for case_id, rounds in (("case_a", 2), ("case_b", 1)):
             metadata = self.read_json(output / case_id / "metadata.json")
             self.assertEqual(metadata["status"], "completed")
@@ -224,6 +234,104 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(batch["status"], "failed")
         self.assertEqual(batch["cases"][0]["status"], "pending")
         self.assertIn("model unavailable", batch["error"])
+
+    def test_supplied_prefix_is_shared_by_methods_and_never_counted_as_new_speech(self):
+        from patient_agents.patient import PatientAgents
+        case = self.case("continuation", 1)
+        case.data["session"] = {
+            "mode": "continuation", "shared_context": "We are continuing a practice; you reported using notes.",
+            "initial_history": [
+                {"speaker": "Therapist", "content": "The practice label was XYLORP.", "source": "PRIVATE_PREFIX_FILE"},
+                {"speaker": "Patient", "content": "I use notes to help.", "source": "PRIVATE_PREFIX_FILE"},
+            ], "evaluation_note": "HIDDEN_SUFFIX_EXCLUDED_FROM_EVALUATION",
+        }
+        outputs = []
+        for method, patient_class in (("single_prompt", TrackingPatient), ("patient_agents", PatientAgents)):
+            self.runner.load_patient_class.return_value = patient_class
+            output = self.run_batch([case], patient_method=method) / "continuation"
+            outputs.append(output)
+            metadata = self.read_json(output / "metadata.json")
+            self.assertEqual(metadata["initial_history_utterances"], 2)
+            self.assertEqual(metadata["completed_rounds"], 1)
+            self.assertEqual(metadata["utterances"], 2)
+            records = [json.loads(line) for line in (output / "dialogue.jsonl").read_text().splitlines()]
+            self.assertEqual(records[0]["content"], case.data["therapist"]["opening_question"])
+            self.assertEqual(len(records), 2)
+            self.assertEqual(len(self.read_json(output / "initial_history.json")), 2)
+            traces = [json.loads(line) for line in (output / "patient_trace.jsonl").read_text().splitlines()]
+            visible = json.dumps(traces[0]["trace"]["model_input"])
+            self.assertIn("XYLORP", visible)
+            self.assertIn(case.data["session"]["shared_context"], visible)
+            self.assertNotIn("PRIVATE_PREFIX_FILE", visible)
+            self.assertNotIn("HIDDEN_SUFFIX_EXCLUDED_FROM_EVALUATION", visible)
+            if method == "patient_agents":
+                self.assertEqual(traces[0]["trace"]["turn"], 2)
+        left, right = [self.read_json(output / "metadata.json") for output in outputs]
+        self.assertEqual(left["patient_profile_sha256"], right["patient_profile_sha256"])
+        self.assertEqual(left["session_sha256"], right["session_sha256"])
+
+    def test_close_stops_after_patient_reply_and_keeps_control_out_of_public_speech(self):
+        FakeModel.therapist_action = "close"
+        output = self.run_batch([self.case("case_a", 12)]) / "case_a"
+        metadata = self.read_json(output / "metadata.json")
+        self.assertEqual(metadata["completed_rounds"], 2)
+        self.assertEqual(metadata["stop_reason"], "therapist_close")
+        records = [json.loads(line) for line in (output / "dialogue.jsonl").read_text().splitlines()]
+        self.assertEqual(len(records), 4)
+        self.assertEqual(records[-1]["speaker"], "Patient")
+        self.assertNotIn('"action"', json.dumps(records))
+        traces = [json.loads(line) for line in (output / "therapist_trace.jsonl").read_text().splitlines()]
+        self.assertEqual(len(traces), 2)
+        for history in TrackingPatient.instances[-1].histories:
+            self.assertTrue(all('"action"' not in message.content for message in history))
+
+    def test_repeated_clarification_stops_without_filling_twelve_rounds(self):
+        FakeModel.therapist_action = "clarify"
+        output = self.run_batch([self.case("case_a", 12)]) / "case_a"
+        metadata = self.read_json(output / "metadata.json")
+        self.assertEqual(metadata["completed_rounds"], 4)
+        self.assertEqual(metadata["stop_reason"], "clarification_limit")
+
+    def test_invalid_therapist_control_persists_raw_trace_and_partial_dialogue(self):
+        FakeModel.invalid_therapist_json = True
+        with self.assertRaisesRegex(ValueError, "invalid JSON"):
+            self.run_batch([self.case("case_a", 3)])
+        root, = Path(self.config["output_dir"]).iterdir()
+        output = root / "case_a"
+        metadata = self.read_json(output / "metadata.json")
+        self.assertEqual(metadata["status"], "failed")
+        self.assertEqual(metadata["completed_rounds"], 1)
+        self.assertEqual(metadata["utterances"], 2)
+        traces = [json.loads(line) for line in (output / "therapist_trace.jsonl").read_text().splitlines()]
+        self.assertEqual(traces[-1]["status"], "failed")
+        self.assertEqual(traces[-1]["trace"]["raw_result"]["content"], "invalid control reply")
+
+    def test_repository_cases_run_with_the_real_composition_for_both_methods(self):
+        from patient_agents.patient import PatientAgents
+        for key in ("therapist", "opening", "patient"):
+            name = "baselines/single_prompt/patient" if key == "patient" else key
+            self.config[f"{key}_prompt"] = str(CODE_DIR / "prompts" / f"{name}.txt")
+        cases = load_cases(CODE_DIR / "cases")
+        snapshots = {}
+        with mock.patch.object(self.runner, "compose_prompts", compose_prompts):
+            for method, patient_class in (("single_prompt", SinglePromptPatient), ("patient_agents", PatientAgents)):
+                self.runner.load_patient_class.return_value = patient_class
+                output = self.run_batch(cases, patient_method=method)
+                for case in cases:
+                    metadata = self.read_json(output / case.case_id / "metadata.json")
+                    prefix = self.read_json(output / case.case_id / "initial_history.json")
+                    records = [json.loads(line) for line in (output / case.case_id / "dialogue.jsonl").read_text().splitlines()]
+                    self.assertEqual(metadata["status"], "completed")
+                    self.assertEqual(metadata["completed_rounds"], case.data["rounds"])
+                    self.assertEqual(metadata["stop_reason"], "round_limit")
+                    self.assertEqual(len(prefix), len(case.data["session"]["initial_history"]))
+                    self.assertEqual(records[0]["content"], case.data["therapist"]["opening_question"])
+                    self.assertEqual(len(records), 2 * case.data["rounds"])
+                    exposure = (metadata["patient_profile_sha256"], metadata["session_sha256"], prefix)
+                    if method == "single_prompt":
+                        snapshots[case.case_id] = exposure
+                    else:
+                        self.assertEqual(exposure, snapshots[case.case_id])
 
 
 if __name__ == "__main__":

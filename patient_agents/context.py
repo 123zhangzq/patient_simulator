@@ -34,7 +34,7 @@ class ContextController:
         ]
         self.last_trace: dict = {}
 
-    def record_patient_reply(self, text: str) -> list[str]:
+    def record_patient_reply(self, text: str, *, from_initial_history: bool = False) -> list[str]:
         """Remember the act of speaking, without asserting the content is true."""
         if not isinstance(text, str) or not text.strip():
             raise ValueError("A nonempty patient reply is required.")
@@ -42,7 +42,8 @@ class ContextController:
         for index, unit in enumerate(split_units(text)):
             identifier = f"t{self.turn}:p{index + 1}"
             self.memories.append({"id": identifier, "text": unit, "encoded_turn": self.turn,
-                                  "origin": "patient_utterance", "cue_tags": []})
+                                  "origin": "patient_utterance", "cue_tags": [],
+                                  "from_initial_history": from_initial_history})
             ids.append(identifier)
         return ids
 
@@ -78,6 +79,11 @@ class ContextController:
         # A small recent workspace is distinct from delayed episodic retrieval.
         # Missing/failed encoding is never reconstructed from the transcript.
         working_ids = {item["id"] for item in (recent[-capacity:] if self.attention_enabled else recent)}
+        # Keep the whole last self-report in the immediate workspace. Its
+        # opening choice or plan must not vanish merely because it was followed
+        # by several short clauses. It expires with the recent workspace and
+        # never becomes an unlimited transcript or a verified personal fact.
+        working_ids.update(item["id"] for item in recent if item["origin"] == "patient_utterance")
         # Only previously encoded episodes are candidates. Neither the public
         # transcript nor an omitted input unit is accessible to this retrieval.
         ranked = []
@@ -87,8 +93,13 @@ class ContextController:
             if not self.memory_enabled or item["id"] in working_ids or overlap or tag_match or recall_requested:
                 ranked.append((overlap + int(tag_match), item))
         ranked.sort(key=lambda pair: (pair[1]["id"] in working_ids, pair[0], pair[1]["encoded_turn"]), reverse=True)
-        limit = self.parameters["retrieval_limit"] if self.memory_enabled else len(ranked)
-        for _, item in ranked[:limit]:
+        # A retrieval limit applies to older episodes, not to a current turn's
+        # conversational commitments. Keep each working item, then retrieve a
+        # bounded number of older episodes through the probabilistic gate.
+        working = [pair for pair in ranked if pair[1]["id"] in working_ids]
+        older = [pair for pair in ranked if pair[1]["id"] not in working_ids]
+        limit = self.parameters["retrieval_limit"] if self.memory_enabled else len(older)
+        for _, item in working + older[:limit]:
             age = max(0, self.turn - item["encoded_turn"] - 1)
             probability = 1.0
             cue_helped = False
@@ -109,6 +120,7 @@ class ContextController:
             if success:
                 retrieved.append({"id": item["id"], "text": item["text"],
                                   "origin": item["origin"], "learned_turn": item["encoded_turn"],
+                                  "from_initial_history": item.get("from_initial_history", False),
                                   "access": "working_memory" if in_working_memory else "episodic_retrieval"})
         # Encoding takes place after retrieval: a newly supplied answer is new
         # information, never evidence that it was remembered beforehand.
@@ -122,35 +134,30 @@ class ContextController:
             if success:
                 self.memories.append({**unit, "encoded_turn": self.turn,
                                       "origin": "therapist_utterance", "cue_tags": []})
-        facts = []
-        candidates = [(len(query & self._tokens(
-            item["text"] + " " + " ".join(item.get("cue_tags", []))
-        )), item)
-                      for item in self.compiled["known_facts"]]
-        candidates.sort(key=lambda pair: pair[0], reverse=True)
-        for overlap, item in candidates[:self.parameters["known_fact_limit"]]:
-            if overlap:
-                facts.append({"id": item["id"], "text": item["text"]})
-        difficulty = bool(omitted) or (recall_requested and not retrieved)
+        # Empty history can mean missing scenario information, not impaired
+        # comprehension or even a failed retrieval. Do not turn it into affect.
+        difficulty = bool(omitted)
         self.frustration = min(2, self.frustration + 1) if difficulty else max(0, self.frustration - 1)
         context = {
             "turn": self.turn,
             "accessible_current_units": deepcopy(attended),
             "retrieved_memories": retrieved,
-            "available_personal_facts": facts,
+            "information_access": {
+                "current_input": "partial" if omitted else "complete",
+                "history": "earlier_statements_returned" if retrieved else "no_earlier_statements_returned",
+            },
             "interaction_state": {"affect": "mild_frustration" if self.frustration >= 2 else "neutral",
                                   "some_input_was_missed": bool(omitted)},
             "response_policy": {
                 "act": "answer_accessible_then_request_repeat" if omitted else "answer_accessible",
                 "max_reply_units": self.parameters[f"max_reply_units_{attention if self.attention_enabled else 'preserved'}"],
-                "recall_requested": recall_requested,
-                "prior_recall_available": bool(retrieved),
             },
         }
         self.last_trace = {
             "turn": self.turn, "input_units": units, "attended_ids": [u["id"] for u in attended],
             "omitted_ids": [u["id"] for u in omitted], "encoding": encoding_events,
             "retrieval": retrieval_events, "encoded_memory_count": len(self.memories),
+            "recall_keyword_detected": recall_requested,
             "state": {"frustration": self.frustration}, "turn_context": deepcopy(context),
         }
         return context

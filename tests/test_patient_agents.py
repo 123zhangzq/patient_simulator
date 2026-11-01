@@ -125,7 +125,6 @@ class PatientAgentTests(unittest.TestCase):
         self.turn(patient, history, "What personal code do you remember?")
         payload = json.loads(model.calls[-1][-1]["content"])
         context = payload["turn_context"]
-        self.assertNotIn("FABRILOX", json.dumps(context["available_personal_facts"]))
         self.assertNotIn("FABRILOX", json.dumps(payload["patient"]))
         self.assertNotIn("FABRILOX", json.dumps(patient.describe()["compiled_profile"]["known_facts"]))
         self_reports = [item for item in context["retrieved_memories"] if "FABRILOX" in item["text"]]
@@ -228,6 +227,130 @@ class PatientAgentTests(unittest.TestCase):
         patient, _ = self.patient(options={}, profile=profile)
         traits = patient.describe()["compiled_profile"]["traits"]
         self.assertEqual(traits, {"attention": "unknown", "memory": "unknown", "language": "unknown"})
+
+    def test_stable_person_facts_remain_available_without_keyword_matches(self):
+        profile = profile_data()
+        profile["background"].update({"lives_with_helper": True, "occupation": "receptionist"})
+        profile["known_facts"].append({
+            "id": "vision", "text": "At baseline I reported poor vision.",
+            "source": "PRIVATE_SOURCE_SENTINEL",
+        })
+        options = controlled_options()
+        options["parameters"].update({"retrieval_probability_preserved": 0.0,
+                                       "encoding_probability_markedly_reduced": 0.0})
+        patient, model = self.patient(profile=profile, options=options)
+        history = []
+        for question in ("How did that activity go?", "Would you like to try something else?"):
+            self.turn(patient, history, question)
+            payload = json.loads(model.calls[-1][-1]["content"])
+            self.assertEqual(payload["patient"]["background"]["occupation"], "receptionist")
+            self.assertTrue(payload["patient"]["background"]["lives_with_helper"])
+            self.assertIn("I live with my spouse.", model.visible_text())
+            self.assertIn("At baseline I reported poor vision.", model.visible_text())
+            self.assertNotIn("PRIVATE_SOURCE_SENTINEL", model.visible_text())
+
+    def test_language_subscore_does_not_prescribe_comprehension_or_expression(self):
+        profile = profile_data()
+        for score in (0, 2, 3, None):
+            with self.subTest(score=score):
+                profile["assessments"]["moca"]["language"] = score
+                patient, _ = self.patient(profile=profile, options={})
+                compiled = patient.describe()["compiled_profile"]
+                self.assertEqual(compiled["traits"]["language"], "unknown")
+                self.assertEqual(compiled["derivation"]["language"]["value"], score)
+        patient, _ = self.patient(profile=profile, options={"traits": {"language": "reduced"}})
+        self.assertEqual(patient.compiled["response_profile"]["expression"]["language"], "reduced")
+
+    def test_empty_history_is_not_missed_input_or_proof_an_event_never_happened(self):
+        patient, model = self.patient(options={})
+        history = []
+        self.turn(patient, history, "What do you remember about last week's activity?")
+        context = json.loads(model.calls[-1][-1]["content"])["turn_context"]
+        self.assertEqual(context["information_access"], {
+            "current_input": "complete", "history": "no_earlier_statements_returned",
+        })
+        self.assertEqual(context["interaction_state"]["affect"], "neutral")
+        self.assertEqual(context["response_policy"]["act"], "answer_accessible")
+        self.assertNotIn("prior_recall_available", context["response_policy"])
+        self.turn(patient, history, "What was the connection we made between the names?")
+        context = json.loads(model.calls[-1][-1]["content"])["turn_context"]
+        self.assertEqual(context["information_access"]["history"], "earlier_statements_returned")
+        self.assertNotIn("prior_recall_available", context["response_policy"])
+
+    def test_initial_history_encodes_exposure_in_order_without_generation_or_reencoding(self):
+        patient, model = self.patient()
+        prefix = [
+            DialogueMessage("Therapist", "The first label is KERBIX. The other label is QUENLAX."),
+            DialogueMessage("Patient", "I have used paper notes."),
+            DialogueMessage("Therapist", "What would you prefer to use now?"),
+            DialogueMessage("Patient", "I would like paper notes again."),
+        ]
+        patient.initialize_history(prefix)
+        self.assertEqual(model.calls, [])
+        self.assertEqual(patient.context.turn, 2)
+        initialization = patient.describe()["initial_history"]
+        self.assertEqual(initialization["message_count"], 4)
+        self.assertEqual(len(initialization["processed_turns"]), 2)
+        self.assertTrue(initialization["processed_turns"][0]["omitted_ids"])
+        history = list(prefix)
+        self.turn(patient, history, "What was the first label, and what would you prefer to use?")
+        self.assertEqual(patient.context.turn, 3)
+        self.assertEqual(len(model.calls), 1)
+        self.assertIn("KERBIX", model.visible_text())
+        self.assertNotIn("QUENLAX", model.visible_text())
+        context = json.loads(model.calls[-1][-1]["content"])["turn_context"]
+        reports = [item for item in context["retrieved_memories"] if item["origin"] == "patient_utterance"]
+        self.assertTrue(reports)
+        self.assertTrue(all(item["from_initial_history"] for item in reports))
+        identifiers = [item["id"] for item in patient.context.memories]
+        self.assertEqual(len(identifiers), len(set(identifiers)))
+
+    def test_initial_history_validation_is_atomic_and_initialization_is_one_time(self):
+        invalid_prefixes = [
+            [DialogueMessage("Therapist", "A question.")],
+            [DialogueMessage("Patient", "An answer."), DialogueMessage("Therapist", "A question.")],
+            [DialogueMessage("Therapist", "A question."), DialogueMessage("Patient", " ")],
+        ]
+        for prefix in invalid_prefixes:
+            with self.subTest(prefix=prefix):
+                patient, model = self.patient()
+                with self.assertRaises(ValueError):
+                    patient.initialize_history(prefix)
+                self.assertEqual(patient.context.turn, 0)
+                self.assertEqual(patient.context.memories, [])
+                self.assertEqual(model.calls, [])
+                patient.initialize_history([])
+                with self.assertRaises(ValueError):
+                    patient.initialize_history([])
+        patient, _ = self.patient()
+        self.turn(patient, [], "Hello.")
+        with self.assertRaises(ValueError):
+            patient.initialize_history([])
+
+    def test_initialized_prefix_cannot_be_changed_when_generation_starts(self):
+        patient, model = self.patient()
+        prefix = [DialogueMessage("Therapist", "The badge is red."), DialogueMessage("Patient", "Okay.")]
+        patient.initialize_history(prefix)
+        with self.assertRaises(ValueError):
+            patient.respond([DialogueMessage("Therapist", "The badge is blue."), prefix[1],
+                             DialogueMessage("Therapist", "What was the badge?")])
+        self.assertEqual(model.calls, [])
+        self.assertEqual(patient.context.turn, 1)
+
+    def test_last_choice_is_not_dropped_by_clause_or_retrieval_limit(self):
+        options = controlled_options()
+        options["parameters"]["retrieval_limit"] = 1
+        patient, model = self.patient(options=options, responses=[
+            "I prefer paper notes. I would rather skip the phone. Please let me try one step."
+        ])
+        history = []
+        self.turn(patient, history, "What would you prefer?")
+        self.turn(patient, history, "How would you start?")
+        context = json.loads(model.calls[-1][-1]["content"])["turn_context"]
+        reports = [item["text"] for item in context["retrieved_memories"]
+                   if item["origin"] == "patient_utterance"]
+        self.assertEqual(set(reports), {"I prefer paper notes.", "I would rather skip the phone.",
+                                        "Please let me try one step."})
 
     def test_reusing_or_rewriting_a_processed_history_fails_before_another_generation(self):
         patient, model = self.patient()

@@ -27,6 +27,14 @@ class CLITests(unittest.TestCase):
             data = case_data(case_id, category)
             if case_id == "case_a":
                 data["rounds"] = 3
+            else:
+                data["session"] = {
+                    "mode": "continuation", "shared_context": "We are discussing a familiar task.",
+                    "initial_history": [
+                        {"speaker": "Therapist", "content": "How do you keep track?", "source": "PRIVATE_PREFIX_SOURCE"},
+                        {"speaker": "Patient", "content": "I use a notebook.", "source": "PRIVATE_PREFIX_SOURCE"},
+                    ], "evaluation_note": "PRIVATE_EVALUATION_NOTE",
+                }
             (case_dir / "case.json").write_text(json.dumps(data), encoding="utf-8")
             (case_dir / "reference_dialogue.json").write_text("not parsed by the simulator", encoding="utf-8")
         config = json.loads((CODE_DIR / "config.json").read_text(encoding="utf-8"))
@@ -80,12 +88,16 @@ class CLITests(unittest.TestCase):
         for left, right in zip(baseline_cases, proposed_cases):
             self.assertEqual(left["patient_profile_sha256"], right["patient_profile_sha256"])
             self.assertEqual(left["patient_information"], right["patient_information"])
+            self.assertEqual(left["session_sha256"], right["session_sha256"])
+            self.assertEqual(left["session"], right["session"])
             self.assertFalse(right["patient_setup"]["options"]["attention_enabled"])
             self.assertFalse(right["patient_setup"]["options"]["memory_enabled"])
             patient_only = json.dumps(right["patient_setup"])
             self.assertNotIn("Target name: Example Name", patient_only)
             self.assertNotIn("PRIVATE_SOURCE_SENTINEL", patient_only)
         self.assertNotIn("PATIENT_PROMPT_PRIVATE_SENTINEL", proposed.stdout)
+        self.assertNotIn("PRIVATE_PREFIX_SOURCE", proposed.stdout)
+        self.assertNotIn("PRIVATE_EVALUATION_NOTE", proposed.stdout)
         self.assertFalse((self.root / "outputs").exists())
 
     def test_invalid_ablation_and_private_preview_flags_fail_before_model_import(self):

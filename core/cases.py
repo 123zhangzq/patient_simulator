@@ -1,6 +1,7 @@
 """Load self-contained cases; keep therapist and patient inputs separate."""
 
 import json
+import hashlib
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -8,11 +9,12 @@ from pathlib import Path
 from string import Formatter
 
 from core.profiles import validate_patient_profile
+from core.interfaces import DialogueMessage
 
 
 _IDENTIFIER = re.compile(r"[a-z0-9]+(?:_[a-z0-9]+)*\Z")
 _REQUIRED_FIELDS = {"schema_version", "id", "category", "title", "summary", "therapist", "patient_profile"}
-_OPTIONAL_FIELDS = {"source", "rounds"}
+_OPTIONAL_FIELDS = {"source", "rounds", "session"}
 _THERAPIST_FIELDS = {
     "context", "objectives", "materials", "opening_question", "conversation_plan",
     "response_guidance", "completion_criteria",
@@ -45,6 +47,53 @@ def _range(value: object, name: str) -> None:
         raise ValueError(f"{name} must be [first, last] with positive, ordered integers.")
 
 
+def _validate_session(session: object) -> None:
+    required = {"mode", "shared_context", "initial_history", "evaluation_note"}
+    if not isinstance(session, dict) or set(session) != required:
+        raise ValueError(f"session requires exactly {sorted(required)}.")
+    if session["mode"] not in ("new_activity", "continuation"):
+        raise ValueError("session.mode must be new_activity or continuation.")
+    for key in ("shared_context", "evaluation_note"):
+        _text(session[key], f"session.{key}")
+    history = session["initial_history"]
+    if not isinstance(history, list):
+        raise ValueError("session.initial_history must be a list.")
+    if (session["mode"] == "continuation") != bool(history):
+        raise ValueError("A continuation requires initial_history; a new_activity starts without it.")
+    for index, item in enumerate(history):
+        if not isinstance(item, dict) or set(item) != {"speaker", "content", "source"}:
+            raise ValueError("initial_history entries require speaker, content and source.")
+        expected = "Therapist" if index % 2 == 0 else "Patient"
+        if item["speaker"] != expected:
+            raise ValueError("initial_history must alternate Therapist / Patient, starting with Therapist.")
+        _text(item["content"], "initial_history.content")
+        _text(item["source"], "initial_history.source")
+    if len(history) % 2:
+        raise ValueError("initial_history must end with Patient before the new therapist opening.")
+
+
+def session_information(case: DialogueCase) -> dict:
+    """Common starting conditions; audit sources and evaluation notes stay private."""
+    session = case.data.get("session")
+    if session is None:
+        return {"mode": "new_activity", "shared_context": "", "initial_history": []}
+    _validate_session(session)
+    return {
+        "mode": session["mode"], "shared_context": session["shared_context"],
+        "initial_history": [{"speaker": item["speaker"], "content": item["content"]}
+                            for item in session["initial_history"]],
+    }
+
+
+def initial_history(case: DialogueCase) -> tuple[DialogueMessage, ...]:
+    return tuple(DialogueMessage(**item) for item in session_information(case)["initial_history"])
+
+
+def session_fingerprint(case: DialogueCase) -> str:
+    payload = json.dumps(session_information(case), sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 def _validate(data: object) -> None:
     if not isinstance(data, dict):
         raise ValueError("A case file must contain a JSON object.")
@@ -55,6 +104,8 @@ def _validate(data: object) -> None:
     if type(data["schema_version"]) is not int or data["schema_version"] != 1:
         raise ValueError("schema_version must be 1.")
     validate_patient_profile(data["patient_profile"])
+    if "session" in data:
+        _validate_session(data["session"])
     for key in ("id", "category", "title", "summary"):
         _text(data[key], key)
     for key in ("id", "category"):
@@ -166,6 +217,9 @@ def compose_prompts(
         raise ValueError("The opening template must contain {opening_question} exactly once.")
     therapist = case.data["therapist"]
     sections = [therapist_template.strip(), "Conversation context\n" + therapist["context"].strip()]
+    shared_context = session_information(case)["shared_context"]
+    if shared_context:
+        sections.append("Shared situation (also available to the patient)\n" + shared_context)
     for key, title in (
         ("objectives", "Conversation objectives"),
         ("materials", "Task material and reference information"),

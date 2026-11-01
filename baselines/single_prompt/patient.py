@@ -14,9 +14,15 @@ class SinglePromptPatient:
         self.patient_profile = copy.deepcopy(patient_profile)
         self.system_prompt = system_prompt + "\n\nCase patient information (JSON)\n" + render_patient_profile(patient_profile)
         self.last_trace = None
+        self.initial_history_size = 0
+
+    def initialize_history(self, history: Sequence[DialogueMessage]) -> None:
+        # The same prefix is kept in public_history for every later model call.
+        self.initial_history_size = len(history)
 
     def describe(self) -> dict:
-        return {"method": "single_prompt", "profile_sha256": profile_fingerprint(self.patient_profile)}
+        return {"method": "single_prompt", "profile_sha256": profile_fingerprint(self.patient_profile),
+                "initial_history_utterances": self.initial_history_size}
 
     def respond(self, public_history: Sequence[DialogueMessage]) -> GenerationResult:
         messages = [{"role": "system", "content": self.system_prompt}]

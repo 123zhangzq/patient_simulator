@@ -2,7 +2,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Literal, Protocol, TypedDict
+from typing import Literal, NotRequired, Protocol, TypedDict
 
 
 @dataclass(frozen=True)
@@ -16,6 +16,8 @@ class GenerationResult(TypedDict):
     input_tokens: int
     output_tokens: int
     finish_reason: Literal["eos", "length"]
+    dialogue_action: NotRequired[Literal["continue", "clarify", "close"]]
+    stop_reason: NotRequired[str | None]
 
 
 class LanguageModel(Protocol):
@@ -26,6 +28,10 @@ class LanguageModel(Protocol):
 
 class Patient(Protocol):
     last_trace: dict | None
+
+    def initialize_history(self, history: Sequence[DialogueMessage]) -> None:
+        """Initialize the supplied public prefix without generating new speech."""
+        ...
 
     def describe(self) -> dict:
         """Return an audit snapshot; this is never part of the public dialogue."""

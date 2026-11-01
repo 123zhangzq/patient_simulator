@@ -12,13 +12,14 @@ import torch
 import transformers
 from transformers import set_seed
 
-from core.cases import DialogueCase, compose_prompts, load_cases
+from core.cases import (DialogueCase, compose_prompts, initial_history, load_cases,
+                        session_fingerprint, session_information)
 from core.interfaces import DialogueMessage
 from core.patient_setup import prepare_patient_setup
 from core.profiles import profile_fingerprint
 from core.llm import LocalQwen
 from core.registry import load_patient_class
-from core.therapist import Therapist
+from core.therapist import Therapist, load_control
 from settings import PROJECT_DIR, read_prompt, write_json
 
 
@@ -41,7 +42,10 @@ def _run_case(
         # Each case starts with fresh agents, history, and an identical random
         # seed. Earlier cases cannot change this case's patient or sampling state.
         set_seed(config["seed"])
-        therapist = Therapist(llm, prompts["therapist"], prompts["opening"])
+        case = DialogueCase(Path(metadata["case"]["source_file"]), metadata["case"]["data"])
+        therapist = Therapist(llm, prompts["therapist"], prompts["opening"],
+                              max_rounds=config["rounds"],
+                              opening_utterance=case.data["therapist"]["opening_question"])
         setup = metadata["patient_setup"]
         patient = patient_class(
             llm, setup["system_prompt"],
@@ -49,59 +53,21 @@ def _run_case(
             seed=config["seed"], options=copy.deepcopy(setup["options"]),
             prompts=copy.deepcopy(setup["prompts"]),
         )
+        public_history = list(initial_history(case))
+        patient.initialize_history(tuple(public_history))
+        metadata["initial_history_utterances"] = len(public_history)
         metadata["patient_initialization"] = patient.describe()
         write_json(metadata_path, metadata)
-        public_history: list[DialogueMessage] = []
+        write_json(output_dir / "initial_history.json", session_information(case)["initial_history"])
         with (output_dir / "dialogue.jsonl").open("w", encoding="utf-8") as jsonl, (
             output_dir / "dialogue.md"
         ).open("w", encoding="utf-8") as markdown, (
             output_dir / "patient_trace.jsonl"
         ).open("w", encoding="utf-8") as trace_file:
-            markdown.write(f"# Therapist / Patient\n\nModel: {config['model_id']}\n\n")
-            markdown.flush()
-            for round_number in range(1, config["rounds"] + 1):
-                for speaker, agent in (("Therapist", therapist), ("Patient", patient)):
-                    # Only the generated public utterances enter either agent's
-                    # history. Reference transcripts remain outside model inputs.
-                    completed = False
-                    if speaker == "Patient":
-                        patient.last_trace = None
-                    try:
-                        result = agent.respond(tuple(public_history))
-                        content = result["content"]
-                        if not isinstance(content, str) or not content.strip():
-                            raise ValueError(f"{speaker} returned an empty or invalid reply.")
-                        completed = True
-                    finally:
-                        # Internal state and model inputs never enter public history.
-                        if speaker == "Patient" and patient.last_trace is not None:
-                            trace_file.write(json.dumps({
-                                "round": round_number,
-                                "status": "completed" if completed else "failed",
-                                "trace": patient.last_trace,
-                            }, ensure_ascii=False, allow_nan=False) + "\n")
-                            trace_file.flush()
-                    record = {
-                        "round": round_number, "speaker": speaker,
-                        "created_at_utc": utc_now(),
-                        "content": content,
-                        "input_tokens": result["input_tokens"],
-                        "output_tokens": result["output_tokens"],
-                        "finish_reason": result["finish_reason"],
-                    }
-                    # Persist every utterance before starting the next generation.
-                    jsonl.write(json.dumps(record, ensure_ascii=False) + "\n")
-                    jsonl.flush()
-                    markdown.write(f"## Round {round_number} - {speaker}\n\n{content}\n\n")
-                    markdown.flush()
-                    public_history.append(DialogueMessage(speaker=speaker, content=content))
-                    metadata["utterances"] += 1
-                    if speaker == "Patient":
-                        metadata["completed_rounds"] = round_number
-                    write_json(metadata_path, metadata)
-                    print(f"\n[Round {round_number}] {speaker}: {content}", flush=True)
-                    if result["finish_reason"] == "length":
-                        print("Note: This reply reached max_new_tokens and may be incomplete.", flush=True)
+            # Kept separate from public speech and from the patient-only trace.
+            with (output_dir / "therapist_trace.jsonl").open("w", encoding="utf-8") as therapist_trace_file:
+                _exchange(patient, therapist, public_history, config, metadata, metadata_path,
+                          jsonl, markdown, trace_file, therapist_trace_file)
         metadata["status"] = "completed"
     except KeyboardInterrupt:
         metadata["status"] = "interrupted"
@@ -113,6 +79,68 @@ def _run_case(
     finally:
         metadata["ended_at_utc"] = utc_now()
         write_json(metadata_path, metadata)
+
+
+def _exchange(patient, therapist, public_history, config, metadata, metadata_path,
+              jsonl, markdown, trace_file, therapist_trace_file):
+    """Generate new exchanges after the supplied, separately recorded prefix."""
+    markdown.write(f"# Therapist / Patient\n\nModel: {config['model_id']}\n\n")
+    if public_history:
+        markdown.write("## Supplied earlier conversation (not generated or scored)\n\n")
+        for message in public_history:
+            markdown.write(f"**{message.speaker}:** {message.content}\n\n")
+        markdown.write("## New dialogue\n\n")
+    markdown.flush()
+    for round_number in range(1, config["rounds"] + 1):
+        close_reason = None
+        for speaker, agent in (("Therapist", therapist), ("Patient", patient)):
+            # Only supplied prefix speech and newly spoken text enter history.
+            completed = False
+            agent.last_trace = None
+            try:
+                result = agent.respond(tuple(public_history))
+                content = result["content"]
+                if not isinstance(content, str) or not content.strip():
+                    raise ValueError(f"{speaker} returned an empty or invalid reply.")
+                completed = True
+            finally:
+                # Internal state and model inputs never enter public history.
+                if agent.last_trace is not None:
+                    destination = trace_file if speaker == "Patient" else therapist_trace_file
+                    destination.write(json.dumps({
+                        "round": round_number,
+                        "status": "completed" if completed else "failed",
+                        "trace": agent.last_trace,
+                    }, ensure_ascii=False, allow_nan=False) + "\n")
+                    destination.flush()
+            if speaker == "Therapist" and result.get("dialogue_action") == "close":
+                close_reason = result.get("stop_reason") or "activity_complete"
+            record = {
+                "round": round_number, "speaker": speaker,
+                "created_at_utc": utc_now(),
+                "content": content,
+                "input_tokens": result["input_tokens"],
+                "output_tokens": result["output_tokens"],
+                "finish_reason": result["finish_reason"],
+            }
+            # Persist every utterance before starting the next generation.
+            jsonl.write(json.dumps(record, ensure_ascii=False) + "\n")
+            jsonl.flush()
+            markdown.write(f"## Round {round_number} - {speaker}\n\n{content}\n\n")
+            markdown.flush()
+            public_history.append(DialogueMessage(speaker=speaker, content=content))
+            metadata["utterances"] += 1
+            if speaker == "Patient":
+                metadata["completed_rounds"] = round_number
+            write_json(metadata_path, metadata)
+            print(f"\n[Round {round_number}] {speaker}: {content}", flush=True)
+            if result["finish_reason"] == "length":
+                print("Note: This reply reached max_new_tokens and may be incomplete.", flush=True)
+        if close_reason:
+            metadata["stop_reason"] = close_reason
+            break
+    else:
+        metadata["stop_reason"] = "round_limit"
 
 
 def run(
@@ -128,6 +156,7 @@ def run(
     reference transcripts are not read by the experiment.
     """
     patient_class = load_patient_class(patient_method)
+    control = load_control()
     model_dir = Path(config["model_dir"])
     manifest_path = model_dir / "download_manifest.json"
     if not manifest_path.is_file():
@@ -159,8 +188,10 @@ def run(
         # the configured patient method, prompt, or generated conversation.
         prompts["therapist"] = composed["therapist"]
         prompts["opening"] = composed["opening"]
-        setup = prepare_patient_setup(config, patient_method, case.data["patient_profile"])
-        prompts["patient"] = setup["system_prompt"] or setup["prompts"]["response"]
+        setup = prepare_patient_setup(config, patient_method, case.data["patient_profile"],
+                                      session_information(case)["shared_context"])
+        prompts["patient"] = "\n\n".join(part for part in
+            (setup["prompts"].get("response", ""), setup["system_prompt"]) if part)
         rounds = rounds_override if rounds_override is not None else (
             case.data.get("rounds", config["rounds"])
         )
@@ -217,6 +248,8 @@ def run(
                 "prompts": prompts,
                 "patient_setup": setup,
                 "patient_profile_sha256": profile_fingerprint(case.data["patient_profile"]),
+                "session_sha256": session_fingerprint(case),
+                "therapist_control": control,
                 "case": {"source_file": str(case.path), "data": case.data},
                 "case_id": case.case_id,
             }
@@ -229,7 +262,7 @@ def run(
             finally:
                 # _run_case records its final status before it propagates errors.
                 # This summary therefore includes completed partial rounds, too.
-                for field in ("status", "completed_rounds", "utterances", "error", "ended_at_utc"):
+                for field in ("status", "completed_rounds", "utterances", "stop_reason", "error", "ended_at_utc"):
                     if field in metadata:
                         entry[field] = metadata[field]
                 write_json(batch_path, batch)

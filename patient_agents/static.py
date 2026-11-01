@@ -17,17 +17,6 @@ TRAIT_VALUES = {
     "language": {"preserved", "reduced", "unknown"},
 }
 OPTION_FIELDS = {"attention_enabled", "memory_enabled", "policy_path", "parameters", "traits"}
-BACKGROUND_FACT_CUES = {
-    "education_years": ["education", "school", "study", "studied", "education_years", "学习", "上学"],
-    "living": ["live", "living", "home", "family", "household", "住", "家里"],
-    "lives_alone": ["alone", "live", "living", "home", "住", "独居"],
-    "lives_with_family": ["family", "live", "living", "home", "住", "家里"],
-    "lives_with_friends": ["friends", "live", "living", "home", "住", "朋友"],
-    "lives_with_helper": ["helper", "caregiver", "live", "living", "home", "住", "照护"],
-    "lives_with_others": ["live", "living", "home", "household", "住", "家里"],
-    "independence": ["independent", "independently", "independence", "assistance", "daily", "help", "自理"],
-    "stroke_year": ["stroke", "stroke_year", "中风"],
-}
 
 
 def load_policy(options: dict | None = None) -> dict:
@@ -67,8 +56,6 @@ def load_policy(options: dict | None = None) -> dict:
             raise ValueError(
                 f"{trait} thresholds must satisfy 1 <= reduced_min < preserved_min <= {maximum}."
             )
-    if parameters["language_preserved_min"] > 3:
-        raise ValueError("language_preserved_min must not exceed the MoCA language maximum of 3.")
     for name in ("cue_markers", "recall_markers", "stopwords"):
         if not isinstance(policy[name], list) or not all(
             isinstance(item, str) and item.strip() for item in policy[name]
@@ -108,11 +95,12 @@ def compile_profile(profile: dict, options: dict | None = None) -> dict:
         derivation[trait] = {"field": f"assessments.moca.{field}", "value": value,
                              "rule": f"{trait}_score_band", "assumption": band}
     value = _number(moca.get("language"))
-    traits["language"] = "unknown" if value is None else (
-        "preserved" if value >= parameters["language_preserved_min"] else "reduced"
-    )
+    # A screening subscore is not a description of everyday communication.
+    # Keep its evidence, but require an explicit experimental override to
+    # constrain expression instead of making every score of 2 mean difficulty.
+    traits["language"] = "unknown"
     derivation["language"] = {"field": "assessments.moca.language", "value": value,
-                              "rule": "language_score_band", "assumption": traits["language"]}
+                              "rule": "not_inferred_from_screening_score", "assumption": "unknown"}
     for trait, value in options.get("traits", {}).items():
         traits[trait] = value
         derivation[trait]["override"] = value
@@ -121,13 +109,17 @@ def compile_profile(profile: dict, options: dict | None = None) -> dict:
     for field in ("age", "language"):
         if field in background and background[field] is not None:
             identity[field] = background[field]
-    # These are available personal facts, not test scores or retrieved episodes.
+    # Familiar background and established facts are stable person information,
+    # not new task items that must match a keyword or survive episodic retrieval.
+    # Source locations and raw assessment evidence remain in the audit view.
     facts = deepcopy(profile.get("known_facts", []))
-    for field, tags in BACKGROUND_FACT_CUES.items():
-        value = background.get(field)
-        if value is not None:
-            facts.append({"id": f"background:{field}", "text": f"{field}: {value}",
-                          "source": f"background.{field}", "cue_tags": tags})
+    response_profile = {
+        "identity": identity,
+        "background": {key: deepcopy(value) for key, value in background.items()
+                       if key not in {"age", "language", "consent_date"} and value is not None},
+        "known_facts": [{"id": item["id"], "text": item["text"]} for item in facts],
+        "expression": {"language": traits["language"]},
+    }
     return {
         "participant_id": profile["participant_id"],
         "profile_fingerprint": profile_fingerprint(profile),
@@ -138,7 +130,7 @@ def compile_profile(profile: dict, options: dict | None = None) -> dict:
         "derivation": derivation,
         "evidence": deepcopy(assessments),
         "unknowns": deepcopy(profile.get("unknowns", [])),
-        "response_profile": {"identity": identity, "expression": {"language": traits["language"]}},
+        "response_profile": response_profile,
         "known_facts": facts,
         "initial_memories": deepcopy(profile.get("initial_memories", [])),
         "limits": [

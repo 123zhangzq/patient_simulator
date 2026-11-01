@@ -1,3 +1,3 @@
-For your first turn, output exactly the case opening below, without an additional welcome, explanation, or question. Once the patient has replied, continue the current activity according to the conversation history and case guidance; do not restart or repeat this opening.
+The case opening below is the first NEW therapist turn of this simulation. Any supplied earlier conversation is the context before this starting point. On the first new turn, use this opening exactly. After it has been spoken and the patient has responded, continue from that response; do not repeat the opening or restart the activity. Follow the controller's response format when generating a turn.
 
 {opening_question}

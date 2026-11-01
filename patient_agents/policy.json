@@ -1,5 +1,5 @@
 {
-  "version": "heuristic-v1",
+  "version": "heuristic-v2",
   "status": "experimental_not_clinically_calibrated",
   "parameters": {
     "attention_units_preserved": 4,
@@ -21,7 +21,6 @@
     "cue_bonus": 0.2,
     "working_memory_turns": 1,
     "retrieval_limit": 6,
-    "known_fact_limit": 5,
     "max_reply_units_preserved": 3,
     "max_reply_units_reduced": 2,
     "max_reply_units_markedly_reduced": 1,
@@ -29,8 +28,7 @@
     "attention_preserved_min": 5,
     "attention_reduced_min": 3,
     "memory_preserved_min": 4,
-    "memory_reduced_min": 2,
-    "language_preserved_min": 3
+    "memory_reduced_min": 2
   },
   "cue_markers": ["hint", "clue", "starts with", "begins with", "rhymes with", "think of", "提示", "开头", "想想"],
   "recall_markers": ["remember", "recall", "earlier", "last time", "last week", "before", "记得", "回忆", "之前", "上次"],

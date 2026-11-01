@@ -5,10 +5,11 @@ import json
 from collections.abc import Sequence
 from pathlib import Path
 
-from core.cases import compose_prompts, load_cases, select_cases
+from core.cases import compose_prompts, load_cases, select_cases, session_fingerprint, session_information
 from core.registry import available_patient_methods
 from core.patient_setup import prepare_patient_setup
 from core.profiles import patient_information, profile_fingerprint
+from core.therapist import load_control
 from settings import DEFAULT_CONFIG, PROJECT_DIR, load_config, read_prompt
 
 
@@ -21,7 +22,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     parser.add_argument(
         "--rounds", type=int,
-        help="Override the number of dialogue rounds; each round has one reply per agent.",
+        help="Override the maximum new dialogue rounds; each round has one reply per agent.",
     )
     parser.add_argument("--seed", type=int, help="Override the configured random seed.")
     parser.add_argument("--no-attention", action="store_true", help="Disable attention filtering for patient_agents.")
@@ -61,14 +62,16 @@ def main(argv: Sequence[str] | None = None) -> None:
         if args.list_cases:
             for case in cases:
                 rounds = args.rounds if args.rounds is not None else case.data.get("rounds", config["rounds"])
-                print(f"{case.case_id}\t{case.data['category']}\t{rounds} rounds\t{case.data['title']}")
+                print(f"{case.case_id}\t{case.data['category']}\tup to {rounds} rounds\t{case.data['title']}")
             return
         therapist_template = read_prompt(config["therapist_prompt"])
         opening_template = read_prompt(config["opening_prompt"])
+        control = load_control()
         # Fail before loading weights if any selected case or template is invalid.
         prepared = [(case, compose_prompts(case, therapist_template, opening_template)) for case in cases]
         patient_setups = {
-            case.case_id: prepare_patient_setup(config, args.patient, case.data["patient_profile"])
+            case.case_id: prepare_patient_setup(config, args.patient, case.data["patient_profile"],
+                                               session_information(case)["shared_context"])
             for case in cases
         }
         if args.dry_run:
@@ -77,6 +80,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                 "patient_prompt_file": (config["patient_prompt"] if args.patient == "single_prompt" else
                     config.get("patient_agents", {}).get("response_prompt", str(PROJECT_DIR / "prompts/patient_agents/response.txt"))),
                 "seed": config["seed"],
+                "therapist_control": control,
                 "cases": [{
                     "id": case.case_id, "category": case.data["category"],
                     "case_file": str(case.path),
@@ -84,6 +88,8 @@ def main(argv: Sequence[str] | None = None) -> None:
                     "prompts": prompts,
                     "patient_id": case.data["patient_profile"]["participant_id"],
                     "patient_profile_sha256": profile_fingerprint(case.data["patient_profile"]),
+                    "session_sha256": session_fingerprint(case),
+                    "session": session_information(case),
                     **({"patient_information": patient_information(case.data["patient_profile"]),
                         "patient_setup": patient_setups[case.case_id]} if args.show_patient else {}),
                 } for case, prompts in prepared],

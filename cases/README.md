@@ -1,18 +1,20 @@
 # 对话场景 cases
 
-每个目录代表一个可独立运行的对话场景，并嵌入本例的患者 profile。`category` 是内容类别，同一类别可以有任意多个 case，也可以新增类别，不需要修改 Python 代码。Patient 的生成方法由 `--patient` 选择；`single_prompt` 和 `patient_agents` 使用同一份 case 患者资料。
+每个目录是一个可以独立运行的场景。`case.json` 同时定义患者资料、对话起点和活动目标；`single_prompt` 与 `patient_agents` 接收同一份人物资料、共同背景和前置对话。运行不需要打开原始 Excel 或参考转录。
 
-## 首批场景
+## 三个场景
 
-| id | category | 内容与开场 | 轮数预算 |
+| id | 起点 | 新生成的交流 | 轮数上限 |
 | --- | --- | --- | --- |
-| `name_recall` | `learning_recall` | 沿用原始复习起点：上周练过姓名策略，现在先问女士姓名，再问男士姓名、记忆方法并适量提示 | 8 |
-| `work_task_compensation` | `compensation_daily_life` | “Do you have any questions about keeping track of new tasks and checking your work?”；随后了解具体做法、检查与调整 | 10 |
-| `name_practice_review` | `practice_review` | 邀请分享怎样练习组员姓名、记住了多少，再追问实际方法、频率和体验 | 12 |
+| `name_recall` | 新活动，没有旧课或图片 | 当前对话先介绍两个姓名和联想，经过一个简短其他话题后逐个回忆，再提示或结束 | 8 |
+| `work_task_compensation` | 提供原记录第 219–230 行作为已发生的对话，患者已描述电子表格笔记 | 讨论被打断后怎样继续任务、如何检查，以及是否保留或调整现有方法 | 10 |
+| `name_practice_review` | 提供原记录第 76–136 行作为已发生的对话，患者已报告写姓名、关系和特征联想 | 讨论当前想保留或调整的方法；需要时尝试一个明确标注为虚构的简短例子 | 8 |
 
-这些轮数是模拟预算，不是原始对话的行数或轮数。运行时 `--rounds` 优先于 case 内的 `rounds`；case 没填 `rounds` 时使用配置文件的值。当前程序运行到有效轮数结束；`completion_criteria` 只作为语言模型的收束指导，不是自动停止条件。
+场景借鉴原始资料，但不要求照搬 TYB 话语或完整课程。后两个场景是**给定前缀后的继续交流**，不再从空白人物经历启动。原始片段中已被放进前缀的患者回答属于输入，不能再作为独立预测目标。
 
-## 每个目录的内容
+`rounds` 是新生成轮次的上限，不包含前缀。`--rounds` 优先于 case 内的值；case 未填写时使用配置值。活动完成、患者不想继续或有效澄清已耗尽时可以提前结束，不需要凑满轮数。前缀与新生成内容分开记录，避免把给定文本计为生成结果。
+
+## 文件与字段
 
 ```text
 cases/
@@ -21,94 +23,108 @@ cases/
     └── reference_dialogue.json
 ```
 
-`case.json` 保存人工整理后的场景设计和患者资料。`therapist` 合成治疗师提示，`patient_profile` 供选定的患者方法处理；两侧私有输入分开。字段含义：
-
 | 字段 | 用途 |
 | --- | --- |
 | `schema_version` | 当前为整数 `1` |
-| `id` | 全部 cases 中唯一的小写标识，仅允许小写字母、数字和单个下划线，最长 80 字符；同时用于选择与输出目录 |
-| `category` | 同样格式的类别标识；可以复用现有类别或新增 |
-| `title`、`summary` | 便于人工识别和说明整理方式；不放入模型提示 |
-| `rounds` | 可选的正整数，一轮是治疗师、患者各一条消息 |
-| `source` | 可选的原始工作簿、工作表、Excel 行号和 utterance/dialogue 标识；不放入模型提示 |
-| `patient_profile` | 必需的患者资料对象；与参考对话分开，包含证据、已知事实、初始记忆和来源 |
-| `therapist.context` | 本次活动的起点和情境，包括是否已有材料或先前学习 |
-| `therapist.objectives` | 本次交流希望弄清或完成什么 |
-| `therapist.materials` | 可用材料、目标答案及判断边界；没有材料时填空列表 |
-| `therapist.opening_question` | 第一条治疗师发言，允许包含必要的简短材料介绍，最后聚焦一个主要问题 |
-| `therapist.conversation_plan` | 如何根据回答逐步展开；不是逐轮必须照读的脚本 |
-| `therapist.reference_utterances` | 可选的原治疗师有效话语列表，合成到治疗师 prompt 中作为提问、追问和反馈示例；不代表已经发生的对话 |
-| `therapist.response_guidance` | 该任务中特别需要注意的追问、澄清、提示或反馈方式 |
-| `therapist.completion_criteria` | 一个有用的结束应当明确哪些内容，也允许无改善、未解决或患者暂不继续 |
+| `id` | 唯一的小写标识，仅允许小写字母、数字和单个下划线，最长 80 字符 |
+| `category` | 内容类别，可以复用或新增；同一类别可有多个 case |
+| `title`、`summary` | 人工阅读的名称、设计说明和适用边界 |
+| `rounds` | 新生成对话的轮数上限；一轮通常包含治疗师和患者各一条发言 |
+| `source` | 可选的原工作簿、工作表、Excel 行号及原标识，供追溯，不注入模型 |
+| `patient_profile` | 必需的患者资料，包含测量证据、稳定事实、可选初始经历及来源 |
+| `session` | 可选的共同背景和前置对话，见下表 |
+| `therapist` | 该活动的目标、材料、开场、推进方式和结束条件 |
 
-`reference_dialogue.json` 是可选的追溯材料。首批文件保留所选片段的全部原始行，包括短答与 `include=no` 行；每行有 `excel_row`、`utt_id`、说话人、原文、时间和原始标注。完整文件不被加载进模型；其中选出的治疗师有效原句或连续摘句另存为 `therapist.reference_utterances`，供运行时参考。原始患者回答不进入模型，也不会被预填为当前患者回答。
+`session` 的四个字段必须一起提供：
 
-`source.workbook` 以 `LLM_TYB_Data_SMU_Deidentified_20261012/` 为相对根，Excel 行号包含标题行。运行不依赖原始工作簿在场；其作用是便于人工追溯。
-
-## 嵌入的患者 profile
-
-三个身份通过原始说话人编码与 profile 中的 SS 角色核对。人口学来自 `Home Visit Stroke Project.xlsx` 的 `Home Visit 1`；评分来自有明确日期、早于模拟录制日期的 `Home Visit 2`。不把后续随访评分或目标患者回答加入初始状态。
-
-| case | 患者 ID | 模拟日期 | 评估日期（按源记录） | MoCA 总分 | 原始资料行 / 评估行 |
-| --- | --- | --- | --- | --- | --- |
-| `name_recall` | XC030 | 2022-12-23 | 2022-11-23 | 28 | `Home Visit 1` 第107行 / `Home Visit 2` 第42行 |
-| `work_task_compensation` | EC011 | 2022-12-01 | 2022-10-26 | 29 | `Home Visit 1` 第27行 / `Home Visit 2` 第6行 |
-| `name_practice_review` | YC026 | 2022-12-05 | 2022-07-11 | 25 | `Home Visit 1` 第154行 / `Home Visit 2` 第21行 |
-
-YC026 的评估日期是原表实际保存的 **2022-07-11**，没有根据课程日期猜改为 11 月 7 日。`Home Visit 1` 未给独立评估日期，背景中的 `consent_date` 只表示同意日期。EC011 的定向力合计 `Home Visit 2!AL6=1` 与 `AF6:AK6` 六项均为1冲突，因此 `assessments.moca.orientation` 为 `null`；原值、分项及问题保存在 provenance，未自动修正。
-
-`patient_profile` 的顶层字段必须完整，缺失数值使用 `null`，不使用0替代：
-
-| 字段 | 内容与约束 |
+| 字段 | 内容 |
 | --- | --- |
-| `schema_version` | 整数 `1` |
-| `participant_id`、`role` | 参与者编号；当前 `role` 必须为 `stroke_survivor`，不可混入照护者资料 |
-| `assessment_date` | `YYYY-MM-DD` 或确实未知时为 `null`；不能晚于模拟日期 |
-| `simulation_date` | 必需的 `YYYY-MM-DD` 日期 |
-| `background` | 必需包含 `age`、`language`、`education_years`，未知为 `null`；可增加有来源的标量，例如生活协助情况和卒中年份 |
-| `assessments.moca` | 必需包含 `total`、`attention`、`language`、`delayed_recall`、`category_cue`、`multiple_choice_cue`、`visuospatial_executive`、`abstraction`、`orientation`、`naming`；可增加有来源的具体分项 |
-| `assessments.sdmt` | `total`，保留原尺度；异常或未确定值为 `null` |
-| `assessments.dass21` | `depression`、`anxiety`、`stress`，本批按所选访视录入总分保存，不乘2、不赋临床严重程度标签 |
-| `known_facts` | 已核实的个人事实列表；每条包含唯一 `id`、`text`、`source`，可选 `cue_tags` 字符串列表 |
-| `initial_memories` | 模拟开始前确实建立的经历记忆，条目格式同上；本批三个 case 均为 `[]` |
-| `provenance` | 来源路径、SHA256、工作表/单元格、原始值、处理说明和数据问题；用于审计，不交给输出模型 |
-| `unknowns` | 尚不能由资料建立的事实或能力，使用字符串列表明确记录 |
+| `mode` | `new_activity` 或 `continuation` |
+| `shared_context` | 双方共同知道的简短背景；只写实际提供的前提，不包含私有答案或未来结果 |
+| `initial_history` | 按时间排序的前置对话。每条为 `speaker`、`content`、`source`；说话人只能为 `Therapist` 或 `Patient` |
+| `evaluation_note` | 说明哪些内容已经作为输入、评价从哪里开始，以及哪些结论不能由本场景得出；用于审计 |
 
-例如，生活独立性和同住情况可以成为已知事实；工作中使用电子表格、完成姓名练习或记住目标姓名不能从场景主题推出。语言编码也不等于语言熟练度。`patient_agents` 只把部分认知分项转成显式的实验假设，具体策略见 `patient_agents/policy.json`，这些映射尚未临床校准。
+`new_activity` 的前置对话为空。`continuation` 的前置对话非空，从治疗师开始，双方交替，以患者结束；新的 `opening_question` 承接这个起点。相邻同一说话人的原始碎片可以按顺序合并，不改写其内容。每条 `source` 指向已核对的原始位置，供审计，不作为发言送进模型。
 
-各字段来源已经嵌入 JSON，运行只校验并读取 case，不打开 Excel、数据字典或 `reference_dialogue.json`。profile 的来源哈希是制作时记录的版本依据；运行另计算 `patient_profile_sha256`，便于确认不同方法确实使用同一份输入。改变 profile 后应更新其 provenance，保留未知和冲突，不能静默修补原始数据。
+共同背景可以保留前缀已明确建立的熟悉习惯，例如“患者曾报告用电子表格记新任务”。这并不证明方法总能成功，也不意味着后面所有记忆细节都应随时可用。具体前置发言仍由动态模块编码、保存和提取；baseline 获得同一前缀并使用其完整历史。不能只给一种方法额外经历。
 
-## 与三个原始实例的对应
+`therapist` 字段如下：
 
-| case | 原文件（`02_whole_session_data/` 下） | `utterances` 的 Excel 行 | `utt_id` |
-| --- | --- | --- | --- |
-| `name_recall` | `Group 2/TYB2_S8_20221223_master_annotated_reviewer2.xlsx` | 42–58 | 41–57 |
-| `work_task_compensation` | `Group 1/TYB1_S6_20221201_master_annotated.xlsx` | 219–258 | 218–257 |
-| `name_practice_review` | `Group 1/TYB1_S7_20221205_master_annotated.xlsx` | 76–169 | 75–168 |
+| 字段 | 用途 |
+| --- | --- |
+| `context` | 当前活动如何开始，已有何种经历或材料 |
+| `objectives` | 本次希望弄清或完成什么 |
+| `materials` | 可用材料、参考答案、可选例子及其适用范围 |
+| `opening_question` | 第一条新生成的治疗师发言，承接前缀或开始新活动；最后聚焦一个主要问题 |
+| `conversation_plan` | 根据患者反应推进，不是必须逐轮照读的脚本 |
+| `response_guidance` | 本场景特别需要注意的澄清、提示、事实边界和结束方式 |
+| `completion_criteria` | 什么情况下已有有用结果或应停止，也允许未解决、没有改善或拒绝 |
+| `reference_utterances` | 可选的历史治疗师示例；首批新版场景不使用它，避免旧问法覆盖新的起点 |
 
-首例保留原实例的“上周学过，现在复习”任务起点。开场清理了原单元格中的饮食话题转场和静音提醒，使用：
+`reference_dialogue.json` 完整保留原始选段，仅作追溯。运行时不读取该文件。只有制作 case 时明确选入 `session.initial_history` 的前缀会进入双方输入，其余原患者回答仍不可见。引用整个参考文件、只把文件放在同目录，均不会自动建立患者经历。
 
-> Last week we practised some strategies for remembering these people's names. Can you remember this lady's name?
+## 怎样避免空白经历与答案泄漏
 
-Tan Mei Li、Lim Chong Wei 及联想保存在治疗师参考材料中，开场不先给出答案。完整男士姓名由同文件第 877–891 行核对，原文保存在 `material_utterances`。当前文本 runner 尚未重建患者的前次教学或提供原人物图片，三个 case 的 `initial_memories` 均为空。所以任务情境不等于患者确实已学过，姓名场景目前不能称为受控的延迟记忆 benchmark。若患者不认识任务或缺少材料，治疗师应先澄清。需要评价保留或提示恢复时，应先明确呈现学习材料，再控制间隔、干扰和提示；不能把参考患者的回答当作先前记忆注入。
+在制作 case 时先决定采用哪一种起点：
 
-治疗师指导保留任务目标与有效追问方式，允许当前患者有不同做法和反应。不会预设患者使用电子表格、认识原组员、完成了作业、存在某种情绪或已经进步。原始转录中描述的个人经验与临床说法不自动成为任务事实或标准答案。
+1. **现场建立经历**：先呈现材料或实际进行练习，再询问回忆与体验。学习暴露相同不代表强制编码、理解或回忆成功。
+2. **真实前缀续写**：提供切点之前已经发生的对话，只评价切点之后的新生成。不能把已提供事实的复述算作独立预测。
+3. **明确的模拟前史**：如果研究设计需要另写一个经历条件，应清楚标注为研究者设定，不冒充该真实患者已知经历，也不能据其与原回答相似就宣称复现成功。
 
-## 增加一个 case
+资料中没记录、明确未做过、发生过但没编码、编码后暂时取不出，是不同状态。缺少场景前史应在制作 case 时补齐或改用现场活动，不能让患者通过无限要求重复来承担这个缺口。
 
-复制最接近的现有 case 目录作为完整模板，保留必需的 `patient_profile` 结构，改成新的唯一 `id`，再修改 `category`、主题与 `therapist` 字段。目录可以继续分层；加载器递归寻找名字恰好是 `case.json` 的文件，按相对路径排序。
+给治疗师提供一个来源明确的前缀，不等于把所有历史治疗师判断都当成事实。早先的夸奖、假设和引导问题仍可能不准确。患者此前说过的话是既有报告，也不自动证明动作完成、策略有效或临床改善。
 
-例如新建 `reminder_practice_review` 时，先复制 `name_practice_review`，再把 `id` 改为 `reminder_practice_review`，更新标题、目标、开场和推进方式。如果仍使用同一患者，应明确保留该身份并核对新的模拟日期；如果换患者，必须同时替换完整 profile 的身份、评分、事实和来源，不能只改 `participant_id`。新增过去经历只能来自明确的先前材料，并说明来源与时间；没有这些材料时保持 `initial_memories: []`。没有依据的评分填 `null`，未知的背景写入 `unknowns`。
+姓名练习中的资料编码是去标识标签，不应拿来充当真实人名刺激。新增材料可用明确标注的虚构名字；没有图片时不要声称展示过人脸。没有写字工具时，“愿意写下”只是意图，不能记成已经产生了笔记。
 
-如填写 `source`，需要包含 `workbook`、`worksheet`、`excel_rows: [起始行, 结束行]`、`utt_ids: [起始ID, 结束ID]`、`dialog_ids: [...]`。没有原始转录时可以省略整个 `source` 和 `reference_dialogue.json`。
+## 人物资料及证据
 
-在代码仓库根目录执行：
+三个身份通过原始说话人编码与 profile 中的 SS 角色核对。人口学来自 `Home Visit Stroke Project.xlsx` 的 `Home Visit 1`；评分取有明确日期且早于模拟日期的 `Home Visit 2`。
+
+| case | 患者 | 模拟日期 | 评估日期，按源记录 | MoCA 总分 | 背景行 / 评分行 |
+| --- | --- | --- | --- | --- | --- |
+| `name_recall` | XC030 | 2022-12-23 | 2022-11-23 | 28 | Home Visit 1 第 107 行 / Home Visit 2 第 42 行 |
+| `work_task_compensation` | EC011 | 2022-12-01 | 2022-10-26 | 29 | Home Visit 1 第 27 行 / Home Visit 2 第 6 行 |
+| `name_practice_review` | YC026 | 2022-12-05 | 2022-07-11 | 25 | Home Visit 1 第 154 行 / Home Visit 2 第 21 行 |
+
+YC026 的日期按原表保存为 **2022-07-11**，没有猜改。`consent_date` 只是同意日期，不等于未填写的访视评估日期。EC011 的定向力合计与六个分项冲突，因此运行字段为 `null`，原值和冲突保留在 provenance。
+
+`patient_profile` 保留以下字段：
+
+| 字段 | 含义 |
+| --- | --- |
+| `schema_version`、`participant_id`、`role` | 版本、参与者编号和角色；当前角色为 `stroke_survivor` |
+| `assessment_date`、`simulation_date` | 评估与模拟日期；评估日期不能晚于模拟日期 |
+| `background` | 年龄、语言、教育及其他有来源的标量背景；未知用 `null` |
+| `assessments` | `moca`、`sdmt`、`dass21` 原尺度结果；未知不填 0，不能从筛查分数推定具体职业、个性或生活经历 |
+| `known_facts` | 有依据的稳定事实，每条含 `id`、`text`、`source`，可选 `cue_tags` |
+| `initial_memories` | 单独提供的过去经历，格式同上；首批三个仍为空，两个续写场景改由 `session.initial_history` 提供真实前缀 |
+| `provenance` | 来源路径、哈希、工作表和单元格、原始值及处理说明；不交给输出模型 |
+| `unknowns` | 当前证据的边界；区分“评估表未测量”和“前缀已另行提供”，避免互相矛盾 |
+
+本次重构没有更改三个患者的测量值，也没有将参考片段后半段的回答填入 profile。手抖、视力差或较低筛查分项不表示所有日常活动都失败；人物仍可以解释熟悉方法、做当前选择、纠正治疗师或表示不确定。分数到模拟机制的对应仍是可替换的实验假设，见 `patient_agents/policy.json`。
+
+## 原始资料的切分
+
+以下工作簿相对 `LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/`，均为 `utterances` 工作表，Excel 行号包括标题行：
+
+| case | 工作簿 | 原参考片段 | 本次给定前缀 | 未作为前缀的后续 |
+| --- | --- | --- | --- | --- |
+| `name_recall` | `Group 2/TYB2_S8_20221223_master_annotated_reviewer2.xlsx` | 42–58；材料核对 877–891 | 无，当前模拟中重新教学 | 全部原患者回答 |
+| `work_task_compensation` | `Group 1/TYB1_S6_20221201_master_annotated.xlsx` | 219–258 | 219–230 | 231–258 |
+| `name_practice_review` | `Group 1/TYB1_S7_20221205_master_annotated.xlsx` | 76–169 | 76–136 | 137–169 |
+
+两个续写场景的新开场经过改编，后续并不是对原转录逐句重建。保留的原后半段可供分析，但不能把新问题下的回答与原句作无条件一一对照。姓名新活动也不是对原先一周延迟或视觉识别的复刻。
+
+## 新增和运行
+
+复制相近目录，修改唯一 `id`、人物资料和活动，明确 `session.mode` 与输入边界。如果更换患者，必须核对完整身份、背景、分数与来源，不能只改编号。运行只读嵌入的数据，原始 Excel 是制作时的证据。
 
 ```bash
 python run_dialogue.py --list-cases
-python run_dialogue.py --case reminder_practice_review --patient patient_agents --dry-run --show-patient
-CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case reminder_practice_review --patient patient_agents
-CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case reminder_practice_review --patient single_prompt
+python run_dialogue.py --case name_practice_review --patient patient_agents --dry-run --show-patient
+CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case name_practice_review --patient patient_agents
+CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case name_practice_review --patient single_prompt
 ```
 
-先完成上述新 case 的创建再运行这些命令。普通 `--dry-run` 输出治疗师提示、启动指令、患者 ID 和 profile 哈希；`--show-patient` 同时显示患者信息与方法配置。两者都不加载模型或生成对话。实际运行另保存 `patient_trace.jsonl`，用于核对患者每轮获得了什么信息及发生了哪些内部决策。
+预览不加载模型或生成对话。实际运行保存配置与 case 快照、生成对话和 `patient_trace.jsonl`；检查模型当轮的 `model_input`，才能知道它实际获得了哪些材料。对比两种方法时同时检查 profile 与前缀，不能只确认它们用了同一个患者编号。

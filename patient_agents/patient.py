@@ -32,6 +32,40 @@ class PatientAgents:
         self.seed = seed
         self.last_trace: dict = {}
         self._history_digests: list[str] = []
+        self._history_initialized = False
+        self._initialization = {"message_count": 0, "therapist_turns": 0, "processed_turns": []}
+
+    def initialize_history(self, history: Sequence[DialogueMessage]) -> None:
+        """Experience the explicitly supplied prefix once, without model calls.
+
+        Both methods receive the same public prefix. The proposed method passes
+        its therapist stimuli through its usual attention/encoding mechanism;
+        supplied patient turns record prior self-reports, not new generations.
+        """
+        if self._history_initialized or self._history_digests or self.context.turn:
+            raise ValueError("Initial history can only be supplied once before the first response.")
+        prefix = tuple(history)
+        if len(prefix) % 2:
+            raise ValueError("Initial history must contain complete Therapist/Patient pairs.")
+        for index, message in enumerate(prefix):
+            expected = "Therapist" if index % 2 == 0 else "Patient"
+            if (not isinstance(message, DialogueMessage) or message.speaker != expected
+                    or not isinstance(message.content, str) or not message.content.strip()):
+                raise ValueError("Initial history must alternate nonempty Therapist and Patient turns.")
+        # Validate the entire prefix before mutating its cognitive state.
+        self._history_initialized = True
+        traces = []
+        for message in prefix:
+            if message.speaker == "Therapist":
+                self.context.advance(message.content)
+                traces.append(deepcopy(self.context.last_trace))
+            else:
+                identifiers = self.context.record_patient_reply(message.content, from_initial_history=True)
+                traces[-1]["patient_utterance_memory_ids"] = identifiers
+                traces[-1]["patient_reply_stored_as_fact"] = False
+        self._history_digests = [_digest(message) for message in prefix]
+        self._initialization = {"message_count": len(prefix), "therapist_turns": self.context.turn,
+                                "processed_turns": traces}
 
     def describe(self) -> dict:
         return deepcopy({"method": "patient_agents", "seed": self.seed,
@@ -39,6 +73,7 @@ class PatientAgents:
                          "attention_enabled": self.context.attention_enabled,
                          "memory_enabled": self.context.memory_enabled,
                          "compiled_profile": self.compiled,
+                         "initial_history": self._initialization,
                          "response_prompt": self.response.system_prompt})
 
     def respond(self, public_history: Sequence[DialogueMessage]) -> GenerationResult:
