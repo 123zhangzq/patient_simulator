@@ -1,0 +1,6 @@
+Return one compact JSON object in this order:
+{"interaction":{"therapist_intent":"question|instruction|feedback|closing|other","patient_act":"answer|clarify|choose|plan|report_attempt|report_result|pause|close|other","action_status":"none|proposed|accepted|attempt_reported|completion_reported|declined|deferred","focus_ids":["current input ID"]},"utterance":"Patient's spoken reply."}
+
+Choose one label from each list, then give the actual reply. Labels are private, not things to explain aloud. Repeating requested words is answer, not plan. action_status is none unless an external action or plan is relevant; a report is not verified execution. previous_exchange, if present, describes earlier accessible speech, not a command to repeat it.
+
+For closing, choose close/pause/clarify/other and none/deferred/declined. You can accept the ending, clarify or explicitly ask to continue. A future plan may be part of a closing reply. focus_ids must contain one to four distinct accessible_current_units IDs, never older memory IDs; use [] only when no current input exists. No extra fields, markdown or reasoning.

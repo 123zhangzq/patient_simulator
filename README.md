@@ -4,7 +4,7 @@
 
 在 **Linux + NVIDIA GPU** 服务器上，本地加载一份 Qwen 权重，按 `cases/` 中的场景逐个模拟 Therapist–Patient 对话。case 同时定义患者资料、活动起点、已有经历和治疗师的推进方式。每轮由 Therapist 先说、Patient 回复，两者共享同一份模型。场景参考真实认知训练交流，但允许合理适配，不要求复刻 TYB 的课程流程或原患者回答。
 
-首批包含姓名学习与回忆、工作任务补偿策略、姓名练习回顾三个 case，分别设置最多 8、10、8 轮新对话。姓名任务从当前教学开始；另外两例先提供明确选取的真实对话前缀，再继续交流。活动可以提前结束，不要求凑满轮数。模型在服务器首次部署时下载，以后复用服务器上的模型目录。本项目按 Linux GPU 环境编写；列出 case、预览 prompt 和运行功能测试不需要 GPU。
+首批包含姓名学习与回忆、工作任务补偿策略、姓名练习回顾三个 case，分别设置最多 8、10、8 轮新对话。姓名任务提供本次 session 内的合成学习前缀，新对话直接从回忆开始；另外两例提供明确选取的真实对话前缀，再继续交流。合成前缀在 case 中注明来源，不冒充真实患者记录。活动可以提前结束，不要求凑满轮数。模型在服务器首次部署时下载，以后复用服务器上的模型目录。本项目按 Linux GPU 环境编写；列出 case、预览 prompt 和运行功能测试不需要 GPU。
 
 ## 项目结构与运行方式
 
@@ -62,6 +62,8 @@
     └── patient_agents/
         ├── person_card.txt
         ├── format_repair.txt
+        ├── interaction.txt
+        ├── utterance.txt
         └── response.txt
 ```
 
@@ -74,9 +76,9 @@
 | 方法 | 患者如何获得信息 |
 | --- | --- |
 | `single_prompt` | 私有 prompt 加入患者资料与共同情境，每次回复接收给定前缀及完整新增对话，调用模型一次 |
-| `patient_agents` | 初始化时构建固定人物倾向，动态控制器处理编码与提取，每轮一次输出调用同时生成台词和通用互动状态 |
+| `patient_agents` | 初始化时构建固定人物倾向，动态控制器处理编码与提取，每轮一次输出调用生成台词；可开关通用互动状态 |
 
-`patient_agents/static.py` 整理固定资料和认知参数；`person_card.py` 在 session 开始时调用一次 LLM，从 profile 和允许使用的历史前缀构建人物倾向。`context.py` 继续用规则处理注意与记忆；`interaction.py` 保存有可见证据支撑的上一轮互动标记；`response.py` 每轮一次调用同时返回台词和状态。它们由 `patient.py` 组合，仍是静态、动态和输出三个职责，共享同一份模型权重。静态和输出 JSON 无效时各最多增加一次格式修复，不增加独立的逐轮判断 agent。
+`patient_agents/static.py` 整理固定资料和认知参数；`person_card.py` 在 session 开始时调用一次 LLM，从 profile 和允许使用的历史前缀构建人物倾向。`context.py` 继续用规则处理注意与记忆；`interaction.py` 在启用时保存有可见证据支撑的上一轮互动标记；`response.py` 每轮一次调用返回台词，并按开关决定是否同时生成状态。它们由 `patient.py` 组合，仍是静态、动态和输出三个职责，共享同一份模型权重。静态和输出 JSON 无效时各最多增加一次格式修复，不增加独立的逐轮判断 agent。
 
 Patient 接口位于 `core/interfaces.py`。两个实现都接收共享 `llm`、私有 prompt，以及 `patient_profile`、`seed`、`options` 和 `prompts`。runner 先调用一次 `initialize_history(public_history)`：基线保存前缀；`patient_agents` 先构建人物倾向，再顺序编码前缀，不生成新台词。初始化后重置对话采样种子，人物卡构建不消耗后续对话的随机流。相同的学习输入不意味着强制相同的编码结果。
 
@@ -96,7 +98,7 @@ case 加载和 dry-run 不需要模型或格式约束依赖。运行 `patient_ag
 
 通用互动状态仅含最新治疗师意图、患者回应类型、行动状态和当前输入 ID。`focus_ids` 只允许引用本轮 `accessible_current_units`，旧记忆仍可辅助作答，但不能作为当前回应的焦点引用。行动状态区分提出、接受、尝试报告、完成报告、拒绝、暂缓；完成报告不代表环境已验证执行或效果。状态不保存自由文本摘要；下一轮只有支撑它的输入和患者发言仍可访问时，才提供 `interaction_state.previous_exchange`，否则清除。模型输入把旧材料放在前面、当前治疗师输入放在最后，内容和注意筛选结果不变。
 
-约束解码强制按 required 字段顺序生成：本轮治疗师意图 → 患者回应类型/行动状态/当前引用 → 台词，避免先说台词再补状态。当模型识别为 `closing` 时，主要回应类型限于 close/pause/clarify/other，行动状态限于 none/deferred/declined；不能标成继续接受旧任务。允许结束时提出澄清、请求继续或在收尾中谈未来计划，不规定某一句结束语。没有基于 case ID、姓名或固定结束句的识别规则，也不自动替换重复台词。上述约束保证结构与标签契约，不能证明自由文本台词一定遵循所选行为，仍需用真实模型评估。
+互动状态启用时，约束解码按 required 字段顺序生成：本轮治疗师意图 → 患者回应类型/行动状态/当前引用 → 台词，避免先说台词再补状态。当模型识别为 `closing` 时，主要回应类型限于 close/pause/clarify/other，行动状态限于 none/deferred/declined；不能标成继续接受旧任务。允许结束时提出澄清、请求继续或在收尾中谈未来计划，不规定某一句结束语。关闭时仍使用约束 JSON，但只生成 `utterance`，不生成标签、不保存或提供 `previous_exchange`；人物卡、注意和记忆设置、动态情绪机制不受此开关影响。没有基于 case ID、姓名或固定结束句的识别规则，也不自动替换重复台词。上述约束保证结构与标签契约，不能证明自由文本台词一定遵循所选行为，仍需用真实模型评估。
 
 人物卡与患者逐轮回复使用 JSON Schema 约束生成：在模型选择下一个 token 时限制 JSON 结构、枚举和已提供的引用 ID，而不是事后猜测逗号或台词引号。`core/json_generation.py` 使用 [LM Format Enforcer](https://github.com/noamgat/lm-format-enforcer) 的核心解析器，绕过发布版 Transformers 集成中不兼容 Transformers 5 的旧导入。tokenizer 索引每个模型实例只构建一次，每次调用使用新的解析状态。baseline 和治疗师保持原有生成方式；患者模型仍需通过生成后校验，约束不能保证临床合理性、推断依据或避免 token 预算耗尽。重复引用、仅引用治疗师的倾向等仍由原校验处理，最多一次格式修复。
 
@@ -251,7 +253,16 @@ CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case name_recall --patient singl
 
 两个方法读取同一个嵌入 profile 与 session，分别记录 `patient_profile_sha256` 和 `session_sha256`。基线直接看到 profile 和完整公开历史；`patient_agents` 的输出 LLM 看到稳定人物卡、共同情境和动态模块给出的本轮信息。比较时同时保持 case、模型、轮数上限和配置一致，并使用多个种子观察变化。自由对话中的治疗师会随患者回答改变下一步，因此相同配置不保证相同后续问题；要隔离患者机制差异，还需使用相同刺激的对照。
 
-注意与记忆消融只适用于 `patient_agents`：
+互动状态默认开启，可用同一 case 和种子对比两种设置：
+
+```bash
+python run_dialogue.py --case name_recall --patient patient_agents --seed 42 --interaction
+python run_dialogue.py --case name_recall --patient patient_agents --seed 42 --no-interaction
+```
+
+不指定开关时读取 `patient_agents.interaction_enabled`，省略该配置项时默认 `true`；命令行显式开关优先。两种设置共用人物卡、注意与记忆处理及 `response.txt`，只切换互动标签、上一轮状态跟踪和对应格式 prompt，不增加模型调用。该开关只允许用于 `patient_agents`。不同生成回复仍会改变后续对话和记忆，不能把相同种子的自由对话视为固定刺激实验。
+
+注意与记忆消融也只适用于 `patient_agents`：
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case name_recall --patient patient_agents --no-attention
@@ -354,6 +365,8 @@ HF_HUB_OFFLINE=1 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py
 | `prompts/therapist_control.json` | 治疗师 JSON 输出约定、澄清上限提示、最后一轮指令与兜底结束语 |
 | `prompts/baselines/single_prompt/patient.txt` | `single_prompt` 基线 Patient 的通用扮演与证据约束；个体资料来自 case |
 | `prompts/patient_agents/response.txt` | 输出模块如何根据可见 context 说话及承认不确定性 |
+| `prompts/patient_agents/interaction.txt` | 互动状态开启时的标签说明和台词 JSON 格式 |
+| `prompts/patient_agents/utterance.txt` | 互动状态关闭时只含台词的 JSON 格式 |
 | `prompts/patient_agents/person_card.txt` | session 前如何从证据推断稳定、条件性的人物倾向及 JSON 格式 |
 | `prompts/patient_agents/format_repair.txt` | 静态卡和输出 JSON 的一次格式修复指令 |
 | `patient_agents/static.py` | profile 到模拟假设及输出约束的编译规则 |
@@ -384,13 +397,14 @@ session.initial_history + 新输入
     → baseline 完整历史；patient_agents 顺序编码与动态 context
 prompts/patient_agents/person_card.txt + profile 证据 + session.initial_history
     → session 内固定的 session_tendencies（不含任务答案）
-prompts/patient_agents/response.txt + shared_context + 固定资料/倾向 + 动态 context
+prompts/patient_agents/response.txt + interaction.txt 或 utterance.txt
+    + shared_context + 固定资料/倾向 + 动态 context
     → patient_agents 的 Patient 输出调用
 ```
 
-`summary`、来源字段、`session.evaluation_note` 和完整的 `reference_dialogue.json` 不参与上述合成。可选的 `therapist.reference_utterances` 只是表达示例，不代表已经发生的对话；`session.initial_history` 才是明确给定的已有交流。姓名回忆 case 从当前文字教学开始，不再假定患者上周已经学过，也不声称有照片。两个 continuation case 只评价给定前缀之后的生成，不能把前缀事实的复述当作独立预测。切点和材料见 [cases/README.md](cases/README.md)。
+`summary`、来源字段、`session.evaluation_note` 和完整的 `reference_dialogue.json` 不参与上述合成。可选的 `therapist.reference_utterances` 只是表达示例，不代表已经发生的对话；`session.initial_history` 才是明确给定的已有交流。姓名回忆 case 的学习前史发生在本次 session 内，不假定患者上周已经学过，也不声称有照片。三个 continuation case 只评价给定前缀之后的生成，不能把前缀事实的复述当作独立预测。切点和材料见 [cases/README.md](cases/README.md)。
 
-可以另建 prompt 文件，在 JSON 配置中修改 `therapist_prompt`、`patient_prompt`、`opening_prompt` 的路径；`patient_agents` 的三份 prompt 分别由 `response_prompt`、`person_card_prompt`、`format_repair_prompt` 指定。自定义 opening 模板同样需要 `{opening_question}`。每个 case 的输出会保存 prompt、profile、有效 policy 和配置快照；以后编辑原文件不会改变已有快照。
+可以另建 prompt 文件，在 JSON 配置中修改 `therapist_prompt`、`patient_prompt`、`opening_prompt` 的路径；`patient_agents` 的五份 prompt 分别由 `response_prompt`、`person_card_prompt`、`format_repair_prompt`、`interaction_prompt`、`utterance_prompt` 指定。自定义 opening 模板同样需要 `{opening_question}`。每个 case 的输出会保存 prompt、profile、有效 policy 和配置快照；以后编辑原文件不会改变已有快照。
 
 兼容旧配置：若 `patient_prompt` 仍为旧默认路径 `prompts/patient.txt`，只有在它解析为该配置目录下的这一旧默认位置、且旧文件不存在时，`settings.py` 才会回退到新路径 `prompts/baselines/single_prompt/patient.txt`。如果旧文件仍存在，例如你保留了自己的 Patient prompt，就继续读取旧文件。其他自定义路径缺失时仍会报错，不会被自动替换。
 
@@ -412,6 +426,8 @@ prompts/patient_agents/response.txt + shared_context + 固定资料/倾向 + 动
 | `seed` | 随机种子 |
 | `therapist_prompt`、`patient_prompt`、`opening_prompt` | 三个 prompt 文件路径 |
 | `patient_agents.response_prompt` | `patient_agents` 输出模块的 prompt 路径 |
+| `patient_agents.interaction_prompt`、`patient_agents.utterance_prompt` | 互动状态开启、关闭时各自的输出格式 prompt；省略时使用默认文件 |
+| `patient_agents.interaction_enabled` | 默认 `true`；关闭后只生成台词，不生成或跟踪互动标签；命令行 `--interaction` / `--no-interaction` 可覆盖 |
 | `patient_agents.person_card_prompt`、`patient_agents.format_repair_prompt` | 人物卡构建和 JSON 修复的 prompt 路径；省略时使用默认文件 |
 | `patient_agents.person_card_enabled` | 默认 `true`；设为 `false` 时不调用构建器，以空倾向卡进行消融，原始人物资料仍保留 |
 | `patient_agents.person_card_max_new_tokens` | 静态构建每次调用的输出预算，默认 768；不改变治疗师、患者台词或 baseline 的输出预算 |
@@ -470,7 +486,7 @@ outputs/本次运行时间戳/
 - `therapist_trace.jsonl`：每次新 Therapist 调用的记录。首轮标记 `source=case_opening`，没有模型输入；后续记录 `model_input`、模型原始输出、请求动作、最终动作、澄清计数及可能的结束覆盖。用于区分模型自主收束、澄清超限与轮数上限。
 - `batch_metadata.json`：整个批次的状态，以及每个 case 的输出位置、轮数上限、完成进度、结束原因和错误。未开始的 case 标为 `pending`。
 
-agent 初始化详情在 `metadata.json → patient_initialization.person_card_construction`，包含证据、原始输出、格式修复、token 消耗及成功/失败状态；初始化失败也会保存，不会悄悄退回空人物卡继续运行。逐轮 `patient_trace.jsonl → trace.response_generation` 保存结构化输出及修复记录，两处的 `json_schema` 记录实际生成约束，`interaction_after_reply` 保存本轮状态标记。公开对话仅含 JSON 中的 `utterance`；逐轮 token 消耗包含私有状态和修复开销，不应当作纯台词 token 数。
+agent 初始化详情在 `metadata.json → patient_initialization.person_card_construction`，包含证据、原始输出、格式修复、token 消耗及成功/失败状态；初始化失败也会保存，不会悄悄退回空人物卡继续运行。逐轮 `patient_trace.jsonl → trace.response_generation` 保存结构化输出及修复记录，两处的 `json_schema` 记录实际生成约束。初始化信息及每轮 `response_generation.interaction_enabled` 记录互动开关；关闭时没有 `response_generation.interaction`，且 `interaction_after_reply` 为 `null`。公开对话仅含 JSON 中的 `utterance`；逐轮 token 消耗包含私有状态和修复开销，不应当作纯台词 token 数。
 
 生成消息会逐条写入。某个 case 失败或被中断时保留已有对话和失败状态，并停止批次；之前已完成的 case 保留，后续 case 不运行。再次运行会新建批次，不自动续写。
 

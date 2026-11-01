@@ -19,8 +19,11 @@ def current_ids(context):
     return {item["id"] for item in context["accessible_current_units"]}
 
 
-def response_schema(context):
+def response_schema(context, interaction_enabled=True):
     """Constrain syntax and available references; semantic checks still follow."""
+    if not interaction_enabled:
+        return {"type": "object", "additionalProperties": False, "required": ["utterance"],
+                "properties": {"utterance": {"type": "string", "minLength": 1}}}
     ids = sorted(current_ids(context))
     focus = {"type": "array", "minItems": 1 if ids else 0, "maxItems": 4 if ids else 0, "uniqueItems": True,
              "items": {"type": "string", **({"enum": ids} if ids else {})}}

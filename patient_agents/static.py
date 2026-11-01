@@ -17,14 +17,14 @@ TRAIT_VALUES = {
     "language": {"preserved", "reduced", "unknown"},
 }
 OPTION_FIELDS = {"attention_enabled", "memory_enabled", "policy_path", "parameters", "traits",
-                 "person_card_enabled", "person_card_max_new_tokens"}
+                 "person_card_enabled", "person_card_max_new_tokens", "interaction_enabled"}
 
 
 def load_policy(options: dict | None = None) -> dict:
     options = {} if options is None else options
     if not isinstance(options, dict) or options.keys() - OPTION_FIELDS:
         raise ValueError(f"Unknown patient_agents options; allowed: {sorted(OPTION_FIELDS)}")
-    for name in ("attention_enabled", "memory_enabled", "person_card_enabled"):
+    for name in ("attention_enabled", "memory_enabled", "person_card_enabled", "interaction_enabled"):
         if name in options and type(options[name]) is not bool:
             raise ValueError(f"{name} must be a boolean.")
     if ("person_card_max_new_tokens" in options

@@ -18,7 +18,7 @@ def prepare_patient_setup(config: dict, method: str, patient_profile: dict, shar
         raise ValueError(f"Unknown patient method: {method}.")
     options = copy.deepcopy(config.get("patient_agents", {}))
     prompts = {}
-    for name in ("response", "person_card", "format_repair"):
+    for name in ("response", "person_card", "format_repair", "interaction", "utterance"):
         path = options.pop(name + "_prompt", str(PROJECT_DIR / "prompts" / "patient_agents" / (name + ".txt")))
         prompts[name] = read_prompt(path)
     options.setdefault("policy_path", str(PROJECT_DIR / "patient_agents" / "policy.json"))

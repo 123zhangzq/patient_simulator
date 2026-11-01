@@ -27,6 +27,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--seed", type=int, help="Override the configured random seed.")
     parser.add_argument("--no-attention", action="store_true", help="Disable attention filtering for patient_agents.")
     parser.add_argument("--no-memory", action="store_true", help="Disable memory impairment for patient_agents.")
+    parser.add_argument("--interaction", action=argparse.BooleanOptionalAction, default=None,
+                        help="Enable/disable patient interaction annotations without changing profile or memory settings.")
     parser.add_argument("--show-patient", action="store_true", help="Include private patient information and instructions in --dry-run output.")
     parser.add_argument(
         "--cases-dir", type=Path, default=PROJECT_DIR / "cases",
@@ -42,6 +44,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         parser.error("--show-patient requires --dry-run.")
     if (args.no_attention or args.no_memory) and args.patient != "patient_agents":
         parser.error("--no-attention and --no-memory require --patient patient_agents.")
+    if args.interaction is not None and args.patient != "patient_agents":
+        parser.error("--interaction and --no-interaction require --patient patient_agents.")
     if args.rounds is not None:
         if args.rounds <= 0:
             parser.error("--rounds must be a positive integer.")
@@ -58,6 +62,8 @@ def main(argv: Sequence[str] | None = None) -> None:
                 agent_options["attention_enabled"] = False
             if args.no_memory:
                 agent_options["memory_enabled"] = False
+        if args.interaction is not None:
+            config.setdefault("patient_agents", {})["interaction_enabled"] = args.interaction
         cases = select_cases(load_cases(args.cases_dir), case_ids=args.case_ids, category=args.category)
         if args.list_cases:
             for case in cases:

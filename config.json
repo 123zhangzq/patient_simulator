@@ -17,6 +17,9 @@
   "output_dir": "outputs",
   "patient_agents": {
     "response_prompt": "prompts/patient_agents/response.txt",
+    "interaction_prompt": "prompts/patient_agents/interaction.txt",
+    "utterance_prompt": "prompts/patient_agents/utterance.txt",
+    "interaction_enabled": true,
     "person_card_prompt": "prompts/patient_agents/person_card.txt",
     "format_repair_prompt": "prompts/patient_agents/format_repair.txt",
     "person_card_enabled": true,

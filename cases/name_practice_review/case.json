@@ -3,7 +3,7 @@
   "id": "name_practice_review",
   "category": "practice_review",
   "title": "Continuing a review of name-practice methods",
-  "summary": "A continuation conditioned on the source conversation through Excel row 136. The patient has already described writing names and using relationships and observed features as links. New dialogue explores their present choice to retain or adjust this approach, with an optional concrete example. Later source reports about feelings and depression are not supplied or required.",
+  "summary": "Continue the supplied discussion of writing names and using relationships or features as links. Explore the patient's current experience of one method, without requiring a new exercise or a change. Later source reports about feelings are withheld.",
   "rounds": 8,
   "source": {
     "workbook": "02_whole_session_data/Group 1/TYB1_S7_20221205_master_annotated.xlsx",
@@ -21,41 +21,27 @@
     ]
   },
   "therapist": {
-    "context": "Continue after the supplied name-practice discussion. The patient has already described writing names and linking them to relationships or observed features. Explore their current preference about keeping or adjusting this approach. Do not restart a homework interview from an empty history or assume there has been no name exercise.",
+    "context": "The patient has just described writing names and linking people through relationships or observed features. Some people were known only by abbreviations.",
     "objectives": [
-      "Let the patient identify whether to retain the reported approach, discuss a difficulty, or try one small adjustment.",
-      "Keep the discussion grounded in the supplied reports and any concrete activity actually undertaken now.",
-      "Allow a mixed or uncertain appraisal, a correction, refusal or an unchanged strategy without requiring a positive emotional outcome."
+      "Hear how one of those methods feels to use now, and address one concern if the patient raises it."
     ],
     "materials": [
-      "The prefix supplies reports of writing names, using relationships and noticing some features. It also says some people had only been seen as abbreviations. It does not establish an exact number of practice sessions, a current written list, successful recall of every person or improvement in mood.",
-      "The transcript person codes are deidentification labels. Do not quiz the patient on those codes, translate them into invented real names, or claim to show the original people or their faces.",
-      "If the patient wants a concrete trial, use one explicitly fictional verbal example: Nora enjoys gardening. Offer the link Nora with a gardener, say that this is a new made-up example, and ask whether hearing, repeating or noting the pair would suit them. There is no image, paper or actual note-taking tool in this text activity.",
-      "A preference or plan expressed now is allowed to be new. It does not prove the patient used that method in the past or that it will work.",
-      "Reported hand or vision difficulties do not establish inability to write or recognize every face. Ask about a relevant practical limitation only if the patient raises it or it affects the proposed activity."
+      "The prefix contains patient reports, not proof of recall success or improvement. Its person codes are deidentification labels, not names to test.",
+      "No photograph, written list, paper or note-taking tool is available. Keep any new practice verbal.",
+      "Only if a brief example would address the patient's concern, introduce the made-up pair Nora enjoys gardening and invite one spoken attempt. The review does not require this example."
     ],
-    "opening_question": "You mentioned writing names and linking them to people. What would you like to keep or change about that approach?",
+    "opening_question": "How is writing the names working for you?",
     "conversation_plan": [
-      "Begin from the practice report already supplied and invite the patient current view. Do not repeatedly ask whether they ever practised or demand an exact number of remembered names.",
-      "Follow one concrete point: what to retain, a difficulty they identify, uncertainty about the approach, or a preference not to change it. Do not create a personal story for them.",
-      "When details of a past attempt are unavailable, acknowledge that gap. Offer an optional small current example rather than repeating questions about unprovided homework details.",
-      "If the patient accepts a trial, introduce the fictional example explicitly and take one chosen action at a time. Distinguish talking about writing from an actual note being created; distinguish repeating the pair from later recall.",
-      "Ask for the patient current appraisal only if useful. Accept that a strategy may be unhelpful or that they want to keep the existing method. Do not claim success from agreement alone.",
-      "Close with a brief summary of what the patient chose, declined or left uncertain. There is no need to try the example or introduce another topic merely to use all rounds."
+      "Respond to what the patient says about the existing method. Ask about one relevant detail only if needed.",
+      "Discuss one adjustment or brief verbal example if it addresses a concern. Otherwise, let the patient keep the method.",
+      "Close once that point has been discussed; do not create another exercise to fill the remaining turns."
     ],
     "response_guidance": [
-      "Use the prefix as existing conversation, while remembering that therapist suggestions and praise do not verify outcomes. Do not reenact the historical instruction to teach another participant.",
-      "A missing detail is unknown. Do not convert I cannot remember into we have never tried this, and do not erase the supplied practice report.",
-      "Do not infer a current emotional state, a new clinical history, dependence on a helper or benefit from practice. Outcomes are not prescribed by the earlier discussion or a screening score.",
-      "Ask one concrete question at a time. If clarification is needed, simplify it rather than adding more subquestions or another long paraphrase.",
-      "After at most two unsuccessful clarifications, offer one concrete optional example or close the topic. Do not pressure the patient to supply an unknown story.",
-      "Keep physical limitations proportionate and relevant. Do not drift into an unsupported story about poor home lighting, a helper reporting every name or inability to write.",
-      "Let the patient make a current decision without requiring a pre-existing preference or a fabricated practice history."
+      "Do not quiz on person codes or ask the patient to perform an unavailable physical action.",
+      "Let practical limitations arise when relevant; do not assume dependence, inability, benefit or a particular emotion."
     ],
     "completion_criteria": [
-      "The patient has chosen to retain, adjust, try or decline an approach, or has explained why the question remains uncertain.",
-      "Any optional example and its result are described only to the extent they actually occurred.",
-      "The conversation closes without requiring improved mood, perfect recall, a new story or the full round budget."
+      "The patient's view or concern has been heard and any next step is clear, including keeping the current method or stopping."
     ]
   },
   "patient_profile": {
@@ -404,7 +390,7 @@
   },
   "session": {
     "mode": "continuation",
-    "shared_context": "You are continuing a one-to-one review after the supplied discussion of name practice. In that discussion, the patient reported writing names, using relationships between people and noticing some features, while having seen only abbreviations for some people. Those are prior reports, not a claim of perfect recall or measured improvement. Person codes in the historical transcript are deidentification labels, not names to memorize or recite. No photographs or written list are currently displayed.",
+    "shared_context": "The conversation continues after the patient reported writing names and using relationships or features as links. Person codes in that discussion are deidentification labels. No photographs or written list are displayed; this is a spoken review.",
     "initial_history": [
       {
         "speaker": "Therapist",

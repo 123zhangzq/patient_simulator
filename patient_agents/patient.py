@@ -24,18 +24,21 @@ class PatientAgents:
         self.options = deepcopy({} if options is None else options)
         self.compiled = compile_profile(patient_profile, self.options)
         prompts = {} if prompts is None else prompts
-        if not isinstance(prompts, dict) or prompts.keys() - {"response", "person_card", "format_repair"}:
-            raise ValueError("prompts supports response, person_card and format_repair overrides.")
+        if not isinstance(prompts, dict) or prompts.keys() - {"response", "person_card", "format_repair", "interaction", "utterance"}:
+            raise ValueError("prompts supports response, person_card, format_repair, interaction and utterance overrides.")
+        self.interaction_enabled = self.options.get("interaction_enabled", True)
         self.context = ContextController(self.compiled, seed,
                                          attention_enabled=self.options.get("attention_enabled", True),
                                          memory_enabled=self.options.get("memory_enabled", True))
         self.response = ResponseAgent(llm, self.compiled["response_profile"], system_prompt,
-                                      prompt=prompts.get("response"), repair_prompt=prompts.get("format_repair"))
+                                      prompt=prompts.get("response"), repair_prompt=prompts.get("format_repair"),
+                                      interaction_enabled=self.interaction_enabled,
+                                      format_prompt=prompts.get("interaction" if self.interaction_enabled else "utterance"))
         self.card_builder = PersonCardBuilder(
             llm, self.compiled, prompt=prompts.get("person_card"), repair_prompt=prompts.get("format_repair"),
             max_new_tokens=self.options.get("person_card_max_new_tokens", 768))
         self.person_card = {"tendencies": []}
-        self.interaction = InteractionTracker()
+        self.interaction = InteractionTracker() if self.interaction_enabled else None
         self.seed = seed
         self.last_trace: dict = {}
         self._history_digests: list[str] = []
@@ -87,6 +90,7 @@ class PatientAgents:
                          "profile_sha256": self.compiled["profile_fingerprint"],
                          "attention_enabled": self.context.attention_enabled,
                          "memory_enabled": self.context.memory_enabled,
+                         "interaction_enabled": self.interaction_enabled,
                          "compiled_profile": self.compiled,
                          "person_card": self.person_card,
                          "person_card_construction": self.card_builder.last_trace,
@@ -112,7 +116,7 @@ class PatientAgents:
         for message in therapist_messages:
             turn_context = self.context.advance(message.content)
             traces.append(deepcopy(self.context.last_trace))
-        previous_exchange = self.interaction.expose(turn_context)
+        previous_exchange = self.interaction.expose(turn_context) if self.interaction is not None else None
         if previous_exchange is not None:
             turn_context["interaction_state"]["previous_exchange"] = previous_exchange
         traces[-1]["turn_context"] = deepcopy(turn_context)
@@ -129,6 +133,7 @@ class PatientAgents:
         # claim never becomes a personal fact or verified real-world episode.
         self.last_trace["patient_utterance_memory_ids"] = self.context.record_patient_reply(result["content"])
         self.last_trace["patient_reply_stored_as_fact"] = False
-        self.interaction.record(self.response.interaction, self.last_trace["patient_utterance_memory_ids"])
-        self.last_trace["interaction_after_reply"] = deepcopy(self.interaction.previous)
+        if self.interaction is not None:
+            self.interaction.record(self.response.interaction, self.last_trace["patient_utterance_memory_ids"])
+        self.last_trace["interaction_after_reply"] = deepcopy(self.interaction.previous) if self.interaction is not None else None
         return result

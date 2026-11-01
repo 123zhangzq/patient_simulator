@@ -1,0 +1,2 @@
+Return only one JSON object: {"utterance":"Patient's spoken reply."}
+Do not generate interaction labels, internal state, markdown or reasoning. The utterance is the complete patient turn.

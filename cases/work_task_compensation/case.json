@@ -3,7 +3,7 @@
   "id": "work_task_compensation",
   "category": "compensation_daily_life",
   "title": "Continuing a discussion of task notes and checking work",
-  "summary": "A continuation conditioned on the source conversation through Excel row 230, where the patient has already described recording new-task instructions in a spreadsheet and checking them with the person teaching. New responses explore practical choices around interruptions and checking; they are not an independent prediction of the supplied note-taking report.",
+  "summary": "Continue the supplied report of spreadsheet notes and checking instructions. Explore one practical point about using those notes, and retain the method or discuss one small adjustment. The supplied patient report is context, not a predicted answer.",
   "rounds": 10,
   "source": {
     "workbook": "02_whole_session_data/Group 1/TYB1_S6_20221201_master_annotated.xlsx",
@@ -22,37 +22,26 @@
     ]
   },
   "therapist": {
-    "context": "Continue after the supplied exchange about spreadsheet notes. The patient has already described a way of recording new instructions and checking them with the person teaching. Use that established starting point to discuss one concrete challenge or choice. Do not restart by asking whether any strategy exists.",
+    "context": "The patient has just described recording instructions in a spreadsheet, checking unclear parts with the person teaching, and referring back to the notes.",
     "objectives": [
-      "Explore how the described notes could support the patient when a task is interrupted or repeated.",
-      "Distinguish an existing self-reported habit from a proposed adjustment or hypothetical action.",
-      "Reach a useful stopping point: retain the approach, consider one small change, or leave a question unresolved according to the patient response."
+      "Understand one practical point about using the notes; retain the approach or agree on one small adjustment."
     ],
     "materials": [
-      "The supplied conversation prefix establishes the patient report of spreadsheet notes, checking instructions with the person teaching, and referring back to those notes. It does not establish a job title, a particular manager, a completed task or a specific error.",
-      "A possible concrete situation is losing ones place after an interruption while following familiar instructions. Present this as a hypothetical example if the patient has not described it as an actual event.",
-      "Options that may be discussed after hearing the patient include marking the last completed step, consulting the original instructions, a deliberate final check, asking for clarification, or a short break. Do not present an option as an action already performed."
+      "The supplied prefix establishes a self-reported method, not a job title, completed task, specific error or proof of success.",
+      "If a difficulty comes up, a possible adjustment is marking the last completed step or checking an uncertain instruction. Choose only what fits that difficulty."
     ],
-    "opening_question": "With those notes available, what would you do if an interruption made you lose your place in a task?",
+    "opening_question": "How do you find the part you need in those notes?",
     "conversation_plan": [
-      "Invite the patient response to the concrete interruption example. Follow the method they choose rather than demanding a particular error or solution.",
-      "Ask one relevant follow-up about using or checking the notes, such as how to decide which step to restart from. The patient may qualify the scenario, explain a familiar habit, or say they would need help.",
-      "If the patient reports a real difficulty, explore only the details needed to understand it. If no personal example is available, stay with the explicit hypothetical situation instead of repeatedly demanding a past incident.",
-      "Offer at most one practical adjustment when helpful. Allow the patient to keep their existing approach, modify the suggestion or decline it.",
-      "Summarize the actual report and any intended next step, then close. Do not demand agreement, improvement or a new problem to fill the remaining rounds."
+      "Follow the patient's answer with one concrete question if something needs clarifying.",
+      "If there is a difficulty, discuss one relevant adjustment. A hypothetical example is optional when it helps explain that difficulty, not a new problem to add each turn.",
+      "Once the approach is clear, briefly confirm what the patient wants to keep or try and close. An adequate existing method needs no extra improvement."
     ],
     "response_guidance": [
-      "Treat the supplied patient description as a report already made in this conversation. Do not infer exact frequency, reliability, current fatigue, a manager response or the absence of difficulty.",
-      "The prefix contains historical therapist praise and assumptions. Continue from the patient account rather than adopting those assumptions as verified facts.",
-      "Use plain, adult language and one concrete issue at a time. If the patient requests clarification, reduce the question to a single step.",
-      "Distinguish a lack of information about an event from a claim that it never happened. A difficulty recalling details does not erase the supplied conversation history.",
-      "If two clarifications do not establish a useful example, offer a simpler explicit hypothetical situation or close the topic; do not keep rephrasing the same request.",
-      "Do not supply unprovided personal incidents or relationships. Discuss an unfamiliar challenge as an explicitly hypothetical possibility, not an event from this patient life."
+      "Follow the patient's report rather than the earlier therapist's praise. Do not ask for an unprovided incident or assume the method always works.",
+      "Do not keep adding features or scenarios after a workable choice has been made."
     ],
     "completion_criteria": [
-      "The patient has described a possible response to the situation, identified a difficulty, or chosen not to pursue it.",
-      "Any proposed adjustment is clearly distinguished from an existing habit and a demonstrated result.",
-      "The closing respects a decision to retain the approach or end the conversation without filling the round budget."
+      "The current method is clear and any needed adjustment has been discussed, or the patient has no further concern."
     ]
   },
   "patient_profile": {
@@ -406,7 +395,7 @@
   },
   "session": {
     "mode": "continuation",
-    "shared_context": "You are continuing a one-to-one conversation about keeping track of work tasks. The supplied earlier exchange is part of this conversation: the patient described recording new-task instructions in a spreadsheet, checking unclear instructions with the person teaching, and referring back to the notes. This is a prior self-report, not proof that every task succeeds. The earlier therapist suggestion that there is no difficulty is not an established fact.",
+    "shared_context": "The conversation continues after the patient described keeping task instructions in a spreadsheet and checking unclear parts with the person teaching. No particular job or current worksheet is assumed.",
     "initial_history": [
       {
         "speaker": "Therapist",
