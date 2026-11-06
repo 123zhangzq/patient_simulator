@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "id": "smart_goal_yc053",
+  "category": "smart_goal",
+  "title": "A small goal for the coming week (YC053)",
+  "summary": "Paired open-ended goal-planning case: the therapist setup is identical across participants, while embedded profiles and limited earlier self-reports differ. No completed SMART plan or expected patient reply is supplied.",
+  "rounds": 12,
+  "source": {
+    "workbook": "02_whole_session_data/Group 2/TYB2_S5_20221216_master_annotated_reviewer2.xlsx",
+    "worksheet": "utterances",
+    "excel_rows": [
+      247,
+      262
+    ],
+    "utt_ids": [
+      251,
+      266
+    ],
+    "dialog_ids": [
+      "dg002"
+    ],
+    "usage": "Selected self-reported habits and earlier intentions inform the embedded profile. The full extract is audit-only, not a dialogue prefix or a target response to reproduce."
+  },
+  "therapist": {
+    "context": "A one-to-one conversation about a small everyday goal for the coming week. No particular goal has yet been agreed.",
+    "objectives": [
+      "Help the patient choose something meaningful and develop a manageable next step, building on what they already do."
+    ],
+    "materials": [
+      "Verbal discussion only; no worksheet or physical task is provided."
+    ],
+    "opening_question": "Let's think about a small goal for the coming week. What would you like to work on?",
+    "conversation_plan": [
+      "Explore what the patient wants to work on and why it matters.",
+      "If they want to make a plan, work out enough detail to make it usable: what they will do, when, what makes it manageable, and how they could tell how it went. Follow what remains unclear rather than a fixed order."
+    ],
+    "response_guidance": [
+      "Use SMART as a planning aid, not an acronym quiz or a script. Work with the goal the patient brings up, including maintaining an approach they already find useful."
+    ],
+    "completion_criteria": [
+      "The patient has a next step they consider useful and manageable, or has expressed a reason to leave the plan open or stop. A fully specified goal is not required for a natural conclusion."
+    ]
+  },
+  "patient_profile": {
+    "schema_version": 1,
+    "participant_id": "YC053",
+    "role": "stroke_survivor",
+    "assessment_date": "2022-11-22",
+    "simulation_date": "2022-12-16",
+    "background": {
+      "age": 65,
+      "gender": "Male",
+      "language": "English",
+      "education_years": 13,
+      "lives_with_family": true,
+      "lives_with_helper": false,
+      "independence": "Able to live independently",
+      "stroke_year": 2017
+    },
+    "assessments": {
+      "moca": {
+        "total": 26,
+        "attention": 6,
+        "language": 0,
+        "delayed_recall": 4,
+        "category_cue": 0,
+        "multiple_choice_cue": 1,
+        "visuospatial_executive": 5,
+        "abstraction": 2,
+        "orientation": 6,
+        "naming": 3,
+        "learning_trial1": 5,
+        "learning_trial2": 5,
+        "digit_span_forward": 1,
+        "digit_span_backward": 1,
+        "vigilance": 1,
+        "serial_sevens": 3,
+        "sentence_repetition": 0,
+        "verbal_fluency": 0
+      },
+      "sdmt": {
+        "total": 38
+      },
+      "dass21": {
+        "depression": 4,
+        "anxiety": 5,
+        "stress": 7
+      }
+    },
+    "known_facts": [
+      {
+        "id": "reported_work",
+        "text": "I have part-time work.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 2/TYB2_S5_20221216_master_annotated_reviewer2.xlsx#utterances!rows248:249"
+      },
+      {
+        "id": "reported_routine_idea",
+        "text": "I have talked about adopting a regular weekly routine around my part-time work to help my focus.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 2/TYB2_S5_20221216_master_annotated_reviewer2.xlsx#utterances!rows248:249"
+      },
+      {
+        "id": "reported_exercise_idea",
+        "text": "I have proposed fitting exercise into days when I am not working.",
+        "source": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 2/TYB2_S5_20221216_master_annotated_reviewer2.xlsx#utterances!rows254:257"
+      }
+    ],
+    "initial_memories": [],
+    "provenance": {
+      "sources": {
+        "home_visit": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/Home Visit Stroke Project.xlsx",
+          "sha256": "5653c7cc0a98a5231bc93fd51f2aa4c59b0c090e73d7e07e9742eb2eda845524"
+        },
+        "code_dictionary": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/01_participant_profile/patient_profile_codex_20260910/Patient_Profile_All_Three_Visits.xlsx",
+          "sha256": "979d6edd33f5a05cb548d032018a0782fa6c99c6604da9b461d6946d0790cd89"
+        },
+        "dialogue_source": {
+          "path": "LLM_TYB_Data_SMU_Deidentified_20261012/02_whole_session_data/Group 2/TYB2_S5_20221216_master_annotated_reviewer2.xlsx",
+          "sha256": "077a39d19547a406945ab72baaa10de365422290ca069c2629ca4fe28bd39187"
+        }
+      },
+      "selection": {
+        "background_sheet": "Home Visit 1",
+        "background_source_row": 181,
+        "assessment_sheet": "Home Visit 2",
+        "assessment_source_row": 38,
+        "rule": "Use the latest explicitly dated assessment before the source session; baseline demographics remain separately attributed. Later Home Visit 3 data are excluded.",
+        "simulation_date_policy": "Place an authored new conversation after the selected self-reports on the source session date. This is not an observed follow-up.",
+        "moca_score_policy": "Preserve recorded totals and subitems without applying a second education adjustment. Domain and subitem sums were checked for consistency.",
+        "dass_score_policy": "Preserve the recorded totals without rescaling or assigning diagnostic categories.",
+        "history_policy": "Include limited self-reported habits and planning interests. Omit exact weekly schedules, step counts and a finished SMART solution; no upcoming trip, present appointment, adherence or improvement is assumed."
+      },
+      "fields": {
+        "assessment_date": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "C38",
+          "raw_value": "22/11/2022"
+        },
+        "background.age": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "L181",
+          "raw_value": 65,
+          "interpretation": "Age recorded at baseline; not recalculated for the simulation date."
+        },
+        "background.gender": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "M181",
+          "raw_value": 0,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H6"
+          }
+        },
+        "background.language": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "P181",
+          "raw_value": 0,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H9"
+          }
+        },
+        "background.education_years": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "T181",
+          "raw_value": 13
+        },
+        "background.lives_with_family": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "V181",
+          "raw_value": 1,
+          "interpretation": "Source binary household field."
+        },
+        "background.lives_with_helper": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "X181",
+          "raw_value": 0,
+          "interpretation": "Source binary household field."
+        },
+        "background.independence": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "AA181",
+          "raw_value": 0,
+          "code_definition": {
+            "source_id": "code_dictionary",
+            "sheet": "Data_Dictionary",
+            "cell": "H20"
+          }
+        },
+        "background.stroke_year": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 1",
+          "cell": "AL181",
+          "raw_value": 2017
+        },
+        "assessments.moca.total": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "D38",
+          "raw_value": 26
+        },
+        "assessments.moca.attention": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "V38",
+          "raw_value": 6
+        },
+        "assessments.moca.language": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "Y38",
+          "raw_value": 0
+        },
+        "assessments.moca.delayed_recall": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AC38",
+          "raw_value": 4
+        },
+        "assessments.moca.category_cue": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AD38",
+          "raw_value": 0
+        },
+        "assessments.moca.multiple_choice_cue": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AE38",
+          "raw_value": 1
+        },
+        "assessments.moca.visuospatial_executive": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "K38",
+          "raw_value": 5
+        },
+        "assessments.moca.abstraction": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AB38",
+          "raw_value": 2
+        },
+        "assessments.moca.orientation": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AL38",
+          "raw_value": 6
+        },
+        "assessments.moca.naming": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "O38",
+          "raw_value": 3
+        },
+        "assessments.moca.learning_trial1": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "P38",
+          "raw_value": 5
+        },
+        "assessments.moca.learning_trial2": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "Q38",
+          "raw_value": 5
+        },
+        "assessments.moca.digit_span_forward": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "R38",
+          "raw_value": 1
+        },
+        "assessments.moca.digit_span_backward": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "S38",
+          "raw_value": 1
+        },
+        "assessments.moca.vigilance": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "T38",
+          "raw_value": 1
+        },
+        "assessments.moca.serial_sevens": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "U38",
+          "raw_value": 3
+        },
+        "assessments.moca.sentence_repetition": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "W38",
+          "raw_value": 0
+        },
+        "assessments.moca.verbal_fluency": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "X38",
+          "raw_value": 0
+        },
+        "assessments.sdmt.total": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AM38",
+          "raw_value": 38
+        },
+        "assessments.dass21.depression": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AT38",
+          "raw_value": 4
+        },
+        "assessments.dass21.anxiety": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AU38",
+          "raw_value": 5
+        },
+        "assessments.dass21.stress": {
+          "source_id": "home_visit",
+          "sheet": "Home Visit 2",
+          "cell": "AV38",
+          "raw_value": 7
+        },
+        "known_facts.reported_work": {
+          "source_id": "dialogue_source",
+          "sheet": "utterances",
+          "excel_rows": [
+            248,
+            249
+          ],
+          "speaker_code": "YC053",
+          "interpretation": "Paraphrase of the participant's own report; not an independently observed outcome or a prescribed new goal."
+        },
+        "known_facts.reported_routine_idea": {
+          "source_id": "dialogue_source",
+          "sheet": "utterances",
+          "excel_rows": [
+            248,
+            249
+          ],
+          "speaker_code": "YC053",
+          "interpretation": "Paraphrase of the participant's own report; not an independently observed outcome or a prescribed new goal."
+        },
+        "known_facts.reported_exercise_idea": {
+          "source_id": "dialogue_source",
+          "sheet": "utterances",
+          "excel_rows": [
+            254,
+            257
+          ],
+          "speaker_code": "YC053",
+          "interpretation": "Paraphrase of the participant's own report; not an independently observed outcome or a prescribed new goal."
+        }
+      },
+      "issues": []
+    },
+    "unknowns": [
+      "Specific commitments and available times for the coming week are not recorded.",
+      "A new goal and its outcome have not yet been established."
+    ]
+  },
+  "session": {
+    "mode": "new_activity",
+    "shared_context": "The patient and therapist are having a one-to-one conversation about choosing a small everyday goal for the coming week. The goal is still open. This is a verbal discussion, with no worksheet or practical task to complete during the conversation.",
+    "initial_history": [],
+    "evaluation_note": "Researcher-authored new planning conversation placed after the source self-reports on the source session date. It is not a replay of recorded SMART goal negotiation. Selected earlier self-reports are profile inputs, not held-out responses. Both paired cases use the same therapist, opening, shared context and round cap. Differences concern the complete profile and reported experience, not the isolated causal effect of any assessment score. Evaluate new generated turns; no exact reference answer or required goal is prescribed."
+  }
+}

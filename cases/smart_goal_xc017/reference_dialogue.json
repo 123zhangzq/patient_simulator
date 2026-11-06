@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "source": {
+    "workbook": "02_whole_session_data/Group 1/TYB1_S5_20221124_master_annotated.xlsx",
+    "worksheet": "utterances",
+    "excel_rows": [
+      425,
+      435
+    ],
+    "utt_ids": [
+      424,
+      434
+    ],
+    "dialog_ids": [
+      "dg008"
+    ],
+    "usage": "Selected self-reported habits and earlier intentions inform the embedded profile. The full extract is audit-only, not a dialogue prefix or a target response to reproduce."
+  },
+  "utterances": [
+    {
+      "excel_row": 425,
+      "utt_id": 424,
+      "start_time": "00:29:56.398",
+      "end_time": "00:29:59.907",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "For me, I like to use listing to help me.",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 426,
+      "utt_id": 425,
+      "start_time": "00:30:00.721",
+      "end_time": "00:30:01.461",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Very good, XC017.",
+      "address_code": "XC017",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 427,
+      "utt_id": 426,
+      "start_time": "00:30:01.861",
+      "end_time": "00:30:07.483",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "So everything that I do, I try to keep a listing next to me so that I remember what I need to do.",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 428,
+      "utt_id": 427,
+      "start_time": "00:30:07.563",
+      "end_time": "00:30:09.483",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "And after I finish, I tick.",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 429,
+      "utt_id": 428,
+      "start_time": "00:30:09.523",
+      "end_time": "00:30:15.305",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "For instance, I go holiday, I will have a listing of all the things that I might need to take or I don't need to take.",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 430,
+      "utt_id": 429,
+      "start_time": "00:30:15.365",
+      "end_time": "00:30:17.285",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "And if I need to take how many pieces.",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 431,
+      "utt_id": 430,
+      "start_time": "00:30:17.825",
+      "end_time": "00:30:22.206",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "And then usually I pack like one month in advance instead of one, two days before.",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 432,
+      "utt_id": 431,
+      "start_time": "00:30:22.806",
+      "end_time": "00:30:25.707",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "So that I don't last minute, forget this, forget that.",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 433,
+      "utt_id": 432,
+      "start_time": "00:30:26.927",
+      "end_time": "00:30:28.828",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "So I give myself more time for planning.",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 434,
+      "utt_id": 433,
+      "start_time": "00:30:30.806",
+      "end_time": "00:30:46.419",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Very important strategy give yourself time, so you're like me, you like to use lists.",
+      "address_code": "XC017",
+      "dialog_id": "dg008",
+      "include": "yes"
+    },
+    {
+      "excel_row": 435,
+      "utt_id": 434,
+      "start_time": "00:30:30.806",
+      "end_time": "00:30:46.419",
+      "speaker_role": "participant",
+      "speaker_code": "XC017",
+      "text": "These yeah i like to use uh uh lists. Like i have a calendar next to me so that every time i got appointment i'll list it down so that i don't miss any appointment",
+      "address_code": "CD",
+      "dialog_id": "dg008",
+      "include": "yes"
+    }
+  ]
+}

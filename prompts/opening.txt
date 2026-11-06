@@ -1,3 +1,5 @@
-The text below is the first NEW therapist utterance. Use it exactly once, after any supplied earlier conversation. On later turns, continue from the patient's response rather than repeating the opening or restarting the activity.
+The case supplies this exact first NEW therapist utterance, following any supplied earlier conversation:
 
 {opening_question}
+
+Use it once. On later turns, continue from the actual exchange; do not repeat the opening or restart the activity.

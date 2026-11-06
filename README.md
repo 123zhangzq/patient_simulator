@@ -6,6 +6,8 @@
 
 首批包含姓名学习与回忆、工作任务补偿策略、姓名练习回顾三个 case，分别设置最多 8、10、8 轮新对话。姓名任务提供本次 session 内的合成学习前缀，新对话直接从回忆开始；另外两例提供明确选取的真实对话前缀，再继续交流。合成前缀在 case 中注明来源，不冒充真实患者记录。活动可以提前结束，不要求凑满轮数。模型在服务器首次部署时下载，以后复用服务器上的模型目录。本项目按 Linux GPU 环境编写；列出 case、预览 prompt 和运行功能测试不需要 GPU。
 
+另有一对 SMART Goal case：`smart_goal_xc017`、`smart_goal_yc053`。二者从相同开场讨论来周一个小目标，没有对话前缀；治疗师设置及 12 轮上限相同，患者 profile 与有来源的既往自述不同。可以用 `--category smart_goal` 只运行这两个 case，先观察 `single_prompt` 是否产生符合各自生活背景的交流。
+
 ## 项目结构与运行方式
 
 主要源码、配置与 prompt 文件如下：
@@ -27,7 +29,13 @@
 │   ├── work_task_compensation/
 │   │   ├── case.json
 │   │   └── reference_dialogue.json
-│   └── name_practice_review/
+│   ├── name_practice_review/
+│   │   ├── case.json
+│   │   └── reference_dialogue.json
+│   ├── smart_goal_xc017/
+│   │   ├── case.json
+│   │   └── reference_dialogue.json
+│   └── smart_goal_yc053/
 │       ├── case.json
 │       └── reference_dialogue.json
 ├── core/
@@ -248,7 +256,15 @@ python run_dialogue.py --case name_recall --dry-run
 python run_dialogue.py --case name_recall --patient patient_agents --dry-run --show-patient
 ```
 
-默认递归寻找 `cases/` 中所有名为 `case.json` 的文件，按相对路径排序。`reference_dialogue.json` 只供追溯，运行不会读取它；从中明确选取并嵌入 case 的前缀会按 `session` 配置使用。普通 `--dry-run` 展示治疗师 prompt、共同情境与前缀、患者 ID、`patient_profile_sha256`、`session_sha256` 及治疗师控制文本；加 `--show-patient` 才同时展示患者资料及方法配置，仍不会生成对话。三个 case 的内容说明、来源定位和新增方法见 [cases/README.md](cases/README.md)。
+默认递归寻找 `cases/` 中所有名为 `case.json` 的文件，按相对路径排序。`reference_dialogue.json` 只供追溯，运行不会读取它；从中明确选取并嵌入 case 的前缀会按 `session` 配置使用。普通 `--dry-run` 展示治疗师 prompt、共同情境与前缀、患者 ID、`patient_profile_sha256`、`session_sha256` 及治疗师控制文本；加 `--show-patient` 才同时展示患者资料及方法配置，仍不会生成对话。各 case 的内容说明、来源定位和新增方法见 [cases/README.md](cases/README.md)。
+
+运行这对 SMART Goal baseline 对话（同一批次只加载一次模型，每个 case 使用独立会话）：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --case smart_goal_xc017 --case smart_goal_yc053 --patient single_prompt --seed 42
+```
+
+将 `--patient` 改为 `patient_agents` 可运行同一对 case 的 agent 版本。两份 case 的资料已嵌入 JSON，服务器不需要原始 Excel。
 
 运行三个职责模块，或在同一 case 上运行基线：
 
@@ -384,7 +400,7 @@ HF_HUB_OFFLINE=1 CUDA_VISIBLE_DEVICES=0 python run_dialogue.py
 | `cases/<case目录>/case.json` | 活动主题、患者 profile、session 共同背景与前缀、治疗师目标与开场、轮数上限 |
 | `cases/<case目录>/reference_dialogue.json` | 原始逐行对话与 Excel 定位，供核对；运行不读取，选用前缀须显式整理到 case |
 
-默认 prompt 模板使用英语，当前三个 case 的患者语言也均为英语。Patient 根据 case 中的语言字段输出；增加其他语言的 case 时也应相应调整治疗师语言。修改所有场景共用的治疗师行为时编辑 `prompts/therapist.txt`，控制格式与结束语在 `therapist_control.json`；修改某个场景时分别编辑 case 的 `session` 和 `therapist`。Patient 侧按选定方法使用对应 prompt，不要把私有背景或未见目标回答放进治疗师字段。agent 的模型指令全部位于 `prompts/patient_agents/`；状态字段和校验在 Python 中，编辑 prompt 时应保留 JSON 字段契约。
+默认 prompt 模板使用英语，当前 case 的患者语言也均为英语。Patient 根据 case 中的语言字段输出；增加其他语言的 case 时也应相应调整治疗师语言。修改所有场景共用的治疗师行为时编辑 `prompts/therapist.txt`，控制格式与结束语在 `therapist_control.json`；修改某个场景时分别编辑 case 的 `session` 和 `therapist`。Patient 侧按选定方法使用对应 prompt，不要把私有背景或未见目标回答放进治疗师字段。agent 的模型指令全部位于 `prompts/patient_agents/`；状态字段和校验在 Python 中，编辑 prompt 时应保留 JSON 字段契约。
 
 治疗师和 agent 患者均不设句数或回答信息点配额：姓名回答可以很短，解释、经历和感受可自然展开。注意与记忆控制可用信息，不再用注意力档位限制讲述长度，也不因为有任何遗漏就强制补问。患者根据实际需要澄清；个人经历和回忆内容必须有依据，当下意见和推理可以自然形成。输出仍受配置中的 token 上限约束。
 

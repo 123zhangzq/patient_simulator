@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "source": {
+    "workbook": "02_whole_session_data/Group 2/TYB2_S5_20221216_master_annotated_reviewer2.xlsx",
+    "worksheet": "utterances",
+    "excel_rows": [
+      247,
+      262
+    ],
+    "utt_ids": [
+      251,
+      266
+    ],
+    "dialog_ids": [
+      "dg002"
+    ],
+    "usage": "Selected self-reported habits and earlier intentions inform the embedded profile. The full extract is audit-only, not a dialogue prefix or a target response to reproduce."
+  },
+  "utterances": [
+    {
+      "excel_row": 247,
+      "utt_id": 251,
+      "start_time": "00:19:24.781",
+      "end_time": "00:19:26.483",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "I do practice the thing.",
+      "address_code": "CD",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 248,
+      "utt_id": 252,
+      "start_time": "00:19:28.064",
+      "end_time": "00:19:37.870",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "I'm going to... How to improve my focus is by adopting a regular weekly routine in my part-time work.",
+      "address_code": "CD",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 249,
+      "utt_id": 253,
+      "start_time": "00:19:38.250",
+      "end_time": "00:19:43.334",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "That means I will work on Monday, Wednesday and Friday.",
+      "address_code": "CD",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 250,
+      "utt_id": 254,
+      "start_time": "00:19:44.334",
+      "end_time": "00:19:44.674",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Wow.",
+      "address_code": "YC053",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 251,
+      "utt_id": 255,
+      "start_time": "00:19:45.315",
+      "end_time": "00:19:45.575",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "Yeah.",
+      "address_code": null,
+      "dialog_id": null,
+      "include": "no"
+    },
+    {
+      "excel_row": 252,
+      "utt_id": 256,
+      "start_time": "00:19:47.129",
+      "end_time": "00:19:48.230",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "So have a regular routine.",
+      "address_code": "YC053",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 253,
+      "utt_id": 257,
+      "start_time": "00:19:49.031",
+      "end_time": "00:19:49.291",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "Yeah.",
+      "address_code": null,
+      "dialog_id": null,
+      "include": "no"
+    },
+    {
+      "excel_row": 254,
+      "utt_id": 258,
+      "start_time": "00:19:49.711",
+      "end_time": "00:20:02.741",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "Number two, I'm going to improve my focus by scheduling the exercise regime on the 365, on the three times a week basis.",
+      "address_code": "CD",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 255,
+      "utt_id": 259,
+      "start_time": "00:20:03.302",
+      "end_time": "00:20:05.243",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "That is Tuesday, Thursday, and Saturday.",
+      "address_code": "CD",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 256,
+      "utt_id": 260,
+      "start_time": "00:20:06.424",
+      "end_time": "00:20:07.205",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "When you're not working.",
+      "address_code": "YC053",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 257,
+      "utt_id": 261,
+      "start_time": "00:20:08.366",
+      "end_time": "00:20:09.586",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "Yeah, when I'm not working, yes.",
+      "address_code": "CD",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 258,
+      "utt_id": 262,
+      "start_time": "00:20:10.347",
+      "end_time": "00:20:11.148",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Very good.",
+      "address_code": "YC053",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 259,
+      "utt_id": 263,
+      "start_time": "00:20:11.308",
+      "end_time": "00:20:15.271",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "When I work, I used to clock more than 10,000 steps.",
+      "address_code": "CD",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 260,
+      "utt_id": 264,
+      "start_time": "00:20:15.551",
+      "end_time": "00:20:15.831",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Wow.",
+      "address_code": "YC053",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 261,
+      "utt_id": 265,
+      "start_time": "00:20:17.362",
+      "end_time": "00:20:18.303",
+      "speaker_role": "therapist",
+      "speaker_code": "CD",
+      "text": "Sounds very cool.",
+      "address_code": "YC053",
+      "dialog_id": "dg002",
+      "include": "yes"
+    },
+    {
+      "excel_row": 262,
+      "utt_id": 266,
+      "start_time": "00:20:20.424",
+      "end_time": "00:20:31.472",
+      "speaker_role": "participant",
+      "speaker_code": "YC053",
+      "text": "So I mean, this is adopting the regular weekly routine as what you mentioned in the tips.",
+      "address_code": "CD",
+      "dialog_id": "dg002",
+      "include": "yes"
+    }
+  ]
+}
