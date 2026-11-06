@@ -83,7 +83,7 @@
 
 | 方法 | 患者如何获得信息 |
 | --- | --- |
-| `single_prompt` | 私有 prompt 加入患者资料与共同情境，每次回复接收给定前缀及完整新增对话，调用模型一次 |
+| `single_prompt` | 私有 prompt 加入患者资料与共同情境，每次接收标明说话人的完整转录（含给定前缀），续写 Patient 台词，调用模型一次 |
 | `patient_agents` | 初始化时构建固定人物倾向，动态控制器处理编码与提取，每轮一次输出调用生成台词；可开关通用互动状态 |
 
 `patient_agents/static.py` 整理固定资料和认知参数；`person_card.py` 在 session 开始时调用一次 LLM，从 profile 和允许使用的历史前缀构建人物倾向。`context.py` 继续用规则处理注意与记忆；`interaction.py` 在启用时保存有可见证据支撑的上一轮互动标记；`response.py` 每轮一次调用返回台词，并按开关决定是否同时生成状态。它们由 `patient.py` 组合，仍是静态、动态和输出三个职责，共享同一份模型权重。静态和输出 JSON 无效时各最多增加一次格式修复，不增加独立的逐轮判断 agent。
@@ -335,7 +335,7 @@ CUDA_VISIBLE_DEVICES=0 python run_dialogue.py --patient single_prompt --config c
 
 `prompts/opening.txt` 是启动指令模板，其中 `{opening_question}` 由 case 提供；模板本身不计入公开台词。第一条新治疗师发言直接使用 `case.therapist.opening_question`，不调用模型，记录的输入和输出 token 数均为 0。后续治疗师调用返回 `{"utterance": "...", "action": "continue|clarify|close"}`，只有 `utterance` 进入公开历史。控制指令、格式修复提示和兜底结束语保存在 `prompts/therapist_control.json`。解析允许单个完整 JSON 外的代码围栏或说明文字；字段缺失、重复、多个对象或截断等问题最多触发一次额外的格式修复调用。修复仍失败时保存完整 trace 并停止，不猜测动作。修复只算一个治疗师回合，token 数合计两次调用。
 
-公开历史由明确给定的前缀和本次新增台词组成。治疗师接收包含完整历史的结构化 transcript，历史普通台词不再作为新 JSON 输出的 `assistant` 格式示例，也不为旧发言虚构动作标签。`single_prompt` 仍将自身发言映射为 `assistant`、对方发言映射为 `user`；`patient_agents` 的输出调用使用人物卡与本轮结构化 context。患者私有 profile、内部状态和 trace 不进入治疗师输入；双方都能看到的 `shared_context` 及前缀是有意共享的条件。格式修复指令及失败草稿不进入患者的公开历史。
+公开历史由明确给定的前缀和本次新增台词组成。治疗师接收包含完整历史的结构化 transcript，历史普通台词不再作为新 JSON 输出的 `assistant` 格式示例，也不为旧发言虚构动作标签。`single_prompt` 也用一条 `user` 消息传入完整的 `conversation`（每条保留 `speaker`、`content`）和 `next_speaker: Patient`，由模型续写患者的下一次发言；输出仍是自由台词，只有一次模型调用，没有额外改写或字数限制。其 metadata 与 trace 中的 `input_format` 为 `speaker_labeled_transcript`，可用来确认服务器使用了这个输入版本。`patient_agents` 的输出调用使用人物卡与本轮结构化 context。患者私有 profile、内部状态和 trace 不进入治疗师输入；双方都能看到的 `shared_context` 及前缀是有意共享的条件。格式修复指令及失败草稿不进入患者的公开历史。
 
 轮数上限的优先级为 `--rounds` > case 的 `rounds` > 配置文件的 `rounds`。一轮是 Therapist 与 Patient 的两条新台词；前缀不计入新轮数。治疗师标记 `close` 后，保留本轮患者的一次回应，然后结束。达到轮数上限也会停止。`completion_criteria` 用来指导模型的结束判断，不是独立的成功评分器；`status=completed` 只表示程序正常完成。
 

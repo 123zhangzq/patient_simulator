@@ -2,6 +2,7 @@
 
 from collections.abc import Sequence
 import copy
+import json
 
 from core.interfaces import DialogueMessage, GenerationResult, LanguageModel
 from core.profiles import profile_fingerprint, render_patient_profile
@@ -22,16 +23,20 @@ class SinglePromptPatient:
 
     def describe(self) -> dict:
         return {"method": "single_prompt", "profile_sha256": profile_fingerprint(self.patient_profile),
-                "initial_history_utterances": self.initial_history_size}
+                "initial_history_utterances": self.initial_history_size,
+                "input_format": "speaker_labeled_transcript"}
 
     def respond(self, public_history: Sequence[DialogueMessage]) -> GenerationResult:
-        messages = [{"role": "system", "content": self.system_prompt}]
-        messages.extend(
-            {
-                "role": "assistant" if message.speaker == "Patient" else "user",
-                "content": message.content,
-            }
-            for message in public_history
-        )
-        self.last_trace = {"method": "single_prompt", "model_input": copy.deepcopy(messages)}
+        # Keep every utterance as attributed transcript data. The model supplies
+        # the next Patient turn rather than treating prior speech as its own chat.
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": json.dumps({
+                "conversation": [{"speaker": message.speaker, "content": message.content}
+                                 for message in public_history],
+                "next_speaker": "Patient",
+            }, ensure_ascii=False)},
+        ]
+        self.last_trace = {"method": "single_prompt", "input_format": "speaker_labeled_transcript",
+                           "model_input": copy.deepcopy(messages)}
         return self.llm.reply(messages)
