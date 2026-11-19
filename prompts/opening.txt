@@ -1,5 +1,0 @@
-The case supplies this exact first NEW therapist utterance, following any supplied earlier conversation:
-
-{opening_question}
-
-Use it once. On later turns, continue from the actual exchange; do not repeat the opening or restart the activity.

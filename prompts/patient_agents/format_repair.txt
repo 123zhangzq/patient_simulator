@@ -1,1 +1,0 @@
-Return one complete JSON object matching the original schema. Repair invalid structure, fields or references using the same supplied evidence. Preserve the intended patient utterance when present; do not add personal facts or restore unavailable information. The failed draft is not new evidence. Return JSON only, without reasoning or markdown.

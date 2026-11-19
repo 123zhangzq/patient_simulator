@@ -1,1 +1,1 @@
-"""Shared interfaces and orchestration components for dialogue experiments."""
+"""Runtime for the standardized patient dialogue benchmark."""

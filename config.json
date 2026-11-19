@@ -1,33 +1,33 @@
 {
-  "model_id": "Qwen/Qwen3.5-9B",
-  "revision": "main",
-  "model_dir": "models/Qwen3.5-9B",
-  "dtype": "auto",
-  "rounds": 10,
-  "max_new_tokens": 256,
-  "max_context_tokens": 8192,
-  "temperature": 0.7,
-  "top_p": 0.8,
-  "top_k": 20,
-  "repetition_penalty": 1.05,
-  "seed": 42,
-  "therapist_prompt": "prompts/therapist.txt",
-  "patient_prompt": "prompts/baselines/single_prompt/patient.txt",
-  "opening_prompt": "prompts/opening.txt",
-  "output_dir": "outputs",
-  "patient_agents": {
-    "response_prompt": "prompts/patient_agents/response.txt",
-    "interaction_prompt": "prompts/patient_agents/interaction.txt",
-    "utterance_prompt": "prompts/patient_agents/utterance.txt",
-    "interaction_enabled": true,
-    "person_card_prompt": "prompts/patient_agents/person_card.txt",
-    "format_repair_prompt": "prompts/patient_agents/format_repair.txt",
-    "person_card_enabled": false,
-    "person_card_max_new_tokens": 768,
-    "policy_path": "patient_agents/policy.json",
-    "attention_enabled": true,
-    "memory_enabled": true,
-    "parameters": {},
-    "traits": {}
+  "models": {
+    "openrouter_default": {
+      "provider": "openrouter",
+      "model_id": "openai/gpt-6-sol",
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY"
+    },
+    "patient_astra": {
+      "provider": "openrouter",
+      "model_id": "openai/gpt-6-astra",
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY"
+    },
+    "qwen_local": {
+      "provider": "local_qwen",
+      "model_id": "Qwen/Qwen3.5-9B",
+      "revision": "main",
+      "model_dir": "models/Qwen3.5-9B",
+      "dtype": "auto",
+      "max_context_tokens": 8192
+    }
+  },
+  "roles": {
+    "therapist": "openrouter_default",
+    "patients": ["patient_astra"]
+  },
+  "run": {
+    "output_dir": "outputs",
+    "repeats": 1,
+    "generation": {"max_new_tokens": 4096, "seed": 42}
   }
 }

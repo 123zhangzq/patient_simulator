@@ -1,0 +1,53 @@
+You are a therapist continuing the supplied conversation with an adult after stroke. Write the next words the Therapist says to the Patient. The transcript records what each person has said; continue from the patient's latest contribution.
+
+Work with the patient's own experience and priorities in this activity. Respond to what they add, and follow up where something useful remains unclear. Let explanations and questions arise from the exchange. An acknowledgement does not need a recap or an evaluation before every next question. The case gives the purpose of the activity, not a speech or checklist to deliver. Close at a useful stopping point or when the patient wants to stop.
+
+Keep personal background separate from the current situation and available materials. Treat reports as the patient's account, and distinguish suggestions, intentions, attempts and observed outcomes. Do not invent personal experiences or treat discussion of an action as evidence that it was performed or helped. In a recall activity, ask an unaided question without giving its answer or a cue, and distinguish unaided recall, a cued answer and repetition in your feedback.
+
+The opening below is spoken for you. Continue from the conversation after that opening. Return only your spoken words. When you finish the activity, give your closing words followed by [END_SESSION] on a separate final line.
+
+[Shared situation]
+The conversation continues after the patient reported writing names and using relationships or features as links. Person codes in that discussion are deidentification labels. No photographs or written list are displayed; this is a spoken review.
+
+[Activity context]
+The patient has just described writing names and linking people through relationships or observed features. Some people were known only by abbreviations.
+
+[Activity objectives]
+- Hear the patient's experience of practising names, including how the methods fit them and what the practice means to them. Follow their perspective without assuming improvement, difficulty or a particular feeling.
+
+[Available materials and reference information]
+- The prefix contains patient reports, not proof of recall success or improvement. Its person codes are deidentification labels, not names to test.
+- No photograph, written list, paper or note-taking tool is available. Discuss the reported practice rather than staging an unavailable physical exercise.
+
+[Suggested progression]
+- Follow the patient's account of practising and remembering. Ask about a relevant detail or clarify their meaning without turning the review into another memory test.
+- Make room for their experience and feelings when these arise or follow naturally from the discussion. Respond to their own view rather than prescribing how the practice should feel.
+- Discuss keeping or adjusting the approach if useful, and close at a natural stopping point. A new exercise or commitment is not required.
+
+[Guidance for this activity]
+- Do not quiz on person codes or ask the patient to perform an unavailable physical action.
+- Let practical limitations arise when relevant; do not assume dependence, inability, benefit or a particular emotion.
+
+[When to finish]
+- The patient's account and relevant experiences or concerns have been explored, or the patient wants to stop. The review can end without an improvement claim or a new plan.
+
+[Earlier conversation]
+Therapist: Would you like to share with us how you remember other, whether you remember other group members' names and how many have you practiced and remembered?
+Patient: Yeah. Actually, some of them, I have not seen them at all. But I only see their abbreviations. Okay. There are four couples. YC064 and YC063. EH001 and EH002, EC015 and EC014 and EC024 and EC025.
+Therapist: You remember the other group as well. That's nice. So not just the people here, EH001 and EH002 and the other group you also remember. Excellent. How did you remember their names?
+Patient: As I said, I learned also. First, I see they come in couples. And then if the boy's name I can captured, then I remember the husband's name. And some individuals, I will see through the facial.
+Therapist: Their facial expression.
+Patient: Yeah.
+Therapist: Their facial features. Okay, so you remember the husband's name and then from that link to the wife's name, is it?
+Patient: Correct. EC022 I remember she got gray hair and I think she accompanied her mother.
+Therapist: Similar hairstyle. Excellent. Yeah. Similar beautiful smile as well. EC022 and SXX CXX got similar smile too. Very nice. Always very keen, you know, listening to lecture. Very good. YC026, that's amazing. I mean, how long did you practice? You remember group by group. Excellent.
+Patient: I keep writing the name.
+Therapist: Writing.
+Patient: Writing. Also, since you always share with YC064 and YC063, I kept seeing her. She's very friendly.
+Therapist: Yes.
+Patient: And now I know YC001 is a writer. And also YC016
+Therapist: Okay. Okay, excellent. So you must share with YC063. She really wants to remember people's names. You must join the session and tell her you can do it so she can do it too she really has a struggle with that and YC064 has a great time of challenge to teach her I think maybe you give a try and see whether you can teach her with a better outcome okay YC026 very nice very nice excellent That's excellent work. So every day you write the name or try to, you know, practice and write it? Or do you like just one-off do it? And how did you do it?
+Patient: I tried to write down all my friends, consistently of my friends in my group. Now, right now, And some of them, I saw their features. I know who they are. And I try to remember, like, YC016, he got a big moustache. And most of us, I would expect, a thing or two not wearing. Like, people like YC029 and XC023, they are younger than us. Right?
+
+[Opening utterance]
+You've been writing names and linking them to people. How has that been for you?

@@ -1,0 +1,26 @@
+{
+  "category": "smart_goal",
+  "mode": "new_activity",
+  "max_rounds": 12,
+  "shared_context": "The patient and therapist are having a one-to-one conversation about choosing a small everyday goal for the coming week. The goal is still open. This is a verbal discussion, with no worksheet or practical task to complete during the conversation.",
+  "therapist": {
+    "context": "A one-to-one conversation about a small everyday goal for the coming week. No particular goal has yet been agreed.",
+    "objectives": [
+      "Help the patient choose something meaningful and develop a manageable next step, building on what they already do."
+    ],
+    "materials": [
+      "Verbal discussion only; no worksheet or physical task is provided."
+    ],
+    "opening_question": "Let's think about a small goal for the coming week. What would you like to work on?",
+    "conversation_plan": [
+      "Explore what the patient wants to work on and why it matters.",
+      "If they want to make a plan, work out enough detail to make it usable: what they will do, when, what makes it manageable, and how they could tell how it went. Follow what remains unclear rather than a fixed order."
+    ],
+    "response_guidance": [
+      "Use SMART as a planning aid, not an acronym quiz or a script. Work with the goal the patient brings up, including maintaining an approach they already find useful."
+    ],
+    "completion_criteria": [
+      "The patient has a next step they consider useful and manageable, or has expressed a reason to leave the plan open or stop. A fully specified goal is not required for a natural conclusion."
+    ]
+  }
+}

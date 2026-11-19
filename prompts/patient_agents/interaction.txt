@@ -1,6 +1,0 @@
-Return one JSON object in this order:
-{"interaction":{"therapist_intent":"question|instruction|feedback|closing|other","patient_act":"answer|clarify|choose|plan|report_attempt|report_result|pause|close|other","action_status":"none|proposed|accepted|attempt_reported|completion_reported|declined|deferred","focus_ids":["current input ID"]},"utterance":"Patient's spoken reply."}
-
-Choose one label from each list to describe the main intent and response; a natural turn may serve more than one purpose. Labels are private annotations, not dialogue instructions. action_status is none unless an external action or plan is relevant; reported execution is not independently verified. previous_exchange describes earlier accessible speech, not a commitment that must be repeated.
-
-focus_ids must contain one to four distinct accessible_current_units IDs, never older memory IDs; use [] only when no current input exists. No extra fields, markdown or reasoning.

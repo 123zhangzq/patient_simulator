@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "instances": [
+    {
+      "id": "name_practice_review",
+      "category": "practice_review",
+      "mode": "continuation",
+      "max_rounds": 8,
+      "therapist_sha256": "52d1cfdc0ea6c70c7f667178cf2030bf7824fd4f610d119b1ec4ebbc4ef82d73",
+      "patient_sha256": "50a03dbf0abd58338d506f96bc90786303e60bfd42079163048da41f8afbb826"
+    },
+    {
+      "id": "name_recall",
+      "category": "learning_recall",
+      "mode": "continuation",
+      "max_rounds": 8,
+      "therapist_sha256": "d134003333f02ab39c2612ba176be7d6d57652b92f2fa69fd82038660a9c1b1f",
+      "patient_sha256": "d5df2b93aa5c97cbb0da598675fe8710d8f7868245b8b53f327e7b5dd1ba6ff6"
+    },
+    {
+      "id": "smart_goal_xc017",
+      "category": "smart_goal",
+      "mode": "new_activity",
+      "max_rounds": 12,
+      "therapist_sha256": "250e1d142dd3094ec7bf6e1712fd65203d5988108c5c5de37bfb3eb31035b66c",
+      "patient_sha256": "31797d8d57dfd8ef392e5d28ff8f2e0a0e4bc86322bbaa2f4626ddbe674146f7"
+    },
+    {
+      "id": "smart_goal_yc053",
+      "category": "smart_goal",
+      "mode": "new_activity",
+      "max_rounds": 12,
+      "therapist_sha256": "250e1d142dd3094ec7bf6e1712fd65203d5988108c5c5de37bfb3eb31035b66c",
+      "patient_sha256": "f6ec1930ca23c62940d6751be5478cf2fbc44bafc3aae0a0e2ea268510981bb1"
+    },
+    {
+      "id": "work_task_compensation",
+      "category": "compensation_daily_life",
+      "mode": "continuation",
+      "max_rounds": 10,
+      "therapist_sha256": "b76a8f5299d5f153bc23fd8fa80cad4bdec92d61a22aa79a68c46ff4e92b66a1",
+      "patient_sha256": "59bba102760eef4bcc606eb85583abcae3e05c66f3bc316fb80d8bfcab11663a"
+    }
+  ]
+}

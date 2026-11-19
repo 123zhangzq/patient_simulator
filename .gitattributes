@@ -1,0 +1,5 @@
+# The authoring inputs are maintained in the development repository.
+construct_ins export-ignore
+construct_ins/** export-ignore
+instances/**/*.txt text eol=lf
+instances/manifest.json text eol=lf

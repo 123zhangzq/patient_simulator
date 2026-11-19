@@ -1,0 +1,29 @@
+{
+  "category": "practice_review",
+  "mode": "continuation",
+  "max_rounds": 8,
+  "shared_context": "The conversation continues after the patient reported writing names and using relationships or features as links. Person codes in that discussion are deidentification labels. No photographs or written list are displayed; this is a spoken review.",
+  "therapist": {
+    "context": "The patient has just described writing names and linking people through relationships or observed features. Some people were known only by abbreviations.",
+    "objectives": [
+      "Hear the patient's experience of practising names, including how the methods fit them and what the practice means to them. Follow their perspective without assuming improvement, difficulty or a particular feeling."
+    ],
+    "materials": [
+      "The prefix contains patient reports, not proof of recall success or improvement. Its person codes are deidentification labels, not names to test.",
+      "No photograph, written list, paper or note-taking tool is available. Discuss the reported practice rather than staging an unavailable physical exercise."
+    ],
+    "opening_question": "You've been writing names and linking them to people. How has that been for you?",
+    "conversation_plan": [
+      "Follow the patient's account of practising and remembering. Ask about a relevant detail or clarify their meaning without turning the review into another memory test.",
+      "Make room for their experience and feelings when these arise or follow naturally from the discussion. Respond to their own view rather than prescribing how the practice should feel.",
+      "Discuss keeping or adjusting the approach if useful, and close at a natural stopping point. A new exercise or commitment is not required."
+    ],
+    "response_guidance": [
+      "Do not quiz on person codes or ask the patient to perform an unavailable physical action.",
+      "Let practical limitations arise when relevant; do not assume dependence, inability, benefit or a particular emotion."
+    ],
+    "completion_criteria": [
+      "The patient's account and relevant experiences or concerns have been explored, or the patient wants to stop. The review can end without an improvement claim or a new plan."
+    ]
+  }
+}
