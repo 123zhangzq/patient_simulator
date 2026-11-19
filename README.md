@@ -2,7 +2,48 @@
 
 这个 benchmark 用多轮对话比较语言模型扮演标准化患者的表现。每个实例包含两份英文角色说明：`therapist.txt` 给治疗师，`patient.txt` 给患者。运行结束后可以查看完整对话和实验记录。
 
-在包含 `config.json` 的项目目录中执行以下命令。建议使用 Python 3.11 或更新版本，并在独立的 Python 环境中安装依赖。选择下面一条路线即可。
+## 项目架构
+
+```text
+.                                   # 项目根目录
+├── README.md
+├── config.json                     # 模型别名、角色分配、重复次数和生成参数
+├── .env.example                    # API 密钥文件模板
+├── .env                            # API 用户在本机填写，Git 忽略
+├── requirements.txt                # OpenRouter 运行依赖
+├── requirements-local.txt          # 本地 Qwen 推理依赖（含基础依赖）
+├── run_dialogue.py                 # 命令行入口：列出、预览或运行实例
+├── download_model.py               # 首次下载本地模型权重
+├── instances/                      # 随 benchmark 发布的五个实例
+│   ├── manifest.json               # 实例 ID、起点模式、轮数上限和文本哈希
+│   ├── name_recall/                # 每个实例都有下列两份完整输入
+│   │   ├── therapist.txt
+│   │   └── patient.txt
+│   ├── name_practice_review/
+│   ├── work_task_compensation/
+│   ├── smart_goal_xc017/
+│   └── smart_goal_yc053/
+├── core/                           # 对话运行代码
+│   ├── config.py                   # 加载并校验运行配置
+│   ├── instances.py                # 读取清单和角色文本，校验内容版本
+│   ├── runner.py                   # 播出固定开场、轮流调用模型、保存对话
+│   └── providers/
+│       ├── openrouter.py           # 远程 API 调用
+│       └── local_qwen.py           # 本地 Qwen 推理
+├── construct_ins/                  # 实例制作工具，仅开发版包含
+│   ├── README.md                   # 新增和修改病例的说明
+│   ├── templates/                  # 通用治疗师和患者角色指令
+│   ├── scenarios/                  # 场景、活动目标和固定开场
+│   ├── cases/                      # 患者资料和会话前史
+│   ├── references/                 # 制作时核对的来源资料
+│   └── build.py                    # 生成或校验 instances/ 中的成品
+├── models/                         # 默认的本地权重目录，下载后生成
+└── outputs/                        # 每次运行的对话、输入快照和元数据
+```
+
+制作病例时，`construct_ins/build.py` 将模板、场景和患者资料整理成两份角色文本。运行已发布的实例时，`run_dialogue.py` 直接读取 `instances/` 的成品，按 `config.json` 为双方选择模型，并将新对话写入 `outputs/`。
+
+以下命令都在项目根目录执行。建议使用 Python 3.11 或更新版本，并在独立的 Python 环境中安装依赖。选择下面一条路线即可。
 
 ## 路线一：通过 OpenRouter API 运行（默认）
 
