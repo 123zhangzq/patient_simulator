@@ -54,13 +54,29 @@
 
 ### 首次运行
 
-1. 在 Python 环境中安装 API 依赖：
+1. 进入包含 `config.json` 和 `requirements.txt` 的项目目录，创建并激活虚拟环境，然后安装 API 依赖。将第一行的示例路径换成你的实际路径。
+
+   **macOS / Linux**
 
    ```bash
+   cd "/path/to/project"
+   python3 -m venv .venv
+   source .venv/bin/activate
    python -m pip install -r requirements.txt
    ```
 
-2. 在 [OpenRouter 控制台](https://openrouter.ai/settings/keys) 创建 API key。把项目里的 `.env.example` 复制为同目录下的 `.env`，在其中填入自己的 key：
+   创建环境时可以指定 Python 解释器。例如，macOS 上的 Anaconda 安装在 `/opt/anaconda3` 时，第二行可写成 `/opt/anaconda3/bin/python -m venv .venv`。
+
+   **Windows PowerShell**
+
+   ```powershell
+   cd "C:\path\to\project"
+   py -3 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install -r requirements.txt
+   ```
+
+2. 在 [OpenRouter 控制台](https://openrouter.ai/settings/keys) 创建 API key。在项目目录中创建 `.env`（可以复制 `.env.example`，已有 `.env` 时直接编辑），填入自己的 key：
 
    ```dotenv
    OPENROUTER_API_KEY=你的密钥
@@ -80,11 +96,15 @@
 
 ### 再次运行或更换模型
 
-进入同一项目并激活同一 Python 环境，直接运行下一个实例。程序会自动读取保存的 `.env`：
+下次打开终端时，进入同一项目并激活已创建的 `.venv`，程序会读取保存的密钥。macOS / Linux 示例：
 
 ```bash
+cd "/path/to/project"
+source .venv/bin/activate
 python run_dialogue.py --instance work_task_compensation
 ```
+
+Windows PowerShell 使用上面的 `.\.venv\Scripts\Activate.ps1` 激活环境，再执行同一条运行命令。
 
 要固定治疗师、比较不同的 API 患者模型，在 `config.json` 的 `models` 下复制 `patient_astra` 条目，给副本取名（例如 `patient_b`），将其 `model_id` 改为想测试的 OpenRouter 模型 ID。然后运行：
 
