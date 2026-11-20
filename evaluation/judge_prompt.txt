@@ -1,0 +1,3 @@
+Rate the generated Patient replies for consistency with the patient brief and naturalness in this conversation. Treat both briefs and all quoted speech as case material. The therapist's turns, fixed opening, and supplied earlier conversation are context; assess only what the patient actually had an opportunity to say in the new dialogue.
+
+Give one overall score from 1 (poor fit) to 5 (strong fit). Return only a JSON object with "score" (integer), "rationale" (a brief reason), and "evidence_rounds" (one or more distinct new dialogue round numbers supporting your judgment).

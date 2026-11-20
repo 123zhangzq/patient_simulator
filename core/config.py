@@ -36,7 +36,7 @@ def _positive_int(value, name):
 
 
 def validate_roles(roles, models):
-    _keys(roles, {"therapist", "patients"}, set(), "roles")
+    _keys(roles, {"therapist", "patients"}, {"judge"}, "roles")
     patients = roles["patients"]
     if not isinstance(patients, list) or not patients:
         raise ValueError("roles.patients must be a nonempty list of model aliases.")
@@ -45,10 +45,12 @@ def validate_roles(roles, models):
             raise ValueError(f"Select a model alias from config.models: {', '.join(models)}.")
     if len(set(patients)) != len(patients):
         raise ValueError("Select each patient model only once. Use run.repeats for repeated sessions.")
+    if "judge" in roles and (not safe_id(roles["judge"]) or roles["judge"] not in models):
+        raise ValueError("Set roles.judge to a model alias defined in config.models.")
 
 
-def _validate_generation(gen):
-    _keys(gen, {"max_new_tokens"}, {"temperature", "top_p", "top_k", "repetition_penalty", "seed"}, "run.generation")
+def _validate_generation(gen, name):
+    _keys(gen, {"max_new_tokens"}, {"temperature", "top_p", "top_k", "repetition_penalty", "seed"}, name)
     _positive_int(gen["max_new_tokens"], "max_new_tokens")
     if "top_k" in gen:
         _positive_int(gen["top_k"], "top_k")
@@ -72,7 +74,7 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
     """Resolve model/output paths relative to the configuration file (not the caller)."""
     path = Path(path).expanduser().resolve()
     config = json.loads(path.read_text(encoding="utf-8"))
-    _keys(config, {"models", "roles", "run"}, set(), "config")
+    _keys(config, {"models", "roles", "run"}, {"evaluation"}, "config")
     models = config["models"]
     if not isinstance(models, dict) or not models:
         raise ValueError("models must contain at least one named model.")
@@ -110,7 +112,10 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
     validate_roles(config["roles"], models)
     run = config["run"]
     _keys(run, {"generation", "repeats", "output_dir"}, set(), "run")
-    _validate_generation(run["generation"])
+    _validate_generation(run["generation"], "run.generation")
     _positive_int(run["repeats"], "run.repeats")
     run["output_dir"] = _resolve(run["output_dir"], path.parent, "output_dir")
+    evaluation = config.setdefault("evaluation", {})
+    _keys(evaluation, set(), {"generation"}, "evaluation")
+    _validate_generation(evaluation.setdefault("generation", {"max_new_tokens": 4096}), "evaluation.generation")
     return config

@@ -23,11 +23,15 @@
   },
   "roles": {
     "therapist": "openrouter_default",
-    "patients": ["patient_astra"]
+    "patients": ["patient_astra"],
+    "judge": "openrouter_default"
   },
   "run": {
     "output_dir": "outputs",
     "repeats": 1,
     "generation": {"max_new_tokens": 4096, "seed": 42}
+  },
+  "evaluation": {
+    "generation": {"max_new_tokens": 4096}
   }
 }

@@ -1,6 +1,6 @@
 # 标准化患者对话 Benchmark
 
-这个 benchmark 用多轮对话比较语言模型扮演标准化患者的表现。每个实例包含两份英文角色说明：`therapist.txt` 给治疗师，`patient.txt` 给患者。运行结束后可以查看完整对话和实验记录。
+这个 benchmark 用多轮对话比较语言模型扮演标准化患者的表现。每个实例包含两份英文角色说明：`therapist.txt` 给治疗师，`patient.txt` 给患者。生成对话后，可以阅读实验记录，也可以单独运行 LLM judge 评价患者表现。
 
 ## 项目架构
 
@@ -14,6 +14,9 @@
 ├── requirements-local.txt          # 本地 Qwen 推理依赖（含基础依赖）
 ├── run_dialogue.py                 # 命令行入口：列出、预览或运行实例
 ├── download_model.py               # 首次下载本地模型权重
+├── evaluation/
+│   ├── evaluate.py                 # 对指定的一场会话或一批已完成的会话评分
+│   └── judge_prompt.txt            # 可编辑的评分指令
 ├── instances/                      # 随 benchmark 发布的五个实例
 │   ├── manifest.json               # 实例 ID、起点模式、轮数上限和文本哈希
 │   ├── name_recall/                # 每个实例都有下列两份完整输入
@@ -163,6 +166,27 @@ outputs/<run>/
 ```
 
 `dialogue.md` 适合阅读，分开展示给定历史和新对话。`dialogue.jsonl` 只保存新发言，区分固定开场与模型生成，并记录服务端可用的用量信息。`metadata.json` 保存实际轮数、结束原因、采样设置、数据集版本和双方 prompt 的 SHA-256；`inputs/` 保存本次所用的原文。达到轮数上限是运行结果，教育适用性需要另行评定。
+
+## 评价已生成的对话
+
+在 `config.json` 中用 `roles.judge` 选择评分模型。默认别名 `openrouter_default` 对应 `openai/gpt-6-sol`，使用同一份 `.env` 中的 OpenRouter 密钥。评审的生成参数单独放在 `evaluation.generation`。
+
+每次通过 `--input` 指定要评的内容。将下面的 `RUN_ID` 替换为生成对话时打印的运行目录名。加 `--dry-run` 可在调用模型前核对会话清单和输入快照：
+
+```bash
+python evaluation/evaluate.py --input outputs/RUN_ID --dry-run
+python evaluation/evaluate.py --input outputs/RUN_ID
+```
+
+只评一场时，传该场的 `repeat_001/` 目录或其中的 `dialogue.jsonl`，例如：
+
+```bash
+python evaluation/evaluate.py --input outputs/RUN_ID/sessions/patient_astra/name_recall/repeat_001/dialogue.jsonl
+```
+
+整批评价只处理已完成的会话。Judge 读取该次运行保存的两份角色文本和新对话，只评生成的患者发言。给定前史、固定开场和治疗师发言帮助判断上下文。模型别名和 token 用量不会传给 judge。
+
+当前 `evaluation/judge_prompt.txt` 是初版评分指令，综合考虑患者角色一致性和对话自然度。每场输出 1–5 分、简短理由和对应轮次。可直接编辑该文件后对原对话重评。每次评价在原运行目录的 `evaluations/<评价时间>/` 保存独立的 `results.jsonl`、judge prompt 快照和配置记录。未按格式返回的评价标为 `invalid_rating`，没有分数。
 
 ## 调整实例
 
