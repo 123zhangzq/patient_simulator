@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from core.providers import load_provider
+from core.usage import print_usage, usage_report
 
 
 def _write_json(path, data):
@@ -37,16 +38,19 @@ def _generate(model, prompt, history, speaker, generation, number):
         content = content[: -len("[END_SESSION]")].strip()
     if not content:
         raise ValueError(f"{speaker} returned no spoken text in round {number}.")
-    usage = {k: reply[k] for k in ("input_tokens", "output_tokens", "finish_reason",
+    usage = {k: reply[k] for k in ("input_tokens", "output_tokens", "total_tokens",
+                                    "cached_input_tokens", "reasoning_tokens", "cost_usd",
+                                    "cost_source", "is_byok", "finish_reason",
                                     "model", "revision", "request_id") if k in reply}
     if "seed" in parameters:
         usage["requested_seed"] = parameters["seed"]
     return content, closing, usage
 
 
-def _session(folder, instance, therapist, patient, generation, repeat, info):
+def _session(folder, instance, therapist, patient, generation, repeat, info, run_usage):
     folder.mkdir(parents=True, exist_ok=False)
     history = []
+    session_usage = []
     early_history = instance["therapist"].partition("\n[Earlier conversation]\n")[2].split("\n\n", 1)[0].strip()
     info.update(status="running", repeat=repeat, completed_rounds=0, max_rounds=instance["max_rounds"],
                 generation=generation, therapist_sha256=instance["therapist_sha256"],
@@ -80,6 +84,10 @@ def _session(folder, instance, therapist, patient, generation, repeat, info):
                     record = {"round": number, **turn, "source": source, **usage}
                     log.write(json.dumps(record, ensure_ascii=False) + "\n")
                     log.flush()
+                    if not supplied:
+                        accounted = {"speaker": speaker, **usage}
+                        session_usage.append(accounted)
+                        run_usage.append(accounted)
                     label = f"Round {number} · {speaker}" + (" (fixed opening)" if supplied else "")
                     readable.write(f"**{label}**\n\n{content}\n\n")
                     readable.flush()
@@ -93,6 +101,7 @@ def _session(folder, instance, therapist, patient, generation, repeat, info):
         info["error_type"] = type(exc).__name__
         raise
     finally:
+        info["usage"] = usage_report(session_usage)
         _write_json(meta_path, info)
 
 
@@ -111,6 +120,7 @@ def run(config, instances):
         "instances": [item["id"] for item in instances], "repeats": options["repeats"],
         "generation": options["generation"], "completed_sessions": 0}
     batch_path = output / "batch_metadata.json"
+    run_usage = []
     _write_json(batch_path, meta)
     try:
         for instance in instances:
@@ -130,7 +140,8 @@ def run(config, instances):
                     folder = output / "sessions" / alias / instance["id"] / f"repeat_{repeat:03d}"
                     print(f"\n{alias} / {instance['id']} / repeat {repeat}", flush=True)
                     _session(folder, instance, therapist, patient, generation, repeat,
-                             {"instance": instance["id"], "therapist": roles["therapist"], "patient": alias})
+                             {"instance": instance["id"], "therapist": roles["therapist"], "patient": alias},
+                             run_usage)
                     meta["completed_sessions"] += 1
                     _write_json(batch_path, meta)
             del patient
@@ -140,5 +151,9 @@ def run(config, instances):
         meta["error_type"] = type(exc).__name__
         raise
     finally:
+        meta["usage"] = usage_report(run_usage)
         _write_json(batch_path, meta)
+        for role, usage in meta["usage"]["by_role"].items():
+            print_usage(usage, f"Run usage: {role}")
+        print_usage(meta["usage"]["total"], "Run total")
     return output

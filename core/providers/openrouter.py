@@ -50,4 +50,11 @@ class OpenRouter:
         return {"content": content.strip(), "finish_reason": reason,
                 "input_tokens": usage.prompt_tokens if usage else None,
                 "output_tokens": usage.completion_tokens if usage else None,
+                "total_tokens": usage.total_tokens if usage else None,
+                "cached_input_tokens": getattr(getattr(usage, "prompt_tokens_details", None), "cached_tokens", None),
+                "reasoning_tokens": getattr(getattr(usage, "completion_tokens_details", None), "reasoning_tokens", None),
+                # OpenRouter includes its actual account charge in the SDK's extra fields.
+                "cost_usd": getattr(usage, "cost", None),
+                "cost_source": "openrouter.usage.cost",
+                "is_byok": getattr(usage, "is_byok", None),
                 "model": result.model, "request_id": result.id}

@@ -14,6 +14,10 @@ if not __package__:
 
 from core.config import DEFAULT_CONFIG, PROJECT_DIR, load_config
 from core.providers import load_provider
+from core.usage import print_usage, usage_report
+
+# Questionnaire v1.0 item order: A1–A5 authenticity, B1–B5 training utility.
+ITEMS = ("A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5")
 
 
 def select_sessions(path):
@@ -73,17 +77,24 @@ def parse_rating(text, round_count):
     lines = text.strip().splitlines()
     if len(lines) >= 3 and lines[0].lower() in ("```json", "```") and lines[-1] == "```":
         text = "\n".join(lines[1:-1])
-    rating = json.loads(text)
-    if not isinstance(rating, dict) or set(rating) != {"score", "rationale", "evidence_rounds"}:
-        raise ValueError("Expected score, rationale, and evidence_rounds.")
-    score, reason, rounds = rating["score"], rating["rationale"], rating["evidence_rounds"]
-    if not (type(score) is int and 1 <= score <= 5 and isinstance(reason, str) and reason.strip()):
-        raise ValueError("Expected integer score 1–5 and a nonempty rationale.")
-    if (not isinstance(rounds, list) or not rounds
-            or any(type(r) is not int or not 1 <= r <= round_count for r in rounds)
-            or len(rounds) != len(set(rounds))):
-        raise ValueError("evidence_rounds must cite distinct rounds in this dialogue.")
-    return rating
+    reply = json.loads(text)
+    if not isinstance(reply, dict) or set(reply) != {"ratings"} or not isinstance(reply["ratings"], dict):
+        raise ValueError("Expected a JSON object holding one ratings object.")
+    ratings = reply["ratings"]
+    if set(ratings) != set(ITEMS):
+        raise ValueError("ratings must cover exactly the items A1–A5 and B1–B5.")
+    for item in ITEMS:
+        entry = ratings[item]
+        if not isinstance(entry, dict) or set(entry) != {"score", "rationale", "evidence_rounds"}:
+            raise ValueError(f"{item}: expected score, rationale, and evidence_rounds.")
+        score, reason, rounds = entry["score"], entry["rationale"], entry["evidence_rounds"]
+        if not (type(score) is int and 1 <= score <= 5 and isinstance(reason, str) and reason.strip()):
+            raise ValueError(f"{item}: expected integer score 1–5 and a nonempty rationale.")
+        if (not isinstance(rounds, list) or not rounds
+                or any(type(r) is not int or not 1 <= r <= round_count for r in rounds)
+                or len(rounds) != len(set(rounds))):
+            raise ValueError(f"{item}: evidence_rounds must cite distinct rounds in this dialogue.")
+    return {"ratings": {item: ratings[item] for item in ITEMS}}
 
 
 def evaluate(config, batch, sessions, prompt, dry_run):
@@ -112,25 +123,35 @@ def evaluate(config, batch, sessions, prompt, dry_run):
                 "generation": generation, "sessions": [s.relative_to(batch).as_posix() for s, _ in sessions]}
     (out / "metadata.json").write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
     failures = 0
-    with (out / "results.jsonl").open("x", encoding="utf-8") as log:
-        for folder, meta in sessions:
-            session = folder.relative_to(batch).as_posix()
-            payload, digest = session_input(batch, folder, meta)
-            reply = judge.reply([{"role": "system", "content": prompt},
-                                 {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
-                                generation=generation)
-            result = {"session": session, "dialogue_sha256": digest,
-                      "usage": {k: v for k, v in reply.items() if k != "content"}}
-            try:
-                rating = parse_rating(reply["content"], meta["completed_rounds"])
-            except ValueError as exc:
-                result.update(status="invalid_rating", error=str(exc), raw_reply=reply["content"])
-                failures += 1
-            else:
-                result.update(status="completed", **rating)
-            log.write(json.dumps(result, ensure_ascii=False) + "\n")
-            log.flush()
-            print(f"{session}: {result.get('score', result['status'])}")
+    run_usage = []
+    try:
+        with (out / "results.jsonl").open("x", encoding="utf-8") as log:
+            for folder, meta in sessions:
+                session = folder.relative_to(batch).as_posix()
+                payload, digest = session_input(batch, folder, meta)
+                reply = judge.reply([{"role": "system", "content": prompt},
+                                     {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
+                                    generation=generation)
+                result = {"session": session, "dialogue_sha256": digest,
+                          "usage": {k: v for k, v in reply.items() if k != "content"}}
+                run_usage.append({"speaker": "Judge", **result["usage"]})
+                try:
+                    rating = parse_rating(reply["content"], meta["completed_rounds"])
+                except ValueError as exc:
+                    result.update(status="invalid_rating", error=str(exc), raw_reply=reply["content"])
+                    failures += 1
+                else:
+                    result.update(status="completed", **rating)
+                log.write(json.dumps(result, ensure_ascii=False) + "\n")
+                log.flush()
+                if result["status"] == "completed":
+                    print(f"{session}: " + " ".join(f"{i}={result['ratings'][i]['score']}" for i in ITEMS))
+                else:
+                    print(f"{session}: {result['status']}")
+    finally:
+        settings["usage"] = usage_report(run_usage)
+        (out / "metadata.json").write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+        print_usage(settings["usage"]["total"], "Evaluation total")
     if failures:
         raise ValueError(f"{failures} invalid judge response(s). Inspect {out / 'results.jsonl'}.")
 

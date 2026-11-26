@@ -34,6 +34,30 @@
       "patient_sha256": "f6ec1930ca23c62940d6751be5478cf2fbc44bafc3aae0a0e2ea268510981bb1"
     },
     {
+      "id": "t17_smart_goal_s01",
+      "category": "smart_goal",
+      "mode": "new_activity",
+      "max_rounds": 14,
+      "therapist_sha256": "b69774dac6b1da0ceebd760591488a7caa82ace0e4148161c9c515075a3cd048",
+      "patient_sha256": "fe3cec50defa65a915e373c1a796c9a1c3cd082a58dadc171c0c36b4854bccf7"
+    },
+    {
+      "id": "t17_smart_goal_s02",
+      "category": "smart_goal",
+      "mode": "new_activity",
+      "max_rounds": 14,
+      "therapist_sha256": "6b48140416b124651871f925273d65e0066d6d9d175b6144401d71462c99f9d5",
+      "patient_sha256": "71665cdc7a9c535ad242e12c4709807e9ef8ea2cdef526de9a4ce3230ccf360c"
+    },
+    {
+      "id": "test",
+      "category": "structured_observation",
+      "mode": "new_activity",
+      "max_rounds": 16,
+      "therapist_sha256": "707ebf009bfc07f69b29ad23d5c64052c9cf4d0c23be3477b66076d19e019daf",
+      "patient_sha256": "c71a5e7f74999dead845e60622aaa32893110cd73ba1f56397dc53f50f2f6e75"
+    },
+    {
       "id": "work_task_compensation",
       "category": "compensation_daily_life",
       "mode": "continuation",

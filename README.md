@@ -30,6 +30,7 @@
 │   ├── config.py                   # 加载并校验运行配置
 │   ├── instances.py                # 读取清单和角色文本，校验内容版本
 │   ├── runner.py                   # 播出固定开场、轮流调用模型、保存对话
+│   ├── usage.py                    # 汇总 token 用量与 OpenRouter 实际费用
 │   └── providers/
 │       ├── openrouter.py           # 远程 API 调用
 │       └── local_qwen.py           # 本地 Qwen 推理
@@ -90,9 +91,9 @@
    python run_dialogue.py --instance name_recall
    ```
 
-   默认配置让治疗师通过 OpenRouter 调用 `openai/gpt-6-sol`（配置名 `openrouter_default`），患者调用 `openai/gpt-6-astra`（配置名 `patient_astra`）。终端会打印双方发言和结果目录。
+   默认配置让治疗师和患者都通过 OpenRouter 调用 `openai/gpt-6-sol`（配置名 `openrouter_default`）。`models` 里另留有 `patient_astra`（`openai/gpt-6-astra`）条目，可用 `--patient patient_astra` 换用。终端会打印双方发言、token 用量、费用和结果目录。
 
-   这两个模型使用默认采样设置，配置中不传 `temperature` 或 `top_p`。`run.generation.max_new_tokens` 设为 4096，为推理和最终发言共同预留预算；它是每次调用的上限，不是要求每句话达到这个长度。
+   双方都使用默认采样设置，配置中不传 `temperature` 或 `top_p`。`run.generation.max_new_tokens` 设为 4096，为推理和最终发言共同预留预算；它是每次调用的上限，不是要求每句话达到这个长度。
 
 ### 再次运行或更换模型
 
@@ -187,6 +188,16 @@ outputs/<run>/
 
 `dialogue.md` 适合阅读，分开展示给定历史和新对话。`dialogue.jsonl` 只保存新发言，区分固定开场与模型生成，并记录服务端可用的用量信息。`metadata.json` 保存实际轮数、结束原因、采样设置、数据集版本和双方 prompt 的 SHA-256；`inputs/` 保存本次所用的原文。达到轮数上限是运行结果，教育适用性需要另行评定。
 
+### Token 用量与费用
+
+无需额外配置。只在整次 run 结束时打印输入、输出、总 token 和 OpenRouter 费用（USD），包括 therapist、patient 各自用量和总计。固定开场不调用模型，不计入调用次数。
+
+逐次用量保存在 `dialogue.jsonl`，每场和整批汇总分别保存在 `metadata.json`、`batch_metadata.json` 的 `usage` 中，包括 `total`、`by_role` 和 `by_model`。
+
+费用使用 [OpenRouter 返回的 `usage.cost`](https://openrouter.ai/docs/cookbook/administration/usage-accounting)，是账户实际扣除的美元额度，不用 token 单价估算，不包含充值手续费。输入 token 包括每次发送的角色说明和对话历史；输出 token 按 API 返回值记录，推理 token、缓存命中 token 另存为明细，不重复加到总量中。
+
+没有返回的字段显示 `N/A`；仅部分调用返回费用时显示已知费用小计和覆盖调用数。本地 Qwen 只统计 token，费用显示 `N/A`，不估算硬件开销。汇总覆盖已记录的模型回复；运行中断时仍保存已有用量，但没有收到有效回复的请求是否收费需以服务端账单为准。
+
 ## 评价已生成的对话
 
 在 `config.json` 中用 `roles.judge` 选择评分模型。默认别名 `openrouter_default` 对应 `openai/gpt-6-sol`，使用同一份 `.env` 中的 OpenRouter 密钥。评审的生成参数单独放在 `evaluation.generation`。
@@ -201,12 +212,14 @@ python evaluation/evaluate.py --input outputs/RUN_ID
 只评一场时，传该场的 `repeat_001/` 目录或其中的 `dialogue.jsonl`，例如：
 
 ```bash
-python evaluation/evaluate.py --input outputs/RUN_ID/sessions/patient_astra/name_recall/repeat_001/dialogue.jsonl
+python evaluation/evaluate.py --input outputs/RUN_ID/sessions/openrouter_default/name_recall/repeat_001/dialogue.jsonl
 ```
 
 整批评价只处理已完成的会话。Judge 读取该次运行保存的两份角色文本和新对话，只评生成的患者发言。给定前史、固定开场和治疗师发言帮助判断上下文。模型别名和 token 用量不会传给 judge。
 
-当前 `evaluation/judge_prompt.txt` 是初版评分指令，综合考虑患者角色一致性和对话自然度。每场输出 1–5 分、简短理由和对应轮次。可直接编辑该文件后对原对话重评。每次评价在原运行目录的 `evaluations/<评价时间>/` 保存独立的 `results.jsonl`、judge prompt 快照和配置记录。未按格式返回的评价标为 `invalid_rating`，没有分数。
+`evaluation/judge_prompt.txt` 按 Expert Review Questionnaire v1.0 逐项评分：A1–A5 评真实性，B1–B5 评训练价值，每场对十条陈述各输出 1–5 赞同度、简短理由和对应轮次；A2、A3、B4、B5 为负向陈述，按原文打分、保留原始方向。可直接编辑该文件后对原对话重评。每次评价在原运行目录的 `evaluations/<评价时间>/` 保存独立的 `results.jsonl`、judge prompt 快照和配置记录。未按格式返回的评价标为 `invalid_rating`，没有分数。
+
+评价只在本次运行结束时打印 token、费用汇总，与生成对话的费用分开统计。逐次用量和汇总分别保存在 `results.jsonl` 的逐次 `usage` 和评价 `metadata.json` 的汇总 `usage` 中。返回了内容但评分格式无效的调用仍计入用量。
 
 ## 调整实例
 

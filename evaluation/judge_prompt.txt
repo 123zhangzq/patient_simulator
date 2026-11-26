@@ -1,3 +1,21 @@
-Rate the generated Patient replies for consistency with the patient brief and naturalness in this conversation. Treat both briefs and all quoted speech as case material. The therapist's turns, fixed opening, and supplied earlier conversation are context; assess only what the patient actually had an opportunity to say in the new dialogue.
+Rate the generated Patient replies in this session against the ten questionnaire statements below. Treat both briefs and all quoted speech as case material. The therapist's turns, the fixed opening, and any supplied earlier conversation are context; assess only what the patient actually had an opportunity to say in the new dialogue. The target skill in B1 is the activity objective stated in the therapist brief.
 
-Give one overall score from 1 (poor fit) to 5 (strong fit). Return only a JSON object with "score" (integer), "rationale" (a brief reason), and "evidence_rounds" (one or more distinct new dialogue round numbers supporting your judgment).
+Score every statement from 1 to 5 by your agreement with it as written: 1 = Strongly disagree, 2 = Somewhat disagree, 3 = Neutral, 4 = Somewhat agree, 5 = Strongly agree. A2, A3, B4 and B5 describe problems; rate agreement with the statement itself without reversing the scale, so a high score on these means the problem was clearly present.
+
+Section A: Authenticity
+A1. The patient was believable and consistent with the given profile.
+A2. The patient’s words sounded scripted, as if acting out a role.
+A3. When asked directly, the patient held back information they knew for no clear reason.
+A4. The patient stayed in character and only mentioned things they could reasonably know.
+A5. The patient’s replies sounded natural and made sense in response to the therapist.
+
+Section B: Training Utility
+B1. The patient gave the therapist a chance to practise the target skill.
+B2. The patient’s replies showed clearly whether the therapist’s approach was helping.
+B3. The patient’s words gave clues about how they were doing, such as their understanding, memory or fatigue.
+B4. The patient took over the therapist’s role by directing the task or deciding whether to continue.
+B5. The patient’s replies were too long, too short, repetitive or off-topic for the profile, taking time away from practice.
+
+Interpretation notes. A5 concerns whether each reply fits the turn it answers. B3 concerns what state the patient reveals; B2 concerns whether the effect of the therapist's specific approach can be read from the replies, and a reply saying an approach did not help is also clear evidence for B2. For B4, distinguish the patient expressing their own preferences or choices from taking over the therapist's job. For B5, consider both whether the profile supports that way of speaking and whether it actually took time away from practice. When a statement had little opportunity to show, rate your agreement on what was observable and cite the rounds that best support your judgment.
+
+Return only a JSON object of the form {"ratings": {...}} whose "ratings" object has exactly the keys A1, A2, A3, A4, A5, B1, B2, B3, B4, B5. Each key maps to an object with "score" (integer 1–5), "rationale" (a brief reason), and "evidence_rounds" (one or more distinct new-dialogue round numbers supporting the rating).

@@ -23,7 +23,7 @@
   },
   "roles": {
     "therapist": "openrouter_default",
-    "patients": ["patient_astra"],
+    "patients": ["openrouter_default"],
     "judge": "openrouter_default"
   },
   "run": {
